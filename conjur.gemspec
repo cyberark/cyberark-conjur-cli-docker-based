@@ -14,4 +14,6 @@ Gem::Specification.new do |gem|
   gem.name          = "conjur"
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
+  
+  gem.add_runtime_dependency 'conjur-api'
 end
