@@ -46,7 +46,7 @@ module Conjur::Auth
     
     def ask_for_credentials
       hl = HighLine.new
-      user = hl.ask "Enter your e-mail to log into Conjur: "
+      user = hl.ask "Enter your login to log into Conjur: "
       pass = hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
       @credentials = [user, get_api_key(user, pass)]
     end
