@@ -16,4 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = Conjur::VERSION
   
   gem.add_runtime_dependency 'conjur-api'
+  gem.add_runtime_dependency 'gli'
+  gem.add_runtime_dependency 'highline'
+  gem.add_runtime_dependency 'netrc'
 end
