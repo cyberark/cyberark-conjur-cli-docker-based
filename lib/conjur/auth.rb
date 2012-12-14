@@ -5,7 +5,8 @@ require 'netrc'
 module Conjur::Auth
   class << self
     def login
-      p get_credentials
+      delete_credentials
+      get_credentials
     end
     
     def delete_credentials
@@ -53,6 +54,10 @@ module Conjur::Auth
     
     def get_api_key user, pass
       Conjur::API.get_key(user, pass)
+    end
+    
+    def api
+      @api ||= Conjur::API.new(*get_credentials)
     end
   end
 end

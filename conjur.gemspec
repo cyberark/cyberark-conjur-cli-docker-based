@@ -19,4 +19,6 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'gli'
   gem.add_runtime_dependency 'highline'
   gem.add_runtime_dependency 'netrc'
+  
+  gem.add_runtime_dependency 'rufus-mnemo'
 end
