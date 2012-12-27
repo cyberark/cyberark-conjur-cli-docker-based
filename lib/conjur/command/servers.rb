@@ -1,7 +1,7 @@
 require 'conjur/auth'
 require 'conjur/command'
 
-class Conjur::Command::Auth < Conjur::Command
+class Conjur::Command::Servers < Conjur::Command
   self.prefix = :server
   
   desc "Enroll a new server into conjur"
