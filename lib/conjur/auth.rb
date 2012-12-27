@@ -19,7 +19,7 @@ module Conjur::Auth
     end
     
     def default_host
-      "localhost:3000"
+      "localhost:5000"
     end
     
     def netrc
@@ -56,8 +56,8 @@ module Conjur::Auth
       Conjur::API.get_key(user, pass)
     end
     
-    def api
-      @api ||= Conjur::API.new(*get_credentials)
+    def api(cls = Conjur::API)
+      @api ||= cls.new(*get_credentials)
     end
   end
 end
