@@ -5,6 +5,7 @@ class Conjur::Command::Servers < Conjur::Command
   self.prefix = :server
   
   desc "Enroll a new server into conjur"
+  arg_name "server-id"
   command :enroll do |c|
     c.action do |global_options, options, args|
       api = Conjur::Auth.api

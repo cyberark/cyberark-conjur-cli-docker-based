@@ -4,9 +4,9 @@ require 'netrc'
 
 module Conjur::Auth
   class << self
-    def login
+    def login(options = {})
       delete_credentials
-      get_credentials
+      get_credentials(options)
     end
     
     def delete_credentials
@@ -26,16 +26,16 @@ module Conjur::Auth
       @netrc ||= Netrc.read
     end
     
-    def get_credentials
-      @credentials ||= (read_credentials || fetch_credentials)
+    def get_credentials(options = {})
+      @credentials ||= (read_credentials || fetch_credentials(options))
     end
     
     def read_credentials
       netrc[host]
     end
     
-    def fetch_credentials
-      ask_for_credentials
+    def fetch_credentials(options = {})
+      ask_for_credentials(options)
       write_credentials
     end
     
@@ -45,10 +45,10 @@ module Conjur::Auth
       @credentials
     end
     
-    def ask_for_credentials
+    def ask_for_credentials(options = {})
       hl = HighLine.new
-      user = hl.ask "Enter your login to log into Conjur: "
-      pass = hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
+      user = options[:username] || hl.ask("Enter your login to log into Conjur: ")
+      pass = options[:password] || hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
       @credentials = [user, get_api_key(user, pass)]
     end
     
@@ -56,8 +56,8 @@ module Conjur::Auth
       Conjur::API.get_key(user, pass)
     end
     
-    def api(cls = Conjur::API)
-      @api ||= cls.new(*get_credentials)
+    def api(cls = Conjur::API, options = {})
+      @api ||= cls.new(*get_credentials(options))
     end
   end
 end
