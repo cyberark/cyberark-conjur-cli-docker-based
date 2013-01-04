@@ -8,7 +8,7 @@ module Conjur
       end
       
       def command name, *a, &block
-        Conjur::Cli.command "#{prefix}:#{name}", &block
+        Conjur::Cli.command "#{prefix}:#{name}", *a, &block
       end
     end
   end
