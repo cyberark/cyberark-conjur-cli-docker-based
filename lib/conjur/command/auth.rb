@@ -15,4 +15,10 @@ class Conjur::Command::Auth < Conjur::Command
       Conjur::Auth.login(options)
     end
   end
+  
+  command :logout do |c|
+    c.action do
+      Conjur::Auth.delete_credentials
+    end
+  end
 end
