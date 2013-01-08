@@ -53,7 +53,7 @@ module Conjur::Auth
     end
     
     def get_api_key user, pass
-      Conjur::API.get_key(user, pass)
+      Conjur::API.login(user, pass)
     end
     
     def api(cls = Conjur::API, options = {})
