@@ -1,8 +1,8 @@
-require 'conjur/auth'
+require 'conjur/authn'
 require 'conjur/command'
 
-class Conjur::Command::Auth < Conjur::Command
-  self.prefix = :auth
+class Conjur::Command::Authn < Conjur::Command
+  self.prefix = :authn
   
   command :login do |c|
     c.arg_name 'username'
@@ -12,13 +12,13 @@ class Conjur::Command::Auth < Conjur::Command
     c.flag [:p,:password]
     
     c.action do |global_options,options,args|
-      Conjur::Auth.login(options)
+      Conjur::Authn.login(options)
     end
   end
   
   command :logout do |c|
     c.action do
-      Conjur::Auth.delete_credentials
+      Conjur::Authn.delete_credentials
     end
   end
 end

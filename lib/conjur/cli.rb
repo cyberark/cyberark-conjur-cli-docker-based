@@ -23,5 +23,13 @@ module Conjur
     (Conjur::Config['plugins']||{}).each do |plugin|
       require "conjur-cli-#{plugin}"
     end
+    
+    on_error do |exception|
+      unless exception.is_a?(GLI::CustomExit)
+        puts "#{exception.class.name}: #{exception.to_s}"
+        puts exception.backtrace.map{|l| "  #{l}"}.join("\n")
+      end
+      true
+    end
   end
 end

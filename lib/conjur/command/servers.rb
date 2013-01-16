@@ -1,4 +1,4 @@
-require 'conjur/auth'
+require 'conjur/authn'
 require 'conjur/command'
 
 class Conjur::Command::Servers < Conjur::Command
@@ -8,8 +8,9 @@ class Conjur::Command::Servers < Conjur::Command
   arg_name "server-id"
   command :enroll do |c|
     c.action do |global_options, options, args|
-      api = Conjur::Auth.api
       name = args.shift || random_name
+
+      api = Conjur::Authn.connect
       server = api.create_server id: name
       puts "Created server #{name}."
       enrollment_script_url = server.generate_enrollment_script

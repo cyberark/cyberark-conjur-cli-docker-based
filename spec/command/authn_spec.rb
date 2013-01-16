@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'tempfile'
 
-describe Conjur::Command::Auth do
+describe Conjur::Command::Authn do
   let(:netrcfile) { Tempfile.new 'authtest' }
   before do
     Conjur::Auth.stub netrc: Netrc.read(netrcfile.path)

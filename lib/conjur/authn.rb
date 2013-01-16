@@ -2,7 +2,7 @@ require 'highline'
 require 'conjur/api'
 require 'netrc'
 
-module Conjur::Auth
+module Conjur::Authn
   class << self
     def login(options = {})
       delete_credentials
@@ -56,8 +56,8 @@ module Conjur::Auth
       Conjur::API.login(user, pass)
     end
     
-    def api(cls = Conjur::API, options = {})
-      @api ||= cls.new(*get_credentials(options))
+    def connect(cls = Conjur::API, options = {})
+      cls.new_from_key(*get_credentials(options))
     end
   end
 end
