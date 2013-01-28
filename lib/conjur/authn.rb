@@ -15,11 +15,7 @@ module Conjur::Authn
     end
     
     def host
-      ENV['CONJUR_HOST'] || default_host
-    end
-    
-    def default_host
-      "localhost:5000"
+      Conjur::Authn::API.host
     end
     
     def netrc

@@ -18,11 +18,16 @@ module Conjur
             
     load_config
     
+    ENV['CONJUR_ENV'] = Config[:env] if Config[:env]
+    ENV['CONJUR_STACK'] = Config[:stack] if Config[:stack]
+    
     commands_from 'conjur/command'
     
     (Conjur::Config['plugins']||{}).each do |plugin|
       require "conjur-cli-#{plugin}"
     end
+
+    $stderr.puts "Using host #{Conjur::Authn::API.host}"
     
     on_error do |exception|
       unless exception.is_a?(GLI::CustomExit)
