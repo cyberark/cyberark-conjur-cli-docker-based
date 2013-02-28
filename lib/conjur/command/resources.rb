@@ -11,7 +11,7 @@ class Conjur::Command::Resources < Conjur::Command
     c.action do |global_options,options,args|
       kind = args.shift or raise "Missing parameter: kind"
       id = args.shift or raise "Missing parameter: resource-id"
-      resource = Conjur::Authn.connect.resource(kind, id)
+      resource = api.resource(kind, id)
       resource.create
     end
   end
@@ -23,7 +23,7 @@ class Conjur::Command::Resources < Conjur::Command
     c.action do |global_options,options,args|
       kind = args.shift or raise "Missing parameter: kind"
       id = args.shift or raise "Missing parameter: resource-id"
-      resource = Conjur::Authn.connect.resource(kind, id)
+      resource = api.resource(kind, id)
       puts resource.exists?
     end
   end

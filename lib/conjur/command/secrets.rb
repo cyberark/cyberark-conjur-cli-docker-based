@@ -1,7 +1,7 @@
 require 'conjur/authn'
 require 'conjur/command'
 
-class Conjur::Command::Values < Conjur::Command
+class Conjur::Command::Secrets < Conjur::Command
   self.prefix = :secret
   
   desc "Create and store a secret"
@@ -9,8 +9,7 @@ class Conjur::Command::Values < Conjur::Command
   command :create do |c|
     c.action do |global_options,options,args|
       secret = args.shift or raise "Missing parameter: secret"
-      value = Conjur::Authn.connect.create_secret(secret)
-      puts "Created #{value.identifier}"
+      display api.create_secret(secret), options
     end
   end
 
@@ -19,8 +18,7 @@ class Conjur::Command::Values < Conjur::Command
   command :value do |c|
     c.action do |global_options,options,args|
       id = args.shift or raise "Missing parameter: id"
-      value = Conjur::Authn.connect.secret(id).value
-      puts value
+      puts api.secret(id).value
     end
   end
 end
