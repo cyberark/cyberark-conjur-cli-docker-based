@@ -10,10 +10,12 @@ class Conjur::Command::Users < Conjur::Command
     c.desc "Prompt for a password for the user"
     c.switch [:p,:password]
     
+    acting_as_option(c)
+    
     c.action do |global_options,options,args|
       login = require_arg(args, 'login')
       
-      opts = {}
+      opts = options.slice(:ownerid)
       if options[:p]
         hl = HighLine.new
         password = hl.ask("Enter the password (it will not be echoed): "){ |q| q.echo = false }
