@@ -30,6 +30,7 @@ module Conjur
     $stderr.puts "Using host #{Conjur::Authn::API.host}"
     
     pre do |global,command,options,args|
+      require 'active_support/core_ext'
       options.delete_if{|k,v| v.blank?}
       options.symbolize_keys!
       
