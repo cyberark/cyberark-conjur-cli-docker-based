@@ -7,9 +7,11 @@ class Conjur::Command::Secrets < Conjur::Command
   desc "Create and store a secret"
   arg_name "secret"
   command :create do |c|
+    acting_as_option(c)
+
     c.action do |global_options,options,args|
       secret = args.shift or raise "Missing parameter: secret"
-      display api.create_secret(secret), options
+      display api.create_secret(secret, options), options
     end
   end
 

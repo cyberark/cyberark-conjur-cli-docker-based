@@ -7,10 +7,12 @@ class Conjur::Command::Roles < Conjur::Command
   desc "Create a new role"
   arg_name "role"
   command :create do |c|
+    acting_as_option(c)
+
     c.action do |global_options,options,args|
-      id = args.shift or raise "Missing parameter: role"
+      id = require_arg(args, 'role')
       role = api.role(id)
-      role.create
+      role.create(options)
     end
   end
   
@@ -18,7 +20,7 @@ class Conjur::Command::Roles < Conjur::Command
   arg_name "role"
   command :exists do |c|
     c.action do |global_options,options,args|
-      id = args.shift or raise "Missing parameter: role"
+      id = require_arg(args, 'role')
       role = api.role(id)
       puts role.exists?
     end
@@ -28,21 +30,21 @@ class Conjur::Command::Roles < Conjur::Command
   arg_name "role"
   command :memberships do |c|
     c.action do |global_options,options,args|
-      id = require_arg(args, 'role')
-      display api.role(id).all.map(&:id)
+      role = args.shift || api.username
+      display api.role(role).all.map(&:id)
     end
   end
 
   desc "Grant a role to another role. You must have admin permission on the granting role."
   arg_name "role"
-  arg_name "member-id"
+  arg_name "member"
   command :grant_to do |c|
     c.desc "Whether to grant with admin option"
     c.switch :admin
     
     c.action do |global_options,options,args|
-      id = args.shift or raise "Missing parameter: role"
-      member = args.shift or raise "Missing parameter: member-id"
+      id = require_arg(args, 'role')
+      member = require_arg(args, 'member')
       role = api.role(id)
       role.grant_to member, options[:admin]
     end
@@ -50,11 +52,11 @@ class Conjur::Command::Roles < Conjur::Command
 
   desc "Revoke a role from another role."
   arg_name "role"
-  arg_name "member-id"
+  arg_name "member"
   command :revoke_from do |c|
     c.action do |global_options,options,args|
-      id = args.shift or raise "Missing parameter: role"
-      member = args.shift or raise "Missing parameter: member-id"
+      id = require_arg(args, 'role')
+      member = require_arg(args, 'member')
       role = api.role(id)
       role.revoke_from member
     end

@@ -12,8 +12,10 @@ class Conjur::Command::Variables < Conjur::Command
     c.arg_name "kind"
     c.flag [:k, :"kind"]
     
+    acting_as_option(c)
+    
     c.action do |global_options,options,args|
-      var = api.create_variable(options[:m], options[:k])
+      var = api.create_variable(options[:m], options[:k], options)
       display(var, options)
     end
   end
@@ -28,12 +30,12 @@ class Conjur::Command::Variables < Conjur::Command
   end
 
   desc "Add a value"
-  arg_name "variable"
-  arg_name "value"
+  arg_name "variable value"
   command :"values:add" do |c|
     c.action do |global_options,options,args|
       id = require_arg(args, 'variable')
-      value = require_arg(args, 'value')
+      value = args.shift || STDIN.read
+      
       api.variable(id).add_value(value)
     end
   end

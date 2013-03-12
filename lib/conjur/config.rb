@@ -9,7 +9,11 @@ module Conjur
       
       def plugins
         plugins = @@attributes['plugins']
-        plugins.is_a?(Array) ? plugins : plugins.split(',')
+        if plugins
+          plugins.is_a?(Array) ? plugins : plugins.split(',')
+        else
+          []
+        end
       end
       
       def merge(a)

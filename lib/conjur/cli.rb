@@ -2,22 +2,22 @@ require 'gli'
 require 'conjur/config'
 
 module Conjur
-  class Cli
+  class CLI
     extend GLI::App
 
     class << self
       def load_config
-        file_names = [ File.join("/etc", "conjur.conf"), File.join(ENV['HOME'], ".conjurrc") ]
-        if file = file_names.find{|fn| File.exists?(fn)}
-          Conjur::Config.merge YAML.load(IO.read(file))
-        else
-          raise "No Conjur configuration file found in #{file_names.join(', ')}"
+        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ) ].each do |f|
+          if File.exists?(f)
+            $stderr.puts "Loading #{f}"
+            Conjur::Config.merge YAML.load(IO.read(f))
+          end
         end
       end
     end
             
     load_config
-    
+            
     ENV['CONJUR_ENV'] = Config[:env] if Config[:env]
     ENV['CONJUR_STACK'] = Config[:stack] if Config[:stack]
     
@@ -29,19 +29,35 @@ module Conjur
 
     $stderr.puts "Using host #{Conjur::Authn::API.host}"
     
+    pre do |global,command,options,args|
+      options.delete_if{|k,v| v.blank?}
+      options.symbolize_keys!
+      
+      if as_group = options.delete(:"as-group")
+        group = Conjur::Command.api.group(as_group)
+        role = Conjur::Command.api.role(group.roleid)
+        exit_now!("Group '#{as_group}' doesn't exist, or you don't have permission to use it") unless role.exists?
+        options[:"ownerid"] = group.roleid
+      end
+      if as_role = options.delete(:"as-role")
+        role = Conjur::Command.api.role(as_role)
+        exit_now!("Role '#{as_role}' does not exist, or you don't have permission to use it") unless role.exists?
+        options[:"ownerid"] = role.id
+      end
+      
+      true
+    end
+    
     on_error do |exception|
-      if exception.is_a?(GLI::CustomExit)
+      if exception.is_a?(GLI::StandardException)
         # pass
       elsif exception.is_a?(RestClient::Exception)
         begin
           body = JSON.parse(exception.response.body)
-          puts body['error']
+          $stderr.puts body['error']
         rescue
-          puts exception.response.body
+          $stderr.puts exception.response.body if exception.response
         end
-      else
-        puts "#{exception.class.name}: #{exception.to_s}"
-        puts exception.backtrace.map{|l| "  #{l}"}.join("\n")
       end
       true
     end

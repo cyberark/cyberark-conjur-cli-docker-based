@@ -2,4 +2,4 @@
 
 require 'conjur/cli'
 
-Conjur::Cli.run(ARGV)
+exit Conjur::CLI.run(ARGV)

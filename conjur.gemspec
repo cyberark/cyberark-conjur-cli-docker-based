@@ -4,8 +4,7 @@ require File.expand_path('../lib/conjur/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["Rafa\305\202 Rzepecki", "Kevin Gilpin"]
   gem.email         = ["divided.mind@gmail.com", "kevin.gilpin@inscitiv.com",]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.summary       = %q{Conjur command line interface}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\) + Dir['build_number']
@@ -19,8 +18,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'gli'
   gem.add_runtime_dependency 'highline'
   gem.add_runtime_dependency 'netrc'
-  
-  gem.add_runtime_dependency 'rufus-mnemo'
+  gem.add_runtime_dependency 'cas_rest_client'
   
   gem.add_development_dependency 'rspec'
   gem.add_development_dependency 'simplecov'

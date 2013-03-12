@@ -24,8 +24,7 @@ class Conjur::Command::Users < Conjur::Command
         opts[:password] = password
       end
       
-      user = api.create_user(login, opts)
-      puts "Created #{user.login}"
+      display api.create_user(login, opts)
     end
   end
 end

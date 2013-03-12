@@ -4,11 +4,11 @@ module Conjur
       attr_accessor :prefix
       
       def method_missing *a
-        Conjur::Cli.send *a
+        Conjur::CLI.send *a
       end
       
       def command name, *a, &block
-        Conjur::Cli.command "#{prefix}:#{name}", *a, &block
+        Conjur::CLI.command "#{prefix}:#{name}", *a, &block
       end
       
       def require_arg(args, name)
@@ -17,6 +17,14 @@ module Conjur
 
       def api
         Conjur::Authn.connect
+      end
+      
+      def acting_as_option(command)
+        command.arg_name 'Perform all actions as the specified Group'
+        command.flag [:"as-group"]
+
+        command.arg_name 'Perform all actions as the specified Role'
+        command.flag [:"as-role"]
       end
 
       def display(obj, options = {})

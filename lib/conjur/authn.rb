@@ -42,14 +42,17 @@ module Conjur::Authn
     end
     
     def ask_for_credentials(options = {})
+      raise "No credentials provided or found" if options[:noask]
+      
       hl = HighLine.new
       user = options[:username] || hl.ask("Enter your login to log into Conjur: ")
       pass = options[:password] || hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
-      @credentials = [user, get_api_key(user, pass)]
-    end
-    
-    def get_api_key user, pass
-      Conjur::API.login(user, pass)
+      api_key = if cas_server = options[:"cas-server"]
+        Conjur::API.login_cas(user, pass, cas_server)
+      else
+        Conjur::API.login(user, pass)
+      end
+      @credentials = [user, api_key]
     end
     
     def connect(cls = Conjur::API, options = {})
