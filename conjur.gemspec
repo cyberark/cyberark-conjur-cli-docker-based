@@ -14,10 +14,11 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
   
-  gem.add_runtime_dependency 'conjur-api'
-  gem.add_runtime_dependency 'gli'
-  gem.add_runtime_dependency 'highline'
-  gem.add_runtime_dependency 'netrc'
+  gem.add_dependency 'conjur-api'
+  gem.add_dependency 'gli'
+  gem.add_dependency 'highline'
+  gem.add_dependency 'netrc'
+  
   gem.add_runtime_dependency 'cas_rest_client'
   
   gem.add_development_dependency 'rspec'
