@@ -45,7 +45,7 @@ module Conjur::Authn
       raise "No credentials provided or found" if options[:noask]
       
       hl = HighLine.new
-      user = options[:username] || hl.ask("Enter your login to log into Conjur: ")
+      user = options[:username] || hl.ask("Enter your username to log into Conjur: ")
       pass = options[:password] || hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
       api_key = if cas_server = options[:"cas-server"]
         Conjur::API.login_cas(user, pass, cas_server)
