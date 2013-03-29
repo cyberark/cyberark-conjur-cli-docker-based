@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\) + Dir['build_number']
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.name          = "conjur2"
+  gem.name          = "conjur-cli"
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
   
