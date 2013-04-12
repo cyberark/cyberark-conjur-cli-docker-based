@@ -36,8 +36,7 @@ class Conjur::Command::Roles < Conjur::Command
   end
 
   desc "Grant a role to another role. You must have admin permission on the granting role."
-  arg_name "role"
-  arg_name "member"
+  arg_name "role member"
   command :grant_to do |c|
     c.desc "Whether to grant with admin option"
     c.switch :admin
@@ -51,8 +50,7 @@ class Conjur::Command::Roles < Conjur::Command
   end
 
   desc "Revoke a role from another role."
-  arg_name "role"
-  arg_name "member"
+  arg_name "role member"
   command :revoke_from do |c|
     c.action do |global_options,options,args|
       id = require_arg(args, 'role')
