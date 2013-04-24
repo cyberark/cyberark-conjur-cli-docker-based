@@ -18,8 +18,7 @@ class Conjur::Command::Groups < Conjur::Command
   end
 
   desc "Add a new group member"
-  arg_name "group"
-  arg_name "member"
+  arg_name "group member"
   command :"members:add" do |c|
     c.desc "Grant with admin option"
     c.switch [:a, :admin]
