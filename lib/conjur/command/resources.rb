@@ -1,4 +1,5 @@
 require 'conjur/authn'
+require 'conjur/resource'
 require 'conjur/command'
 
 class Conjur::Command::Resources < Conjur::Command
@@ -12,7 +13,7 @@ class Conjur::Command::Resources < Conjur::Command
     c.action do |global_options,options,args|
       kind = require_arg(args, "kind")
       id = require_arg(args, "resource-id")
-      resource = api.resource(kind, id)
+      resource = api.resource([ Conjur.account, kind, id ].join(':'))
       resource.create(options)
     end
   end
@@ -23,7 +24,7 @@ class Conjur::Command::Resources < Conjur::Command
     c.action do |global_options,options,args|
       kind = require_arg(args, "kind")
       id = require_arg(args, "resource-id")
-      display api.resource(kind, id).attributes
+      display api.resource([ Conjur.account, kind, id ].join(':')).attributes
     end
   end
   
@@ -33,7 +34,7 @@ class Conjur::Command::Resources < Conjur::Command
     c.action do |global_options,options,args|
       kind = require_arg(args, "kind")
       id = require_arg(args, "resource-id")
-      resource = api.resource(kind, id)
+      resource = api.resource([ Conjur.account, kind, id ].join(':'))
       puts resource.exists?
     end
   end
@@ -46,7 +47,7 @@ class Conjur::Command::Resources < Conjur::Command
       id = require_arg(args, "resource-id")
       role = require_arg(args, "role")
       privilege = require_arg(args, "privilege")
-      api.resource(kind, id).permit privilege, role
+      api.resource([ Conjur.account, kind, id ].join(':')).permit privilege, role
     end
   end
 
@@ -58,7 +59,7 @@ class Conjur::Command::Resources < Conjur::Command
       id = require_arg(args, "resource-id")
       role = require_arg(args, "role")
       privilege = require_arg(args, "privilege")
-      api.resource(kind, id).deny privilege, role
+      api.resource([ Conjur.account, kind, id ].join(':')).deny privilege, role
     end
   end
 
@@ -69,7 +70,7 @@ class Conjur::Command::Resources < Conjur::Command
       kind = require_arg(args, "kind")
       id = require_arg(args, "resource-id")
       owner = require_arg(args, "owner")
-      api.resource(kind, id).give_to owner
+      api.resource([ Conjur.account, kind, id ].join(':')).give_to owner
     end
   end
 
@@ -80,7 +81,7 @@ class Conjur::Command::Resources < Conjur::Command
       kind = require_arg(args, "kind")
       id = require_arg(args, "resource-id")
       permission = require_arg(args, "permission")
-      display api.resource(kind, id).permitted_roles(permission)
+      display api.resource([ Conjur.account, kind, id ].join(':')).permitted_roles(permission)
     end
   end
 end

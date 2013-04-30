@@ -30,7 +30,7 @@ class Conjur::Command::Variables < Conjur::Command
   end
 
   desc "Add a value"
-  arg_name "variable value"
+  arg_name "variable ( value | STDIN )"
   command :"values:add" do |c|
     c.action do |global_options,options,args|
       id = require_arg(args, 'variable')
