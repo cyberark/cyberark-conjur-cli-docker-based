@@ -1,3 +1,4 @@
+testdata/
 *.gem
 *.rbc
 .bundle
