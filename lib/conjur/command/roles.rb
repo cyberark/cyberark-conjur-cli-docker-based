@@ -31,7 +31,16 @@ class Conjur::Command::Roles < Conjur::Command
   command :memberships do |c|
     c.action do |global_options,options,args|
       role = args.shift || api.user(api.username).roleid
-      display api.role(role).all.map(&:id)
+      display api.role(role).all.map(&:roleid)
+    end
+  end
+
+  desc "Lists all members of the role"
+  arg_name "role"
+  command :members do |c|
+    c.action do |global_options,options,args|
+      role = args.shift || api.user(api.username).roleid
+      display api.role(role).members.map(&:member).map(&:roleid)
     end
   end
 
