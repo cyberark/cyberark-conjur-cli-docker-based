@@ -7,7 +7,7 @@ SimpleCov.start
 module RSpec::Core::DSL
   def describe_command name, *a, &block
     describe name, *a do
-      let(:invoke) { Conjur::Cli.run [name] }
+      let(:invoke) { Conjur::CLI.run [name] }
       instance_eval &block
     end
   end
