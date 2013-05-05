@@ -13,7 +13,9 @@ describe Conjur::Command::Authn do
 
   context "when not logged in" do
     describe_command 'authn:whoami' do
-      it "prints a descriptive error message and quits"
+      it "errors out" do
+        expect{ invoke }.to write(/not logged in/i).to :stderr
+      end
     end
   end
 

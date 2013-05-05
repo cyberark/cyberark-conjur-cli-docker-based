@@ -39,7 +39,11 @@ DESC
   desc "Prints out the current logged in username"
   command :whoami do |c|
     c.action do
-      puts Conjur::Authn.read_credentials[0]
+      if creds = Conjur::Authn.read_credentials
+        puts creds[0]
+      else
+        exit_now! 'Not logged in.', -1
+      end
     end
   end
 end
