@@ -35,4 +35,11 @@ DESC
       Conjur::Authn.delete_credentials
     end
   end
+
+  desc "Prints out the current logged in username"
+  command :whoami do |c|
+    c.action do
+      puts Conjur::Authn.read_credentials[0]
+    end
+  end
 end
