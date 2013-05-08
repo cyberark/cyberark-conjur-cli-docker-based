@@ -5,7 +5,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Rafa\305\202 Rzepecki", "Kevin Gilpin"]
   gem.email         = ["divided.mind@gmail.com", "kevin.gilpin@inscitiv.com",]
   gem.summary       = %q{Conjur command line interface}
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/inscitiv/cli-ruby"
 
   gem.files         = `git ls-files`.split($\) + Dir['build_number']
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
