@@ -5,11 +5,11 @@ require "simplecov"
 SimpleCov.start
 
 module RSpec::Core::DSL
-  def describe_command name, *a, &block
-    describe name, *a do
+  def describe_command *argv, &block
+    describe *argv do
       let(:invoke) do
         Conjur::CLI.error_device = $stderr
-        Conjur::CLI.run [name]
+        Conjur::CLI.run argv 
       end
       instance_eval &block
     end
