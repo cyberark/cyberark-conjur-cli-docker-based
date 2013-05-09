@@ -43,8 +43,11 @@ module Conjur::Authn
     
     def ask_for_credentials(options = {})
       raise "No credentials provided or found" if options[:noask]
-      
-      hl = HighLine.new
+
+      # also use stderr here, because we might be prompting for a password as part
+      # of a command like user:create that we'd want to send to a file.
+      hl = HighLine.new $stdin, $stderr
+
       user = options[:username] || hl.ask("Enter your username to log into Conjur: ")
       pass = options[:password] || hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
       api_key = if cas_server = options[:"cas-server"]

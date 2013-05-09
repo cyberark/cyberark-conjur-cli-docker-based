@@ -17,7 +17,11 @@ class Conjur::Command::Users < Conjur::Command
       
       opts = options.slice(:ownerid)
       if options[:p]
-        hl = HighLine.new
+
+        # use stderr to allow output redirection, e.g.
+        # conjur user:create -p username > user.json
+        hl = HighLine.new($stdin, $stderr)
+
         password = hl.ask("Enter the password (it will not be echoed): "){ |q| q.echo = false }
         confirmation = hl.ask("Confirm the password: "){ |q| q.echo = false }
         
