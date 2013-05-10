@@ -29,6 +29,22 @@ class Conjur::Command::Groups < Conjur::Command
       
       group = api.group(group)
       api.role(group.roleid).grant_to member, !!options[:admin]
+
+      puts "Membership granted"
+    end
+  end
+
+  desc "Remove a group member"
+  arg_name "group member"
+  command :"members:remove" do |c|
+    c.action do |global_options,options,args|
+      group = require_arg(args, 'group')
+      member = require_arg(args, 'member')
+      
+      group = api.group(group)
+      api.role(group.roleid).revoke_from member
+      
+      puts "Membership revoked"
     end
   end
 end
