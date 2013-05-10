@@ -48,7 +48,7 @@ class Conjur::Command::Variables < Conjur::Command
     
     c.action do |global_options,options,args|
       id = require_arg(args, 'variable')
-      puts api.variable(id).value(options[:version])
+      $stdout.write api.variable(id).value(options[:version])
     end
   end
 end
