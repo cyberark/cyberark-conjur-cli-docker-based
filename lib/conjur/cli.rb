@@ -1,5 +1,6 @@
 require 'gli'
 require 'conjur/config'
+require 'conjur/log'
 
 module Conjur
   class CLI
@@ -9,7 +10,9 @@ module Conjur
       def load_config
         [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ) ].each do |f|
           if File.exists?(f)
-            $stderr.puts "Loading #{f}"
+            if Conjur.log
+              Conjur.log << "Loading #{f}\n"
+            end
             Conjur::Config.merge YAML.load(IO.read(f))
           end
         end
@@ -29,8 +32,10 @@ module Conjur
     
     commands_from 'conjur/command'
 
-    $stderr.puts "Using host #{Conjur::Authn::API.host}"
-    
+    if Conjur.log
+      Conjur.log << "Using host #{Conjur::Authn::API.host}\n"
+    end
+
     pre do |global,command,options,args|
       require 'active_support/core_ext'
       options.delete_if{|k,v| v.blank?}
