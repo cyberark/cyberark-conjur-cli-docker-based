@@ -62,6 +62,19 @@ class Conjur::Command::Resources < Conjur::Command
       api.resource([ Conjur.account, kind, id ].join(':')).deny privilege, role
     end
   end
+  
+  desc "Check whether a role has a privilege on a resource"
+  arg_name "kind resource-id role privilege"
+  command :check do |c|
+    c.action do |global_options,options,args|
+      kind = args.shift or raise "Missing parameter: resource-kind"
+      resource_id = args.shift or raise "Missing parameter: resource-id"
+      role = args.shift or raise "Missing parameter: role"
+      privilege = args.shift or raise "Missing parameter: privilege"
+      role = api.role(role)
+      puts role.permitted? kind, resource_id, privilege
+    end
+  end
 
   desc "Grant ownership on a resource to a new owner"
   arg_name "kind resource-id owner"
