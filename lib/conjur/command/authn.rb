@@ -29,6 +29,22 @@ DESC
     end
   end
   
+  desc "Obtains an authentication token using the current logged-in user"
+  command :authenticate do |c|
+    c.arg_name 'header'
+    c.desc "Base64 encode the result and format as an HTTP Authorization header"
+    c.switch [:H,:header]
+
+    c.action do |global_options,options,args|
+      token = Conjur::Authn.authenticate(options)
+      if options[:header]
+        puts "Authorization: Token token=\"#{Base64.strict_encode64(token.to_json)}\""
+      else
+        puts token
+      end
+    end
+  end
+  
   desc "Logs out"
   command :logout do |c|
     c.action do

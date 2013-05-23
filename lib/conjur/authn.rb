@@ -9,6 +9,10 @@ module Conjur::Authn
       get_credentials(options)
     end
     
+    def authenticate(options = {})
+      Conjur::API.authenticate(*get_credentials(options))
+    end
+    
     def delete_credentials
       netrc.delete host
       netrc.save
