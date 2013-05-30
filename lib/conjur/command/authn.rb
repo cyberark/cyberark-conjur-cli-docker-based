@@ -54,12 +54,9 @@ DESC
 
   desc "Prints out the current logged in username"
   command :whoami do |c|
-    c.action do
-      if creds = Conjur::Authn.read_credentials
-        puts creds[0]
-      else
-        exit_now! 'Not logged in.', -1
-      end
+    c.action do |global_options,options,args|
+      token = Conjur::Authn.authenticate(options)
+      puts({ account: Conjur::Core::API.conjur_account, username: token['data'] }.to_json)
     end
   end
 end
