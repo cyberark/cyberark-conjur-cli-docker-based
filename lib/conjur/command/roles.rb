@@ -35,19 +35,12 @@ class Conjur::Command::Roles < Conjur::Command
     end
   end
 
-  desc "Lists members of the role"
+  desc "Lists all members of the role"
   arg_name "role"
   command :members do |c|
-    c.desc "List all members recursively"
-    c.switch :a
-
     c.action do |global_options,options,args|
       role = args.shift || api.user(api.username).roleid
-      if options[:a]
-        display api.role(role).all.map(&:roleid)
-      else
-        display api.role(role).members.map(&:member).map(&:roleid)
-      end
+      display api.role(role).members.map(&:member).map(&:roleid)
     end
   end
 
