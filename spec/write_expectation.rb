@@ -27,6 +27,7 @@ RSpec::Matchers.define :write do |message|
     case message
     when String then output.include? message
     when Regexp then output.match message
+    when nil then output
     else fail("Allowed types for write `message` are String or Regexp, got `#{message.class}`")
     end
   end
