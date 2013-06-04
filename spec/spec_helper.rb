@@ -10,7 +10,7 @@ module RSpec::Core::DSL
     describe *argv do
       let(:invoke) do
         Conjur::CLI.error_device = $stderr
-        Conjur::CLI.run argv 
+        Conjur::CLI.run argv.clone
       end
       instance_eval &block
     end
