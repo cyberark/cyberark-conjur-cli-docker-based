@@ -18,6 +18,10 @@ module Conjur
       def api
         Conjur::Authn.connect
       end
+
+      def conjur_account
+        Conjur::Core::API.conjur_account
+      end
       
       def acting_as_option(command)
         command.arg_name 'Perform all actions as the specified Group'
