@@ -56,7 +56,7 @@ DESC
   command :whoami do |c|
     c.action do
       if creds = Conjur::Authn.read_credentials
-        puts creds[0]
+        puts({account: Conjur::Core::API.conjur_account, username: creds[0]}.to_json)
       else
         exit_now! 'Not logged in.', -1
       end
