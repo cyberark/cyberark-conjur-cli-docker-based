@@ -30,8 +30,8 @@ class Conjur::Command::Roles < Conjur::Command
   arg_name "role"
   command :memberships do |c|
     c.action do |global_options,options,args|
-      role = args.shift || api.user(api.username).roleid
-      display api.role(role).all.map(&:roleid)
+      role = args.shift.tap {|r| r && api.role(r)} || api.current_role
+      display role.all.map(&:roleid)
     end
   end
 

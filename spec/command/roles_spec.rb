@@ -13,7 +13,16 @@ describe Conjur::Command::Roles, logged_in: true do
 
     context "when logged in as a user" do
       let(:username) { "joerandom" }
-      let(:rolename) { "the-account:user:joerandom" }
+      let(:rolename) { "user:joerandom" }
+
+      it "lists all roles" do
+        JSON::parse(expect { invoke }.to write).should == all_roles
+      end
+    end
+
+    context "when logged in as a host" do
+      let(:username) { "host/foobar" }
+      let(:rolename) { "host:foobar" }
 
       it "lists all roles" do
         JSON::parse(expect { invoke }.to write).should == all_roles
