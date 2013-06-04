@@ -1,5 +1,7 @@
 module Conjur
   class Command
+    @@api = nil
+    
     class << self
       attr_accessor :prefix
       
@@ -16,7 +18,7 @@ module Conjur
       end
 
       def api
-        Conjur::Authn.connect
+        @@api ||= Conjur::Authn.connect
       end
       
       def acting_as_option(command)
