@@ -1,19 +1,7 @@
 require 'spec_helper'
-require 'tempfile'
-require 'write_expectation'
 
 describe Conjur::Command::Authn do
-  let(:netrcfile) { Tempfile.new 'authtest' }
-  let(:netrc) { Netrc.read(netrcfile.path) }
-  let(:host) { 'https://authn.example.com' }
-  let(:account) { 'the-account' }
-  before { Conjur::Core::API.stub conjur_account: account }
-
-  before do
-    Conjur::Authn.stub netrc: netrc, host: host
-  end
-
-  context "when not logged in" do
+  context logged_in: false do
     describe_command 'authn:whoami' do
       it "errors out" do
         expect{ invoke }.to write(/not logged in/i).to :stderr
@@ -21,15 +9,11 @@ describe Conjur::Command::Authn do
     end
   end
 
-  context "when logged in" do
-    let(:username) { 'dknuth' }
-    let(:api_key) { 'sekrit' }
-    before { netrc[host] = [username, api_key] }
-
+  context logged_in: true do
     describe_command 'authn:logout' do
       it "deletes credentials" do
         invoke
-        netrc[host].should_not be
+        netrc[authn_host].should_not be
       end
     end
 
