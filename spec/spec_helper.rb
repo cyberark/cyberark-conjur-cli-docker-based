@@ -26,7 +26,7 @@ shared_context "with fake endpoints and test config" do
     Conjur::Authz::API.stub host: authz_host
     Conjur::Core::API.stub host: core_host
 
-    Conjur::Config.merge 'trace' => true
+    ENV['GLI_DEBUG'] = 'true'
   end
 end
 

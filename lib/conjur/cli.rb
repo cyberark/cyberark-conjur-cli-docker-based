@@ -66,7 +66,6 @@ module Conjur
           $stderr.puts exception.response.body if exception.response
         end
       end
-      raise(exception) if Config[:trace] && !exception.is_a?(GLI::StandardException)
       true
     end
   end
