@@ -13,6 +13,7 @@ class Conjur::Command::Roles < Conjur::Command
       id = require_arg(args, 'role')
       role = api.role(id)
       role.create(options)
+      puts "Created #{role}"
     end
   end
   
@@ -30,24 +31,18 @@ class Conjur::Command::Roles < Conjur::Command
   arg_name "role"
   command :memberships do |c|
     c.action do |global_options,options,args|
-      role = args.shift || api.user(api.username).roleid
-      display api.role(role).all.map(&:roleid)
+      roleid = args.shift
+      role = roleid.nil? && api.current_role || api.role(roleid)
+      display role.all.map(&:roleid)
     end
   end
 
-  desc "Lists members of the role"
+  desc "Lists all members of the role"
   arg_name "role"
   command :members do |c|
-    c.desc "List all members recursively"
-    c.switch :a
-
     c.action do |global_options,options,args|
       role = args.shift || api.user(api.username).roleid
-      if options[:a]
-        display api.role(role).all.map(&:roleid)
-      else
-        display api.role(role).members.map(&:member).map(&:roleid)
-      end
+      display api.role(role).members.map(&:member).map(&:roleid)
     end
   end
 
@@ -62,6 +57,7 @@ class Conjur::Command::Roles < Conjur::Command
       member = require_arg(args, 'member')
       role = api.role(id)
       role.grant_to member, options[:admin]
+      puts "Role granted"
     end
   end
 
@@ -73,6 +69,7 @@ class Conjur::Command::Roles < Conjur::Command
       member = require_arg(args, 'member')
       role = api.role(id)
       role.revoke_from member
+      puts "Role revoked"
     end
   end
 end
