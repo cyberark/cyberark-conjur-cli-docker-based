@@ -13,6 +13,7 @@ class Conjur::Command::Roles < Conjur::Command
       id = require_arg(args, 'role')
       role = api.role(id)
       role.create(options)
+      puts "Created #{role}"
     end
   end
   
@@ -56,6 +57,7 @@ class Conjur::Command::Roles < Conjur::Command
       member = require_arg(args, 'member')
       role = api.role(id)
       role.grant_to member, options[:admin]
+      puts "Role granted"
     end
   end
 
@@ -67,6 +69,7 @@ class Conjur::Command::Roles < Conjur::Command
       member = require_arg(args, 'member')
       role = api.role(id)
       role.revoke_from member
+      puts "Role revoked"
     end
   end
 end
