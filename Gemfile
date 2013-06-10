@@ -3,8 +3,9 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in conjur.gemspec
 gemspec
 
-gem 'slosilo', git: 'https://github.com/inscitiv/slosilo.git', branch: 'master'
-gem 'conjur-api', '~> 2.2', git: 'https://github.com/inscitiv/api-ruby.git', branch: 'master'
+# when developing in parallel, you might want to uncomment the following:
+# gem 'conjur-api', git: 'https://github.com/inscitiv/api-ruby.git', branch: 'master'
+
 gem 'conjur-asset-cmi-study', git: 'https://inscitiv-ops-dev:Me5aswes@github.com/inscitiv/conjur-asset-cmi-study', branch: 'master'
 gem 'conjur-asset-environment', git: 'https://inscitiv-ops-dev:Me5aswes@github.com/inscitiv/conjur-asset-environment', branch: 'master'
 gem 'conjur-asset-deployment',  git: 'https://inscitiv-ops-dev:Me5aswes@github.com/inscitiv/conjur-asset-deployment',  branch: 'master'
