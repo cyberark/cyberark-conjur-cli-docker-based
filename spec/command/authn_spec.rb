@@ -4,11 +4,7 @@ describe Conjur::Command::Authn do
   context logged_in: false do
     describe_command 'authn:whoami' do
       it "errors out" do
-        begin
-          invoke
-        rescue GLI::CustomExit => e
-          e.message.should =~ /not logged in/i
-        end
+        expect { invoke }.to raise_error(GLI::CustomExit, /not logged in/i)
       end
     end
   end
