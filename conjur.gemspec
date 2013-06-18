@@ -18,9 +18,13 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'gli'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc'
+  gem.add_dependency 'methadone'
   
   gem.add_runtime_dependency 'cas_rest_client'
   
   gem.add_development_dependency 'rspec'
   gem.add_development_dependency 'simplecov'
+  gem.add_development_dependency 'aruba'
+  gem.add_development_dependency 'ci_reporter', '~> 1.8'
+  gem.add_development_dependency 'rake', '~> 10.0'
 end
