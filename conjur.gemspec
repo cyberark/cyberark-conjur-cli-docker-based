@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'gli'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc'
+  gem.add_dependency 'methadone'
   
   gem.add_runtime_dependency 'cas_rest_client'
   

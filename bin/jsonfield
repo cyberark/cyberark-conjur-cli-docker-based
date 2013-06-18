@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'methadone'
+
+class JsonField
+  include Methadone::Main
+  include Methadone::CLILogging
+
+  main do |path, input = nil|
+    input ||= STDIN.read
+    data = JSON.parse input
+    result = data.instance_eval massage_path(path)
+    puts result
+  end
+end
+
+# massage object path to support .<digit> syntax
+def massage_path path
+  path.gsub /\.(\d+)/, '[\1]'
+end
+
+class Hash
+  def method_missing label
+    self[label] || self[label.to_s] || super
+  end
+end
+
+JsonField.go!
