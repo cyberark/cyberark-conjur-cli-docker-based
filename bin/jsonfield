@@ -1,0 +1,50 @@
+#!/usr/bin/env ruby
+
+require 'json'
+require 'methadone'
+
+class JsonField
+  include Methadone::Main
+  include Methadone::CLILogging
+
+  description "parse JSON and extract a field value"
+  arg :json_path, "path to object to extract, eg. 'headers.0' or 'document.author.name'"
+  arg :json, :optional, "data to parse (reads from stdin if not given)"
+
+  main do |path, input = nil|
+    input ||= STDIN.read
+    data = JSON.parse input
+    result = data.extract_field *(path.split '.', -1)
+    puts result
+  end
+end
+
+class Hash
+  def extract_field head = nil, *tail
+    return self unless head
+    field_not_found! head unless has_key? head
+    self[head].extract_field *tail
+  end
+end
+
+class Array
+  def extract_field head = nil, *tail
+    return self unless head
+    index = Integer(head) rescue field_not_found!(head)
+    field_not_found! index if index >= size
+    self[index].extract_field *tail
+  end
+end
+
+class Object
+  def extract_field head = nil, *tail
+    field_not_found! head if head
+    self
+  end
+
+  def field_not_found! field
+    raise Methadone::Error.new(2, "No field #{field} in #{inspect}")
+  end
+end
+
+JsonField.go!
