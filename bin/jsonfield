@@ -14,19 +14,36 @@ class JsonField
   main do |path, input = nil|
     input ||= STDIN.read
     data = JSON.parse input
-    result = data.instance_eval massage_path(path)
+    result = data.extract_field *(path.split '.', -1)
     puts result
   end
 end
 
-# massage object path to support .<digit> syntax
-def massage_path path
-  path.gsub /\.(\d+)/, '[\1]'
+class Hash
+  def extract_field head = nil, *tail
+    return self unless head
+    field_not_found! head unless has_key? head
+    self[head].extract_field *tail
+  end
 end
 
-class Hash
-  def method_missing label
-    self[label] || self[label.to_s] || super
+class Array
+  def extract_field head = nil, *tail
+    return self unless head
+    index = Integer(head) rescue field_not_found!(head)
+    field_not_found! index if index >= size
+    self[index].extract_field *tail
+  end
+end
+
+class Object
+  def extract_field head = nil, *tail
+    field_not_found! head if head
+    self
+  end
+
+  def field_not_found! field
+    raise Methadone::Error.new(2, "No field #{field} in #{inspect}")
   end
 end
 
