@@ -7,6 +7,10 @@ class JsonField
   include Methadone::Main
   include Methadone::CLILogging
 
+  description "parse JSON and extract a field value"
+  arg :json_path, "path to object to extract, eg. 'headers.0' or 'document.author.name'"
+  arg :json, :optional, "data to parse (reads from stdin if not given)"
+
   main do |path, input = nil|
     input ||= STDIN.read
     data = JSON.parse input
