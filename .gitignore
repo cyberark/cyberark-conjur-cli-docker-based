@@ -1,3 +1,7 @@
+*.cert
+*.credential
+*.json
+*.pem
 testdata/
 *.gem
 *.rbc
