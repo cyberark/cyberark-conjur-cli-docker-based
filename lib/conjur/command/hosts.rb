@@ -27,7 +27,7 @@ class Conjur::Command::Hosts < Conjur::Command
       enrollment_url = api.host(id).enrollment_url
       puts enrollment_url
       $stderr.puts "On the target host, please execute the following command:"
-      $stderr.puts "sudo true && curl -L #{enrollment_url} | sudo bash"
+      $stderr.puts "curl -L #{enrollment_url} | bash"
     end
   end
 end
