@@ -15,6 +15,7 @@ class Conjur::Command::Resources < Conjur::Command
       id = require_arg(args, "resource-id")
       resource = api.resource([ conjur_account, kind, id ].join(':'))
       resource.create(options)
+      display resource.attributes
     end
   end
   
@@ -48,6 +49,7 @@ class Conjur::Command::Resources < Conjur::Command
       role = require_arg(args, "role")
       privilege = require_arg(args, "privilege")
       api.resource([ conjur_account, kind, id ].join(':')).permit privilege, role
+      puts "Permission granted"
     end
   end
 
@@ -60,6 +62,7 @@ class Conjur::Command::Resources < Conjur::Command
       role = require_arg(args, "role")
       privilege = require_arg(args, "privilege")
       api.resource([ conjur_account, kind, id ].join(':')).deny privilege, role
+      puts "Permission revoked"
     end
   end
   
@@ -84,6 +87,7 @@ class Conjur::Command::Resources < Conjur::Command
       id = require_arg(args, "resource-id")
       owner = require_arg(args, "owner")
       api.resource([ conjur_account, kind, id ].join(':')).give_to owner
+      puts "Role granted"
     end
   end
 
