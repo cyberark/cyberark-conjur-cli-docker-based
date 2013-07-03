@@ -47,8 +47,9 @@ shared_context "when logged in", logged_in: true do
   include_context "with mock authn"
   let(:username) { 'dknuth' }
   let(:api_key) { 'sekrit' }
-  let(:api) { Conjur::API.new_from_token({ 'data' => username }) }
+  let(:api) { Conjur::API.new_from_key(username, api_key) }
   before do
+    api.stub credentials: {}
     netrc[authn_host] = [username, api_key]
     Conjur::Command.stub api: api
   end
