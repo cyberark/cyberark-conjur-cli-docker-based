@@ -18,21 +18,20 @@ module Conjur
         end
       end
     end
-            
-    
+          
+    load_config
+
+    Conjur::Config.plugins.each do |plugin|
+      require "conjur-asset-#{plugin}"
+    end
+
     commands_from 'conjur/command'
 
     pre do |global,command,options,args|
-      load_config
-
       ENV['CONJUR_ENV'] = Config[:env] || "production"
       ENV['CONJUR_STACK'] = Config[:stack] if Config[:stack]
       ENV['CONJUR_STACK'] ||= 'v3' if ENV['CONJUR_ENV'] == 'production'
       ENV['CONJUR_ACCOUNT'] = Config[:account] or raise "Missing configuration setting: account. Please set it in ~/.conjurrc"
-
-      Conjur::Config.plugins.each do |plugin|
-        require "conjur-asset-#{plugin}"
-      end
 
       if Conjur.log
         Conjur.log << "Using host #{Conjur::Authn::API.host}\n"
