@@ -40,9 +40,23 @@ class Conjur::Command::Roles < Conjur::Command
   desc "Lists all members of the role"
   arg_name "role"
   command :members do |c|
+    c.desc "Verbose output"
+    c.switch [:v,:verbose]
+    
     c.action do |global_options,options,args|
       role = args.shift || api.user(api.username).roleid
-      display api.role(role).members.map(&:member).map(&:roleid)
+      result = if options[:v]
+        api.role(role).members.collect {|member|
+          {
+            member: member.member.roleid,
+            grantor: member.grantor.roleid,
+            admin_option: member.admin_option
+          }
+        }
+      else
+        api.role(role).members.map(&:member).map(&:roleid)
+      end
+      display result
     end
   end
 
