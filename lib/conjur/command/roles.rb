@@ -12,6 +12,11 @@ class Conjur::Command::Roles < Conjur::Command
     c.action do |global_options,options,args|
       id = require_arg(args, 'role')
       role = api.role(id)
+      
+      if ownerid = options.delete(:ownerid)
+        options[:acting_as] = ownerid
+      end
+      
       role.create(options)
       puts "Created #{role}"
     end
@@ -41,11 +46,11 @@ class Conjur::Command::Roles < Conjur::Command
   arg_name "role"
   command :members do |c|
     c.desc "Verbose output"
-    c.switch [:v,:verbose]
+    c.switch [:V,:verbose]
     
     c.action do |global_options,options,args|
       role = args.shift || api.user(api.username).roleid
-      result = if options[:v]
+      result = if options[:V]
         api.role(role).members.collect {|member|
           {
             member: member.member.roleid,

@@ -14,6 +14,11 @@ class Conjur::Command::Resources < Conjur::Command
       kind = require_arg(args, "kind")
       id = require_arg(args, "resource-id")
       resource = api.resource([ conjur_account, kind, id ].join(':'))
+
+      if ownerid = options.delete(:ownerid)
+        options[:acting_as] = ownerid
+      end
+
       resource.create(options)
       display resource.attributes
     end
