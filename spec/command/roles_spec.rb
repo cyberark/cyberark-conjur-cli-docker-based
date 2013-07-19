@@ -30,7 +30,7 @@ describe Conjur::Command::Roles, logged_in: true do
       end
     end
   end
-
+  
   describe "role:memberships" do
     let(:all_roles) { %w(foo:user:joerandom foo:something:cool foo:something:else foo:group:admins) }
     let(:role) do
