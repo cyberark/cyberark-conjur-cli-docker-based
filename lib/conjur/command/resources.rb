@@ -70,11 +70,7 @@ class Conjur::Command::Resources < Conjur::Command
       puts "Permission revoked"
     end
   end
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> 8f7261fa5f165b2452a2cd6966b809c43a2605f6
   desc "Check for a privilege on a resource"
   long_desc """
   By default, the privilege is checked for the logged-in user.
