@@ -41,7 +41,7 @@ class Conjur::Command::Resources < Conjur::Command
     end
   end
 
-  desc "Grant a privilege on a resource"
+  desc "Give a privilege on a resource"
   arg_name "resource-id role privilege"
   command :permit do |c|
     c.action do |global_options,options,args|
@@ -53,7 +53,7 @@ class Conjur::Command::Resources < Conjur::Command
     end
   end
 
-  desc "Revoke a privilege on a resource"
+  desc "Deny a privilege on a resource"
   arg_name "resource-id role privilege"
   command :deny do |c|
     c.action do |global_options,options,args|

@@ -23,22 +23,22 @@ module Conjur
 
       def full_resource_id id
         parts = id.split(':') unless id.nil? 
-        if id.to_s.empty? or parts.size<2 
-          raise "Id should consists of minimum two parts (passed value: #{id})"
+        if id.blank? or parts.size < 2
+          raise "Expecting at least two tokens in #{id}"
         end
-        if parts.size==2
-          return [conjur_account, parts].flatten.join(":")
+        if parts.size == 2
+          id = [conjur_account, parts].flatten.join(":")
         end
-        return id
+        id
       end
 
       def parse_full_resource_id id
         id_parts = id.split(':')
-        account=id_parts[0]
+        account = id_parts[0]
         kind = id_parts[1]
-        resource_id=id_parts[2,id_parts.size].join(":")
-        resource_id=nil if resource_id.to_s.empty? 
-        return [account, kind, resource_id]
+        resource_id = id_parts[2,id_parts.size].join(":")
+        resource_id = nil if resource_id.blank? 
+        [account, kind, resource_id]
       end
 
       def conjur_account

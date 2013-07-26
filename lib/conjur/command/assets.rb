@@ -11,7 +11,7 @@ class Conjur::Command::Assets < Conjur::Command
     
     c.action do |global_options, options, args|
       kind, id = require_arg(args, 'kind:id').split(':')
-      id=nil if id.to_s.empty?
+      id = nil if id.blank?
       kind.gsub!('-', '_')
  
       m = "create_#{kind}"
