@@ -70,7 +70,7 @@ class Conjur::Command::Resources < Conjur::Command
       puts "Permission revoked"
     end
   end
-  
+
   desc "Check for a privilege on a resource"
   long_desc """
   By default, the privilege is checked for the logged-in user.
@@ -78,13 +78,16 @@ class Conjur::Command::Resources < Conjur::Command
   When the role argument is used, either the logged-in user must either own the specified
   resource or be an admin of the specified role (i.e. be granted the specified role with grant option).
   """
-  arg_name "kind resource-id privilege role?"
+  arg_name "kind resource-id privilege"
   command :check do |c|
+    c.desc "Role to check. By default, the current logged-in role is used"
+    c.flag [:r,:role]
+
     c.action do |global_options,options,args|
       kind = args.shift or raise "Missing parameter: resource-kind"
       resource_id = args.shift or raise "Missing parameter: resource-id"
       privilege = args.shift or raise "Missing parameter: privilege"
-      if role = args.shift
+      if role = options[:role]
         role = api.role(role)
         puts role.permitted? kind, resource_id, privilege
       else

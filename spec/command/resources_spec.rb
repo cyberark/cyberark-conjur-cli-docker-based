@@ -11,7 +11,7 @@ describe Conjur::Command::Resources, logged_in: true do
     end
   end
   
-  describe_command "resource:check food bacon fry test:the-role" do
+  describe_command "resource:check -r test:the-role food bacon fry" do
     it "performs a permission check for a specified role" do
       api.should_receive(:role).with("test:the-role").and_return role = double("the-account:test:the-role")
 
