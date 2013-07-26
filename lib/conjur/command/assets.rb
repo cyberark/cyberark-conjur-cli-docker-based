@@ -5,22 +5,25 @@ class Conjur::Command::Assets < Conjur::Command
   self.prefix = :asset
 
   desc "Create an asset"
-  arg_name "kind id"
+  arg_name "kind:id"
   command :create do |c|
     acting_as_option(c)
     
     c.action do |global_options, options, args|
-      kind = require_arg(args, 'kind').gsub('-', '_')
-      
+      kind, id = require_arg(args, 'kind:id').split(':')
+      id=nil if id.to_s.empty?
+      kind.gsub!('-', '_')
+ 
       m = "create_#{kind}"
       record = if [ 1, -1 ].member?(api.method(m).arity)
-        id = args.shift
         if id
           options[:id] = id
         end
         api.send(m, options)
       else
-        id = require_arg(args, 'id')
+        unless id
+          raise "for kind #{kind} id should be specified explicitly after colon"
+        end
         api.send(m, id, options)
       end
       display(record, options)
@@ -28,21 +31,23 @@ class Conjur::Command::Assets < Conjur::Command
   end
   
   desc "Show an asset"
-  arg_name "kind id"
+  arg_name "id"
   command :show do |c|
     c.action do |global_options,options,args|
-      kind = require_arg(args, "kind").gsub('-', '_')
-      id = require_arg(args, "resource-id")
+      id_arg = require_arg(args, 'id')
+      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
+      kind.gsub!('-', '_')
       display api.send(kind, id).attributes
     end
   end
 
   desc "Checks for the existance of an asset"
-  arg_name "kind id"
+  arg_name "id"
   command :exists do |c|
     c.action do |global_options,options,args|
-      kind = require_arg(args, "kind").gsub('-', '_')
-      id = require_arg(args, "id")
+      id_arg = require_arg(args, 'id')
+      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
+      kind.gsub!('-', '_')
       puts api.send(kind, id).exists?
     end
   end
@@ -59,14 +64,15 @@ class Conjur::Command::Assets < Conjur::Command
   end
 
   desc "Add a member to an asset"
-  arg_name "kind id role-name member"
+  arg_name "id role-name member"
   command :"members:add" do |c|
     c.desc "Grant with admin option"
     c.flag [:a, :admin]
 
     c.action do |global_options, options, args|
-      kind = require_arg(args, "kind").gsub('-', '_')
-      id = require_arg(args, "resource-id")
+      id_arg = require_arg(args, 'id')
+      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
+      kind.gsub!('-', '_')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
       admin_option = !options.delete(:admin).nil?
@@ -81,11 +87,12 @@ class Conjur::Command::Assets < Conjur::Command
   end
 
   desc "Remove a member from an asset"
-  arg_name "kind id role-name member"
+  arg_name "id role-name member"
   command :"members:remove" do |c|
     c.action do |global_options, options, args|
-      kind = require_arg(args, "kind").gsub('-', '_')
-      id = require_arg(args, "resource-id")
+      id_arg = require_arg(args, 'id')
+      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
+      kind.gsub!('-', '_')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
       admin_option = !options.delete(:admin).nil?
