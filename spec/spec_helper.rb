@@ -59,6 +59,16 @@ shared_context "when not logged in", logged_in: false do
   include_context "with mock authn"
 end
 
+# stub parameters to be used in resource/asset tests
+  KIND="asset_kind"
+  ID="unique_id" 
+  ROLE='<role>'
+  MEMBER='<member>'
+  PRIVILEGE='<privilege>'
+  OWNER='<owner/userid>'
+  ACCOUNT='<core_account>'
+
+
 require 'write_expectation'
 
 require 'conjur/cli'
