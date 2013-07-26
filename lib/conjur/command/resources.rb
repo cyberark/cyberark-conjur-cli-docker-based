@@ -92,7 +92,7 @@ class Conjur::Command::Resources < Conjur::Command
       id = require_arg(args, "resource-id")
       owner = require_arg(args, "owner")
       api.resource([ conjur_account, kind, id ].join(':')).give_to owner
-      puts "Role granted"
+      puts "Ownership granted"
     end
   end
 

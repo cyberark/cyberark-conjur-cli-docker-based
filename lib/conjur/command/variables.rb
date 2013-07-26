@@ -37,6 +37,7 @@ class Conjur::Command::Variables < Conjur::Command
       value = args.shift || STDIN.read
       
       api.variable(id).add_value(value)
+      puts "Value added"
     end
   end
 
