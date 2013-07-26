@@ -2,27 +2,6 @@ require 'spec_helper'
 
 describe Conjur::Command::Resources, logged_in: true do
 
-<<<<<<< HEAD
-  describe_command "resource:check food bacon fry" do
-    it "performs a permission check for the logged-in user" do
-      api.should_receive(:resource).with("the-account:food:bacon").and_return bacon = double("the-account:food:bacon")
-      bacon.should_receive(:permitted?).with("fry")
-      
-      invoke
-    end
-  end
-  
-  describe_command "resource:check -r test:the-role food bacon fry" do
-    it "performs a permission check for a specified role" do
-      api.should_receive(:role).with("test:the-role").and_return role = double("the-account:test:the-role")
-
-      role.should_receive(:permitted?).with("food", "bacon", "fry")
-      
-      invoke
-    end
-  end
-end
-=======
   let (:full_resource_id) { [account, KIND, ID].join(":") }
   let (:resource_instance) { double(attributes: resource_attributes) }
   let (:resource_attributes) { { "some" => "attribute"} }
@@ -111,7 +90,16 @@ end
     it { expect { invoke }.to write "Permission revoked" }
   end
 
-  describe_command "resource:check #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
+  describe_command "resource:check #{KIND}:#{ID} #{PRIVILEGE}" do
+    it "performs a permission check for the logged-in user" do
+      api.should_receive(:resource).with("the-account:#{KIND}:#{ID}").and_return bacon = double("the-account:#{KIND}:#{ID}")
+      bacon.should_receive(:permitted?).with(PRIVILEGE)
+      
+      invoke
+    end
+  end
+
+  describe_command "resource:check -r #{ROLE} #{KIND}:#{ID} #{PRIVILEGE}" do
     let (:role_instance) { double() }
     let (:role_response) { "role response: true|false" }
     before(:each) { 
@@ -136,7 +124,7 @@ end
       resource_instance.should_receive(:give_to).with(OWNER)
       invoke_silently
     end
-    it { expect { invoke }.to write "Role granted" }
+    it { expect { invoke }.to write "Ownership granted" }
   end
 
   describe_command "resource:permitted_roles #{KIND}:#{ID} #{PRIVILEGE}" do
@@ -154,4 +142,3 @@ end
     end
   end
 end
->>>>>>> Asset and resource commands no more use "kind" arg; it's evaluated from "id" instead
