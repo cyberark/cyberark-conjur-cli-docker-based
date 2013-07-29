@@ -10,9 +10,11 @@ class Conjur::Command::Assets < Conjur::Command
     acting_as_option(c)
     
     c.action do |global_options, options, args|
+      # NOTE: no generic functions there, as :id is optional
       kind, id = require_arg(args, 'kind:id').split(':')
       id = nil if id.blank?
       kind.gsub!('-', '_')
+
  
       m = "create_#{kind}"
       record = if [ 1, -1 ].member?(api.method(m).arity)
@@ -34,9 +36,7 @@ class Conjur::Command::Assets < Conjur::Command
   arg_name "id"
   command :show do |c|
     c.action do |global_options,options,args|
-      id_arg = require_arg(args, 'id')
-      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
-      kind.gsub!('-', '_')
+      kind, id = get_kind_and_id_from_args(args, 'id')
       display api.send(kind, id).attributes
     end
   end
@@ -45,9 +45,7 @@ class Conjur::Command::Assets < Conjur::Command
   arg_name "id"
   command :exists do |c|
     c.action do |global_options,options,args|
-      id_arg = require_arg(args, 'id')
-      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
-      kind.gsub!('-', '_')
+      kind, id = get_kind_and_id_from_args(args, 'id')
       puts api.send(kind, id).exists?
     end
   end
@@ -70,9 +68,7 @@ class Conjur::Command::Assets < Conjur::Command
     c.flag [:a, :admin]
 
     c.action do |global_options, options, args|
-      id_arg = require_arg(args, 'id')
-      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
-      kind.gsub!('-', '_')
+      kind, id = get_kind_and_id_from_args(args, 'id')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
       admin_option = !options.delete(:admin).nil?
@@ -90,9 +86,7 @@ class Conjur::Command::Assets < Conjur::Command
   arg_name "id role-name member"
   command :"members:remove" do |c|
     c.action do |global_options, options, args|
-      id_arg = require_arg(args, 'id')
-      _, kind, id = parse_full_resource_id( full_resource_id(id_arg) )
-      kind.gsub!('-', '_')
+      kind, id = get_kind_and_id_from_args(args, 'id')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
       admin_option = !options.delete(:admin).nil?

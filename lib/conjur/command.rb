@@ -40,6 +40,16 @@ module Conjur
         resource_id = nil if resource_id.blank? 
         [account, kind, resource_id]
       end
+      
+      def get_kind_and_id_from_args args, argname='id'
+        _, kind, id = parse_full_resource_id( 
+                        full_resource_id(
+                          require_arg(args, argname)
+                        )
+                      )
+        kind.gsub!('-', '_')
+        [kind, id]
+      end
 
       def conjur_account
         Conjur::Core::API.conjur_account
