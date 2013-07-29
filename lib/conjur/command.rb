@@ -21,6 +21,36 @@ module Conjur
         @@api ||= Conjur::Authn.connect
       end
 
+      def full_resource_id id
+        parts = id.split(':') unless id.nil? 
+        if id.blank? or parts.size < 2
+          raise "Expecting at least two tokens in #{id}"
+        end
+        if parts.size == 2
+          id = [conjur_account, parts].flatten.join(":")
+        end
+        id
+      end
+
+      def parse_full_resource_id id
+        id_parts = id.split(':')
+        account = id_parts[0]
+        kind = id_parts[1]
+        resource_id = id_parts[2,id_parts.size].join(":")
+        resource_id = nil if resource_id.blank? 
+        [account, kind, resource_id]
+      end
+      
+      def get_kind_and_id_from_args args, argname='id'
+        _, kind, id = parse_full_resource_id( 
+                        full_resource_id(
+                          require_arg(args, argname)
+                        )
+                      )
+        kind.gsub!('-', '_')
+        [kind, id]
+      end
+
       def conjur_account
         Conjur::Core::API.conjur_account
       end
