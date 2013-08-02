@@ -5,6 +5,7 @@ class Conjur::Command::Variables < Conjur::Command
   self.prefix = :variable
   
   desc "Create and store a variable"
+  arg_name "id?"
   command :create do |c|
     c.arg_name "mime_type"
     c.flag [:m, :"mime-type"]
@@ -15,7 +16,16 @@ class Conjur::Command::Variables < Conjur::Command
     acting_as_option(c)
     
     c.action do |global_options,options,args|
-      var = api.create_variable(options[:m], options[:k], options)
+      id = args.shift
+      options[:id] = id if id
+      
+      mime_type = options.delete(:m)
+      kind = options.delete(:k)
+      
+      options.delete(:"mime-type")
+      options.delete(:"kind")
+      
+      var = api.create_variable(mime_type, kind, options)
       display(var, options)
     end
   end

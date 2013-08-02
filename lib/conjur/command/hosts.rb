@@ -5,7 +5,7 @@ class Conjur::Command::Hosts < Conjur::Command
   self.prefix = :host
 
   desc "Create a new host"
-  arg_name "host"
+  arg_name "id?"
   command :create do |c|
     c.arg_name "password"
     c.flag [:p,:password]

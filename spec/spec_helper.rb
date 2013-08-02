@@ -1,6 +1,7 @@
 require "rubygems"
 require "bundler/setup"
 require 'tempfile'
+require 'ostruct'
 
 require "simplecov"
 SimpleCov.start
@@ -57,6 +58,16 @@ end
 
 shared_context "when not logged in", logged_in: false do
   include_context "with mock authn"
+end
+
+  
+def post_response(id, attributes = {})
+  attributes[:id] = id
+  
+  OpenStruct.new({
+    headers: { location: [ collection_url, id ].join('/') }, 
+    body: attributes.to_json
+  })
 end
 
 require 'write_expectation'
