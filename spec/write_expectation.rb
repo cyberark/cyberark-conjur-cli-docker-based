@@ -25,6 +25,7 @@ RSpec::Matchers.define :write do |message|
       end
 
     case message
+    when Hash then output.include?(JSON.pretty_generate message)
     when String then output.include? message
     when Regexp then output.match message
     when nil then output
