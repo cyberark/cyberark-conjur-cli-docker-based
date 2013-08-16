@@ -102,6 +102,7 @@ describe Conjur::Command::Resources, logged_in: true do
   describe_command "resource:check -r #{ROLE} #{KIND}:#{ID} #{PRIVILEGE}" do
     let (:role_instance) { double() }
     let (:role_response) { "role response: true|false" }
+    let (:account) { ACCOUNT }
     before(:each) { 
       api.stub(:role).and_return(role_instance)
       role_instance.stub(:permitted?).and_return(role_response)
@@ -110,8 +111,8 @@ describe Conjur::Command::Resources, logged_in: true do
       api.should_receive(:role).with(ROLE)
       invoke_silently
     end
-    it "calls role.permitted?(#{KIND}, #{ID}, #{PRIVILEGE})" do
-      role_instance.should_receive(:permitted?).with(KIND,ID,PRIVILEGE)
+    it "calls role.permitted?('#{ACCOUNT}:#{KIND}:#{ID}', #{PRIVILEGE})" do
+      role_instance.should_receive(:permitted?).with([ACCOUNT,KIND,ID].join(":"),PRIVILEGE)
       invoke_silently
     end
     it { expect { invoke }.to write role_response }

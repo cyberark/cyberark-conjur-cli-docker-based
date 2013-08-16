@@ -79,12 +79,10 @@ class Conjur::Command::Resources < Conjur::Command
 
     c.action do |global_options,options,args|
       id = full_resource_id( require_arg(args, "resource-id") )
-      _, kind, resource_id = parse_full_resource_id(id)
       privilege = args.shift or raise "Missing parameter: privilege"
       if role = options[:role]
         role = api.role(role)
-        # TODO: change "role:permitted" to get rid of kind
-        puts role.permitted? kind, resource_id, privilege
+        puts role.permitted? id, privilege
       else
         puts api.resource(id).permitted? privilege
       end
