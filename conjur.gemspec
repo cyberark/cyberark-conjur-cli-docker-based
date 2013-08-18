@@ -15,7 +15,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
   
-  gem.add_dependency 'conjur-api', '~> 2.4'
+  gem.add_dependency 'conjur-api', '~> 3.0'
   gem.add_dependency 'gli'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc'
