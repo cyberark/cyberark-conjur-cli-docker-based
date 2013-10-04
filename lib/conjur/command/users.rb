@@ -7,7 +7,7 @@ class Conjur::Command::Users < Conjur::Command
   desc "Create a new user"
   arg_name "login"
   command :create do |c|
-    c.desc "Prompt for a password for the user"
+    c.desc "Prompt for a password for the user (default: --no-password)"
     c.switch [:p,:password]
     
     acting_as_option(c)
