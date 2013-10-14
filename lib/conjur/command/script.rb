@@ -18,49 +18,27 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-module Conjur
-  class Command
-    extend IdentifierManipulation
+require 'conjur/authn'
+require 'conjur/command'
+
+class Conjur::Command::Authn < Conjur::Command
+  self.prefix = :script
+
+  desc "Run a Conjur DSL script"
+  arg_name "script"
+  command :execute do |c|
+    acting_as_option(c)
     
-    @@api = nil
-    
-    class << self
-      attr_accessor :prefix
-      
-      def method_missing *a
-        Conjur::CLI.send *a
+    c.action do |global_options,options,args|
+      filename = nil
+      if script = args.pop
+        filename = script
+        script = File.read(script)
+      else
+        script = STDIN.read
       end
-      
-      def command name, *a, &block
-        Conjur::CLI.command "#{prefix}:#{name}", *a, &block
-      end
-      
-      def require_arg(args, name)
-        args.shift or raise "Missing parameter: #{name}"
-      end
-
-      def api
-        @@api ||= Conjur::Authn.connect
-      end
-      
-      def acting_as_option(command)
-        command.arg_name 'Perform all actions as the specified Group'
-        command.flag [:"as-group"]
-
-        command.arg_name 'Perform all actions as the specified Role'
-        command.flag [:"as-role"]
-      end
-
-      def display(obj, options = {})
-        str = if obj.respond_to?(:attributes)
-          JSON.pretty_generate obj.attributes
-        elsif obj.respond_to?(:id)
-          obj.id
-        else
-          JSON.pretty_generate obj
-        end
-        puts str
-      end
+      require 'conjur/ize'
+      puts Conjur::Ize.new(script, filename).execute
     end
   end
 end
