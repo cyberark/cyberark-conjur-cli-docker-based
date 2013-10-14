@@ -39,10 +39,14 @@ module Conjur
         end
       end
       
-      def namespace &block
-        require 'conjur/api/variables'
-        ns = api.create_variable("text/plain", "namespace").id
-        do_scope ns
+      def namespace ns = nil, &block
+        if block_given?
+          require 'conjur/api/variables'
+          ns ||= api.create_variable("text/plain", "namespace").id
+          do_scope ns, &block
+        else
+          @scopes[0]
+        end
       end
       
       alias model namespace
@@ -84,8 +88,9 @@ module Conjur
       
       def method_missing(sym, *args, &block)
         if create_compatible_args?(args) && api.respond_to?(sym)
-          id = qualify_id(args[0])
-          find_or_create sym, id, args[1] || {}
+          id = args[0]
+          id = qualify_id(id) unless sym == :user
+          find_or_create sym, id, args[1] || {}, &block
         elsif current_object && current_object.respond_to?(sym)
           current_object.send(sym, *args, &block)
         else
@@ -104,7 +109,7 @@ module Conjur
       def find_or_create(type, id, options, &block)
         find_method = type.to_sym
         create_method = "create_#{type}".to_sym
-        unless obj = api.send(find_method, id).exists?
+        unless (obj = api.send(find_method, id)) && obj.exists?
           options = expand_options(options)
           obj = api.send(create_method, id, options)
         end
@@ -122,6 +127,8 @@ module Conjur
       end
       
       def do_scope name, &block
+        return unless block_given?
+        
         @scopes.push(name)
         begin
           yield
