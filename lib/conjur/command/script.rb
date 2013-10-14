@@ -37,8 +37,8 @@ class Conjur::Command::Authn < Conjur::Command
       else
         script = STDIN.read
       end
-      require 'conjur/ize'
-      puts Conjur::Ize.new(script, filename).execute
+      require 'conjur/dsl/runner'
+      puts Conjur::DSL::Runner.new(script, filename).execute
     end
   end
 end
