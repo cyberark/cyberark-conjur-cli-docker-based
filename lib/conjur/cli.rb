@@ -21,6 +21,7 @@
 require 'gli'
 require 'conjur/config'
 require 'conjur/log'
+require 'conjur/identifier_manipulation'
 
 module Conjur
   class CLI
