@@ -11,6 +11,14 @@ class MockAPI
     (@things[kind.to_sym] || []).find{|r| r.id == id}  
   end
   
+  def create_user(id, options = {})
+    thing(:user, id) || create_thing(:user, id, options)
+  end
+  
+  def create_variable(mime_type, kind)
+    create_thing(:user, SecureRandom.uuid, mime_type: mime_type, kind: kind)
+  end
+  
   def create_resource(id, options = {})
     resource(id).tap do |resource|
       resource.send(:"exists?=", true)
@@ -23,6 +31,10 @@ class MockAPI
       role.send(:"exists?=", true)
       populate_options role, options
     end
+  end
+  
+  def user(id)
+    thing(:user, id)
   end
   
   def role(id)
