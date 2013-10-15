@@ -1,3 +1,4 @@
+# 99d6r0
 namespace do
   bacon = resource "service", "bacon"
   user "#{namespace}-alice"

@@ -11,8 +11,18 @@ class MockAPI
     (@things[kind.to_sym] || []).find{|r| r.id == id}  
   end
   
+  def create_host(options = {})
+    id = options.delete(:id)
+    if id
+      host = thing(:host, id)
+    else
+      id = SecureRandom.uuid
+    end
+    host ||= create_thing(:host, id, options, role: true)
+  end
+  
   def create_user(id, options = {})
-    thing(:user, id) || create_thing(:user, id, options)
+    thing(:user, id) || create_thing(:user, id, options, role: true)
   end
   
   def create_variable(mime_type, kind)
@@ -33,13 +43,15 @@ class MockAPI
     end
   end
   
-  def user(id)
-    thing(:user, id)
+  [ :user, :host ].each do |kind|
+    define_method kind do |id|
+      thing(kind, id)
+    end
   end
   
   def role(id)
     raise "Role id must be a string" unless id.is_a?(String)
-    thing(:role, id) || create_thing(:role, id, exists?: false)
+    thing(:role, id) || create_thing(:role, id, { exists?: false }, role: true)
   end
   
   def resource(id)
@@ -49,18 +61,17 @@ class MockAPI
   
   protected
   
-  def create_thing(kind, id, options)
+  def create_thing(kind, id, options, kind_options = {})
     thing = OpenStruct.new(kind: kind, id: id, exists?: true)
     
-    if kind == :resource
-      class << thing
-        def permit(privilege, role, options = {})
-          (self.permissions ||= []) << OpenStruct.new(privilege: privilege, role: role.id, grant_option: !!options[:grant_option])
-        end
+    class << thing
+      def permit(privilege, role, options = {})
+        (self.permissions ||= []) << OpenStruct.new(privilege: privilege, role: role.id, grant_option: !!options[:grant_option])
       end
     end
     
-    if kind == :role
+    if kind_options[:role]
+      thing.roleid = id
       class << thing
         def can(privilege, resource, options = {})
           resource.permit privilege, self, options
