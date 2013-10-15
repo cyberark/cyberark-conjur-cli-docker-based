@@ -67,8 +67,12 @@ module Conjur
         find_or_create :role, id, options, &block
       end
       
+      def create_host id = nil, options = {}, &block
+        options[:id] = id if id
+      end
+      
       def owns
-        @owners.push current_object.id
+        @owners.push current_object
         begin
           yield
         ensure
@@ -111,7 +115,12 @@ module Conjur
         create_method = "create_#{type}".to_sym
         unless (obj = api.send(find_method, id)) && obj.exists?
           options = expand_options(options)
-          obj = api.send(create_method, id, options)
+          obj = if [ 2, -2 ].member?(api.method(create_method).arity)
+            api.send(create_method, id, options)
+          else
+            options[:id] = id
+            api.send(create_method, options)
+          end
         end
         do_object obj, &block
       end
