@@ -63,7 +63,8 @@ class Conjur::Command::Groups < Conjur::Command
         opts = { admin_option: false }
         message = "Adminship revoked"
       end
-      api.role(group.roleid).grant_to member, opts
+      
+      group.add_member member, opts
       puts message
     end
   end
@@ -75,9 +76,7 @@ class Conjur::Command::Groups < Conjur::Command
       group = require_arg(args, 'group')
       member = require_arg(args, 'member')
       
-      group = api.group(group)
-      api.role(group.roleid).revoke_from member
-      
+      api.group(group).remove_member member
       puts "Membership revoked"
     end
   end

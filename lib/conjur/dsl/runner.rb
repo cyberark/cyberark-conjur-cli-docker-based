@@ -66,9 +66,11 @@ module Conjur
         id = full_resource_id([ kind, qualify_id(id) ].join(':'))
         find_or_create :role, id, options, &block
       end
-      
-      def create_host id = nil, options = {}, &block
+
+      def create_variable id = nil, options = {}, &block
         options[:id] = id if id
+        mime_type = options.delete(:mime_type)
+        kind = options.delete(:kind)
       end
       
       def owns
@@ -107,7 +109,7 @@ module Conjur
           lambda { args.length == 1 },
           lambda { args.length == 2 && args[1].is_a?(Hash) }
         ]
-        !valid_prototypes.find{|p| p.call}.nil?
+        !valid_prototypes.find{|p| p.call}.nil?      
       end
       
       def find_or_create(type, id, options, &block)
@@ -115,7 +117,10 @@ module Conjur
         create_method = "create_#{type}".to_sym
         unless (obj = api.send(find_method, id)) && obj.exists?
           options = expand_options(options)
-          obj = if [ 2, -2 ].member?(api.method(create_method).arity)
+          obj = if create_method == :create_variable
+            options[:id] = id
+            api.send(create_method, options.delete(:mime_type), options.delete(:kind), options)
+          elsif [ 2, -2 ].member?(api.method(create_method).arity)
             api.send(create_method, id, options)
           else
             options[:id] = id
