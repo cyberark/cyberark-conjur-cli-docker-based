@@ -1,5 +1,4 @@
-# 8sc880
-namespace do
+namespace "8sc880" do
   group "admin" do
     owns do
       warehouse = resource "service", "warehouse"
