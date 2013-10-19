@@ -4,4 +4,4 @@ source 'https://rubygems.org'
 gemspec
 
 # when developing in parallel, you might want to uncomment the following:
-gem 'conjur-api', git: 'https://github.com/inscitiv/api-ruby.git', branch: 'master'
+gem 'conjur-api', path: File.expand_path("../api-ruby", File.dirname(__FILE__))
