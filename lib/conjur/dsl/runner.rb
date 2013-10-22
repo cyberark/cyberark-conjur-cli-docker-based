@@ -41,8 +41,10 @@ module Conjur
       
       def namespace ns = nil, &block
         if block_given?
-          require 'conjur/api/variables'
-          ns ||= api.create_variable("text/plain", "namespace").id
+          if ns.nil?
+            require 'conjur/api/variables'
+            ns = ENV['CONJUR_NAMESPACE'] || api.create_variable("text/plain", "namespace").id
+          end
           do_scope ns, &block
         else
           @scopes[0]
