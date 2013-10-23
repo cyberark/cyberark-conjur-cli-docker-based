@@ -89,8 +89,13 @@ module Conjur
         rescue
           $stderr.puts exception.response.body if exception.response
         end
+        true
+      elsif exception.is_a? Conjur::AuthenticationError
+        $stderr.puts "Authentication error. Did you supply the right credentials? Try conjur authn:login"
+        false
+      else
+        true
       end
-      true
     end
   end
 end
