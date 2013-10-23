@@ -42,7 +42,12 @@ module Conjur
     load_config
 
     Conjur::Config.plugins.each do |plugin|
-      require "conjur-asset-#{plugin}"
+      begin
+        filename = "conjur-asset-#{plugin}"
+        require filename
+      rescue LoadError
+        warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+      end
     end
 
     commands_from 'conjur/command'
