@@ -109,7 +109,6 @@ class Conjur::Command::Assets < Conjur::Command
       kind, id = get_kind_and_id_from_args(args, 'id')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
-      admin_option = !options.delete(:admin).nil?
       
       asset = api.send(kind, id)
       tokens = [ asset.resource_kind, asset.resource_id, role_name ]
