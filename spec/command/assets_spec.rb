@@ -81,55 +81,36 @@ describe Conjur::Command::Assets, logged_in: true do
     end
   end
 
-  shared_examples 'it obtains role via asset' do
+  shared_examples 'it obtains asset by kind and id' do
     it "obtains asset instance as api.#{KIND}(#{ID})" do
       api.should_receive(KIND.to_sym).with(ID)
       invoke_silently
     end
-    it "account=asset.core_conjur_account" do
-      asset.should_receive(:core_conjur_account)
-      invoke_silently
-    end
-    it "kind=asset.resource_kind" do
-      asset.should_receive(:resource_kind)
-      invoke_silently
-    end
-    it "id=asset.resource_id" do
-      asset.should_receive(:resource_id)
-      invoke_silently
-    end
-
-    it "obtains role as #{ACCOUNT}:@:#{KIND}/#{ID}/#{ROLE}" do
-      api.should_receive(:role).with("#{ACCOUNT}:@:#{KIND}/#{ID}/#{ROLE}")
-      invoke_silently
-    end
   end
-
-  shared_context "asset with role" do
-    before(:each) {
-      asset.stub(:core_conjur_account).and_return(ACCOUNT)
-      asset.stub(:resource_kind).and_return(KIND)
-      asset.stub(:resource_id).and_return(ID)
-      api.stub(:role).and_return(role_instance)
+  
+  shared_context "asset instance" do
+    before(:each) { 
+      api.stub(KIND.to_sym).and_return(asset) 
+      asset.stub(:add_member)
+      asset.stub(:remove_member)
     }
-    let(:role_instance) { double(grant_to: true, revoke_from: true) }
   end
 
   describe_command "asset:members:add #{KIND}:#{ID} #{ROLE} #{MEMBER}" do
-    include_context "asset with role"
-    it_behaves_like "it obtains role via asset"
+    include_context "asset instance"
+    it_behaves_like "it obtains asset by kind and id"
     it 'calls role.grant_to(member,...)' do
-      role_instance.should_receive(:grant_to).with(MEMBER, anything)
+      asset.should_receive(:add_member).with(MEMBER, anything)
       invoke_silently
     end
     it { expect { invoke }.to write "Membership granted" }
   end
   
   describe_command "asset:members:remove #{KIND}:#{ID} #{ROLE} #{MEMBER}" do
-    include_context "asset with role"
-    it_behaves_like "it obtains role via asset"
+    include_context "asset instance"
+    it_behaves_like "it obtains asset by kind and id"
     it 'calls role.revoke_from(member)' do
-      role_instance.should_receive(:revoke_from).with(MEMBER)
+      asset.should_receive(:remove_member).with(MEMBER)
       invoke_silently
     end
     it { expect { invoke }.to write "Membership revoked" }
