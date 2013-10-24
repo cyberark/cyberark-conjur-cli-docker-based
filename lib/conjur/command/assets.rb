@@ -105,9 +105,7 @@ class Conjur::Command::Assets < Conjur::Command
       kind, id = get_kind_and_id_from_args(args, 'id')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
-      
-      admin_option = !options.delete(:admin).nil?
-      api.send(kind, id).remove_member member
+      api.send(kind, id).remove_member role_name, member
       puts "Membership revoked"
     end
   end
