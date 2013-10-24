@@ -100,7 +100,7 @@ describe Conjur::Command::Assets, logged_in: true do
     include_context "asset instance"
     it_behaves_like "it obtains asset by kind and id"
     it 'calls role.grant_to(member,...)' do
-      asset.should_receive(:add_member).with(MEMBER, anything)
+      asset.should_receive(:add_member).with(ROLE, MEMBER, anything)
       invoke_silently
     end
     it { expect { invoke }.to write "Membership granted" }
@@ -110,7 +110,7 @@ describe Conjur::Command::Assets, logged_in: true do
     include_context "asset instance"
     it_behaves_like "it obtains asset by kind and id"
     it 'calls role.revoke_from(member)' do
-      asset.should_receive(:remove_member).with(MEMBER)
+      asset.should_receive(:remove_member).with(ROLE, MEMBER)
       invoke_silently
     end
     it { expect { invoke }.to write "Membership revoked" }
