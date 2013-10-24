@@ -93,7 +93,7 @@ class Conjur::Command::Assets < Conjur::Command
       member = require_arg(args, 'member')
       admin_option = !options.delete(:admin).nil?
       
-      api.send(kind, id).add_member member, admin_option: admin_option
+      api.send(kind, id).add_member role_name, member, admin_option: admin_option
       puts "Membership granted"
     end
   end
