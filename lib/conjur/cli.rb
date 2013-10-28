@@ -50,7 +50,7 @@ module Conjur
     pre do |global,command,options,args|
       ENV['CONJUR_ENV'] = Config[:env] || "production"
       ENV['CONJUR_STACK'] = Config[:stack] if Config[:stack]
-      ENV['CONJUR_STACK'] ||= 'v3' if ENV['CONJUR_ENV'] == 'production'
+      ENV['CONJUR_STACK'] ||= 'v4' if ENV['CONJUR_ENV'] == 'production'
       ENV['CONJUR_ACCOUNT'] = Config[:account] or raise "Missing configuration setting: account. Please set it in ~/.conjurrc"
 
       if Conjur.log
