@@ -1,6 +1,12 @@
+When(/^I use script context:$/) do |context|
+  @context = JSON.parse context
+end
+
 When(/^I run script:$/) do |script|
   require 'conjur/dsl/runner'
-  Conjur::DSL::Runner.new(script).execute
+  @runner = Conjur::DSL::Runner.new(script)
+  @runner.context = @context if @context
+  @runner.execute
 end
 
 Then(/^the model should contain "(.*?)" "(.*?)"$/) do |kind, id|
@@ -24,3 +30,17 @@ Then(/^"(.*?)" can "(.*?)" "(.*?)"( with grant option)?$/) do |role, privilege, 
   end
   raise "#{role} cannot #{privilege} #{resource.id} with#{grant_option ? "" : "out"} grant_option" unless permission
 end
+
+Then(/^the context should contain "(.*?)"$/) do |key|
+  @runner.context.should have_key(key.to_s)
+end
+
+Then(/^the context "(.*?)" should be "(.*?)"$/) do |key, value|
+  @runner.context[key].should == value
+end
+
+Then(/^the context "(.*?)" should contain "(.*?)" item$/) do |key, key_count|
+  step "the context should contain \"#{key}\""
+  @runner.context[key].should have(key_count.to_i).items
+end
+

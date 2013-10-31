@@ -29,6 +29,10 @@ class Conjur::Command::Authn < Conjur::Command
   command :execute do |c|
     acting_as_option(c)
     
+    c.desc "Load context from this config file; save it when finished"
+    c.arg_name "context"
+    c.flag [:c, :context]
+    
     c.action do |global_options,options,args|
       filename = nil
       if script = args.pop
@@ -38,7 +42,22 @@ class Conjur::Command::Authn < Conjur::Command
         script = STDIN.read
       end
       require 'conjur/dsl/runner'
-      puts Conjur::DSL::Runner.new(script, filename).execute
+      runner = Conjur::DSL::Runner.new(script, filename)
+      if options[:context]
+        runner.context = begin
+          JSON.parse(File.read(options[:context])) 
+        rescue Errno::ENOENT 
+          {}
+        end
+      end
+      
+      result = runner.execute
+      
+      if options[:context]
+        File.write(options[:context], JSON.pretty_generate(runner.context))
+      end
+
+      puts JSON.pretty_generate(result)
     end
   end
 end

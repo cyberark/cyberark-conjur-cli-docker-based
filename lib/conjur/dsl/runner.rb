@@ -8,9 +8,15 @@ module Conjur
     class Runner
       include Conjur::IdentifierManipulation
       
-      attr_reader :script, :filename
+      attr_reader :script, :filename, :context
       
       def initialize(script, filename = nil)
+        @context = {
+          "env" => Conjur.env,
+          "stack" => Conjur.stack,
+          "account" => Conjur.account,
+          "api_keys" => {}
+        }
         @script = script
         @filename = filename
         @api = nil
@@ -21,6 +27,14 @@ module Conjur
       
       def api
         @api ||= connect
+      end
+      
+      def context=(context)
+        @context.deep_merge! context
+      end
+      
+      def api_keys
+        @context["api_keys"]
       end
       
       def current_object
@@ -41,11 +55,13 @@ module Conjur
       
       def namespace ns = nil, &block
         if block_given?
+          ns ||= context["namespace"]
           if ns.nil?
             require 'conjur/api/variables'
-            ns = ENV['CONJUR_NAMESPACE'] || api.create_variable("text/plain", "namespace").id
+            ns = context["namespace"] = api.create_variable("text/plain", "namespace").id
           end
           do_scope ns, &block
+          context
         else
           @scopes[0]
         end
@@ -133,6 +149,11 @@ module Conjur
       end
       
       def do_object obj, &block
+        begin
+          api_keys[obj.resourceid] = obj.api_key 
+        rescue
+        end
+        
         @objects.push obj
         begin
           yield obj if block_given?

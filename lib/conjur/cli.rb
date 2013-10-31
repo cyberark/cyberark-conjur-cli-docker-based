@@ -29,34 +29,29 @@ module Conjur
 
     class << self
       def load_config
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ) ].each do |f|
-          if File.exists?(f)
-            if Conjur.log
-              Conjur.log << "Loading #{f}\n"
-            end
-            Conjur::Config.merge YAML.load(IO.read(f))
-          end
-        end
+        Conjur::Config.load
+      end
+      
+      def apply_config
+        Conjur::Config.apply
       end
     end
           
     load_config
 
     Conjur::Config.plugins.each do |plugin|
-      require "conjur-asset-#{plugin}"
+      begin
+        filename = "conjur-asset-#{plugin}"
+        require filename
+      rescue LoadError
+        warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+      end
     end
 
     commands_from 'conjur/command'
 
     pre do |global,command,options,args|
-      ENV['CONJUR_ENV'] = Config[:env] || "production"
-      ENV['CONJUR_STACK'] = Config[:stack] if Config[:stack]
-      ENV['CONJUR_STACK'] ||= 'v4' if ENV['CONJUR_ENV'] == 'production'
-      ENV['CONJUR_ACCOUNT'] = Config[:account] or raise "Missing configuration setting: account. Please set it in ~/.conjurrc"
-
-      if Conjur.log
-        Conjur.log << "Using host #{Conjur::Authn::API.host}\n"
-      end
+      apply_config
 
       require 'active_support/core_ext'
       options.delete_if{|k,v| v.blank?}
