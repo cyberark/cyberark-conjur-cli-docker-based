@@ -18,6 +18,46 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-module Conjur
-  VERSION = "4.2.0"
+require 'conjur/authn'
+require 'conjur/command'
+
+class Conjur::Command::Authn < Conjur::Command
+  self.prefix = :script
+
+  desc "Run a Conjur DSL script"
+  arg_name "script"
+  command :execute do |c|
+    acting_as_option(c)
+    
+    c.desc "Load context from this config file; save it when finished"
+    c.arg_name "context"
+    c.flag [:c, :context]
+    
+    c.action do |global_options,options,args|
+      filename = nil
+      if script = args.pop
+        filename = script
+        script = File.read(script)
+      else
+        script = STDIN.read
+      end
+      require 'conjur/dsl/runner'
+      runner = Conjur::DSL::Runner.new(script, filename)
+      if options[:context]
+        runner.context = begin
+          JSON.parse(File.read(options[:context])) 
+        rescue Errno::ENOENT 
+          {}
+        end
+      end
+      
+      result = runner.execute
+      
+      if options[:context]
+        File.write(options[:context], JSON.pretty_generate(runner.context))
+      end
+
+      puts JSON.pretty_generate(result)
+    end
+  end
 end

@@ -24,4 +24,4 @@ tmp
 .kateproject.d
 .idea
 .rvmrc
-
+update_ci.sh

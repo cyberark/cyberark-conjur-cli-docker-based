@@ -93,11 +93,7 @@ class Conjur::Command::Assets < Conjur::Command
       member = require_arg(args, 'member')
       admin_option = !options.delete(:admin).nil?
       
-      asset = api.send(kind, id)
-      tokens = [ asset.resource_kind, asset.resource_id, role_name ]
-      grant_role = [ asset.core_conjur_account, '@', tokens.join('/') ].join(':')
-      api.role(grant_role).grant_to member, admin_option
-      
+      api.send(kind, id).add_member role_name, member, admin_option: admin_option
       puts "Membership granted"
     end
   end
@@ -109,12 +105,7 @@ class Conjur::Command::Assets < Conjur::Command
       kind, id = get_kind_and_id_from_args(args, 'id')
       role_name = require_arg(args, 'role-name')
       member = require_arg(args, 'member')
-      
-      asset = api.send(kind, id)
-      tokens = [ asset.resource_kind, asset.resource_id, role_name ]
-      grant_role = [ asset.core_conjur_account, '@', tokens.join('/') ].join(':')
-      api.role(grant_role).revoke_from member
-      
+      api.send(kind, id).remove_member role_name, member
       puts "Membership revoked"
     end
   end
