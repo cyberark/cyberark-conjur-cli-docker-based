@@ -53,6 +53,14 @@ module Conjur
       ENV['CONJUR_STACK'] ||= 'v4' if ENV['CONJUR_ENV'] == 'production'
       ENV['CONJUR_ACCOUNT'] = Config[:account] or raise "Missing configuration setting: account. Please set it in ~/.conjurrc"
 
+      # It's weird to configure a library which we 'link'
+      # to through environment variables.
+      # There really should be a better way to configure hosts.
+      # Actually, this also applies to the above envars. -divide
+      ENV['CONJUR_AUTHN_URL'] ||= Config.hosts.authn
+      ENV['CONJUR_AUTHZ_URL'] ||= Config.hosts.authz
+      ENV['CONJUR_CORE_URL'] ||= Config.hosts.core
+
       if Conjur.log
         Conjur.log << "Using host #{Conjur::Authn::API.host}\n"
       end
