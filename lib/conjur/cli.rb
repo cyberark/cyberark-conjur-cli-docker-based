@@ -42,7 +42,12 @@ module Conjur
     load_config
 
     Conjur::Config.plugins.each do |plugin|
-      require "conjur-asset-#{plugin}"
+      begin
+        filename = "conjur-asset-#{plugin}"
+        require filename
+      rescue LoadError
+        warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+      end
     end
 
     commands_from 'conjur/command'
@@ -84,8 +89,13 @@ module Conjur
         rescue
           $stderr.puts exception.response.body if exception.response
         end
+        true
+      elsif exception.is_a? Conjur::AuthenticationError
+        $stderr.puts "Authentication error. Did you supply the right credentials? Try conjur authn:login"
+        false
+      else
+        true
       end
-      true
     end
   end
 end
