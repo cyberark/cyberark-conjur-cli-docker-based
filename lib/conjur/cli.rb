@@ -93,6 +93,10 @@ module Conjur
           $stderr.puts exception.response.body if exception.response
         end
       end
+      
+      if Conjur.log
+        Conjur.log << "error: #{exception}\n#{exception.backtrace rescue 'NO BACKTRACE?'}"
+      end
       true
     end
   end

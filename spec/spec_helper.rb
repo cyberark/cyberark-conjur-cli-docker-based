@@ -82,4 +82,6 @@ end
 
 require 'write_expectation'
 
+ENV['CONJURRC'] = '/dev/null'
+
 require 'conjur/cli'
