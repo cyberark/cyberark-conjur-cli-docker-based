@@ -71,14 +71,13 @@ def post_response(id, attributes = {})
 end
 
 # stub parameters to be used in resource/asset tests
-  KIND="asset_kind"
-  ID="unique_id" 
-  ROLE='<role>'
-  MEMBER='<member>'
-  PRIVILEGE='<privilege>'
-  OWNER='<owner/userid>'
-  ACCOUNT='<core_account>'
-
+KIND="asset_kind"
+ID="unique_id" 
+ROLE='<role>'
+MEMBER='<member>'
+PRIVILEGE='<privilege>'
+OWNER='<owner/userid>'
+ACCOUNT='<core_account>'
 
 require 'write_expectation'
 
