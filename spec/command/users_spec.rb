@@ -29,4 +29,23 @@ describe Conjur::Command::Users, logged_in: true do
       end
     end
   end
+
+
+  context "user:create" do
+    context "immediately rejects logins with special symbols" do
+
+      let(:errmsg) { /Sorry\, no special characters allowed in login/ }
+      before(:each) { api.should_not_receive(:create_user) }
+
+      describe_command "user:create with:colon" do
+        it { expect { invoke }.to raise_error(ArgumentError, errmsg) }
+      end
+      describe_command "user:create with/slash" do
+        it { expect { invoke }.to raise_error(ArgumentError, errmsg) }
+      end
+      describe_command "user:create root@localhost" do
+        it { expect { invoke }.to raise_error(ArgumentError, errmsg) }
+      end
+    end
+  end
 end
