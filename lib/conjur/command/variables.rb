@@ -28,10 +28,10 @@ class Conjur::Command::Variables < Conjur::Command
   arg_name "id?"
   command :create do |c|
     c.arg_name "mime_type"
-    c.flag [:m, :"mime-type"]
+    c.flag [:m, :"mime-type"], default_value: "text/plain"
     
     c.arg_name "kind"
-    c.flag [:k, :"kind"]
+    c.flag [:k, :"kind"], default_value: "secret"
     
     acting_as_option(c)
     
@@ -44,7 +44,7 @@ class Conjur::Command::Variables < Conjur::Command
       
       options.delete(:"mime-type")
       options.delete(:"kind")
-      
+    
       var = api.create_variable(mime_type, kind, options)
       display(var, options)
     end
