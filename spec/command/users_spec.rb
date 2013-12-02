@@ -43,9 +43,6 @@ describe Conjur::Command::Users, logged_in: true do
       describe_command "user:create with/slash" do
         it { expect { invoke }.to raise_error(ArgumentError, errmsg) }
       end
-      describe_command "user:create root@localhost" do
-        it { expect { invoke }.to raise_error(ArgumentError, errmsg) }
-      end
     end
   end
 end

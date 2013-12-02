@@ -49,7 +49,7 @@ class Conjur::Command::Users < Conjur::Command
     c.action do |global_options,options,args|
       login = require_arg(args, 'login')
       
-      if not /^[-\w]+$/.match(login)
+      if /[\/\:]/.match(login)
         raise ArgumentError, "Sorry, no special characters allowed in login"
       end     
 
