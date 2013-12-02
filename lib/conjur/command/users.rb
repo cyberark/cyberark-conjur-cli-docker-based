@@ -50,7 +50,7 @@ class Conjur::Command::Users < Conjur::Command
       login = require_arg(args, 'login')
       
       if /[\/\:]/.match(login)
-        raise ArgumentError, "Sorry, no special characters allowed in login"
+        raise ArgumentError, "Sorry, characters ':' and '/' are not allowed in login"
       end     
 
  
