@@ -109,4 +109,23 @@ class Conjur::Command::Assets < Conjur::Command
       puts "Membership revoked"
     end
   end
+  
+  desc "Provision cloud resources for an asset"
+  arg_name "provisioner kind:id"
+  command :provision do |c|
+    c.action do |global_options, options, args|
+      provisioner = require_arg(args, 'provisioner')
+      kind, id = get_kind_and_id_from_args args, 'kind:id'
+      asset = api.send(kind, id)
+      raise "asset #{kind}:#{id} does not exist" unless asset.exists?
+      path = "conjur/provisioner/#{kind}/#{provisioner}"
+      require path
+      asset.extend path.classify.constantize
+      
+      if Conjur.log
+        Conjur.log << "provisioning asset #{kind}:#{id} with #{provisioner}"
+      end
+      asset.provision
+    end
+  end
 end

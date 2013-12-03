@@ -115,4 +115,39 @@ describe Conjur::Command::Assets, logged_in: true do
     end
     it { expect { invoke }.to write "Membership revoked" }
   end
+  
+  describe_command "asset:provision #{PROVISIONER} #{KIND}:#{ID}" do
+    include_context "asset instance"
+    
+    let(:exists?){ true }
+    let(:provisioner) do
+      Module.new do
+        def provision options={}; end
+      end
+    end
+    
+    before do
+      asset.stub(exists?: exists?)
+      path = "conjur/provisioner/#{KIND}/#{PROVISIONER}"
+      Conjur::Command.stub(:require).with(path).and_return true
+      stub_const(path.classify,provisioner)
+    end
+    
+    it_behaves_like "it obtains asset by kind and id"
+    
+    it "calls #provision on the asset" do
+      asset.should_receive(:provision)
+      invoke_silently
+    end
+    
+    context "when the specified asset does not exist" do
+      let(:exists?){ false }
+      it "fails" do
+        # Hmm, can't figure out a quick way to keep this from
+        # writing to stderr during the tests :-(
+        expect{ invoke_silently }.to raise_error
+      end
+    end
+  end
+  
 end
