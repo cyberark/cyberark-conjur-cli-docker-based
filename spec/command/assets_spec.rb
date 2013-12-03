@@ -128,6 +128,7 @@ describe Conjur::Command::Assets, logged_in: true do
     
     before do
       asset.stub(exists?: exists?)
+      asset.stub(:provision)
       path = "conjur/provisioner/#{KIND}/#{PROVISIONER}"
       Conjur::Command.stub(:require).with(path).and_return true
       stub_const(path.classify,provisioner)
@@ -135,14 +136,25 @@ describe Conjur::Command::Assets, logged_in: true do
     
     it_behaves_like "it obtains asset by kind and id"
     
+    it "requires 'conjur/provisioner/#{KIND}/#{PROVISIONER}'" do
+      Conjur::Command.should_receive(:require).with("conjur/provisioner/#{KIND}/#{PROVISIONER}")
+      invoke_silently
+    end
+    
     it "calls #provision on the asset" do
       asset.should_receive(:provision)
       invoke_silently
     end
     
+    it "extends the asset with the provisioner module" do
+      asset.should_receive(:extend).with(provisioner)
+      invoke_silently
+    end
+    
     context "when the specified asset does not exist" do
       let(:exists?){ false }
-      it "fails" do
+      it "the command fails without invoking #provision" do
+        asset.should_not_receive :provision
         # Hmm, can't figure out a quick way to keep this from
         # writing to stderr during the tests :-(
         expect{ invoke_silently }.to raise_error
