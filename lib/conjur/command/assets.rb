@@ -119,11 +119,25 @@ class Conjur::Command::Assets < Conjur::Command
       asset = api.send(kind, id)
       raise "asset #{kind}:#{id} does not exist" unless asset.exists?
       path = "conjur/provisioner/#{kind}/#{provisioner}"
-      require path
-      asset.extend path.classify.constantize
+      
+      # Hmm could be DRYer
+      begin
+        require path
+      rescue LoadError => ex
+        raise "unable to find #{provisioner} provisioner for #{kind} asset (LoadError while requiring #{path})"
+      end
+
+      begin 
+        name = path.classify
+        mod = name.constantize
+      rescue NameError
+        raise "unable to find #{provisioner} provisioner for #{kind} asset (missing const #{name})"
+      end
+      
+      asset.extend mod
       
       if Conjur.log
-        Conjur.log << "provisioning asset #{kind}:#{id} with #{provisioner}"
+        Conjur.log << "provisioning asset #{kind}:#{id} for #{provisioner}"
       end
       asset.provision
     end
