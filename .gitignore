@@ -1,3 +1,4 @@
+.conjurrc
 *.cert
 *.credential
 *.json
