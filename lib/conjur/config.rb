@@ -25,7 +25,7 @@ module Conjur
     class << self
       def load
         require 'yaml'
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ) ].each do |f|
+        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ), '.conjurrc' ].each do |f|
           if File.exists?(f)
             if Conjur.log
               Conjur.log << "Loading #{f}\n"
@@ -36,13 +36,15 @@ module Conjur
       end
       
       def apply
-        ENV['CONJUR_ENV'] = Config[:env] || "production"
-        ENV['CONJUR_STACK'] = Config[:stack] if Config[:stack]
-        ENV['CONJUR_STACK'] ||= 'v4' if ENV['CONJUR_ENV'] == 'production'
-        ENV['CONJUR_ACCOUNT'] = Config[:account] or raise "Missing configuration setting: account. Please set it in ~/.conjurrc"
+        keys = Config.keys.dup
+        keys.delete(:plugins)
+        keys.each do |k|
+          value = Config[k]
+          Conjur.configuration.set k, value if value
+        end
   
         if Conjur.log
-          Conjur.log << "Using host #{Conjur::Authn::API.host}\n"
+          Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
         end
       end
       
@@ -62,6 +64,10 @@ module Conjur
       def merge(a)
         a = {} unless a
         @@attributes.merge!(a)
+      end
+      
+      def keys
+        @@attributes.keys.map(&:to_sym)
       end
       
       def [](key)
