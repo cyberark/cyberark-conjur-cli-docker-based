@@ -4,3 +4,7 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'conjur-api', git: 'https://github.com/inscitiv/api-ruby.git', branch: 'master'
+
+group :test, :development do
+  gem 'pry'
+end
