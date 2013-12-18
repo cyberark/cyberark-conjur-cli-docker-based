@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'active_support/core_ext/hash/deep_merge'
+require 'active_support/core_ext/hash/indifferent_access'
 module Conjur
   class Config
     @@attributes = {}
@@ -64,7 +65,7 @@ module Conjur
       
       def merge(a)
         a = {} unless a
-        @@attributes.deep_merge!(a)
+        @@attributes.deep_merge!(a.stringify_keys)
       end
       
       def keys
