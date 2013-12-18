@@ -25,6 +25,12 @@ module Conjur
         @objects = Array.new
       end
       
+      # Provides a hash to export various application specific
+      # asset ids (or anything else you want)
+      def assets
+        @context['assets'] ||= {}
+      end
+      
       def api
         @api ||= connect
       end
