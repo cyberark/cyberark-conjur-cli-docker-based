@@ -83,7 +83,7 @@ module Conjur
       end
       
       if Conjur.log
-        Conjur.log << "error: #{exception}\n#{exception.backtrace rescue 'NO BACKTRACE?'}"
+        Conjur.log << "error: #{exception}\n#{exception.backtrace.join("\n") rescue 'NO BACKTRACE?'}"
       end
       true
     end
