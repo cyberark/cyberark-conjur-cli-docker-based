@@ -18,6 +18,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+require 'active_support/core_ext/hash/deep_merge'
 module Conjur
   class Config
     @@attributes = {}
@@ -63,7 +64,7 @@ module Conjur
       
       def merge(a)
         a = {} unless a
-        @@attributes.merge!(a)
+        @@attributes.deep_merge!(a)
       end
       
       def keys
