@@ -29,7 +29,7 @@ class Conjur::Command::Authn < Conjur::Command
   command :execute do |c|
     acting_as_option(c)
     
-    c.desc "Load context from this config file; save it when finished"
+    c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
     c.arg_name "context"
     c.flag [:c, :context]
     
@@ -55,6 +55,7 @@ class Conjur::Command::Authn < Conjur::Command
       
       if options[:context]
         File.write(options[:context], JSON.pretty_generate(runner.context))
+        File.chmod(0600, options[:context])
       end
 
       puts JSON.pretty_generate(result)
