@@ -62,8 +62,6 @@ class MockAPI
   protected
   
   def create_thing(kind, id, options, kind_options = {})
-    p kind, id, options, kind_options
-    
     thing = OpenStruct.new(kind: kind, id: id, exists?: true)
     
     class << thing
