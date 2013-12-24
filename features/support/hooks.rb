@@ -18,11 +18,11 @@ class MockAPI
     else
       id = SecureRandom.uuid
     end
-    host ||= create_thing(:host, id, options, role: true)
+    host ||= create_thing(:host, id, options, role: true, api_key: true)
   end
   
   def create_user(id, options = {})
-    thing(:user, id) || create_thing(:user, id, options, role: true)
+    thing(:user, id) || create_thing(:user, id, options, role: true, api_key: true)
   end
   
   def create_variable(mime_type, kind)
@@ -70,6 +70,9 @@ class MockAPI
       end
     end
     
+    if kind_options[:api_key]
+      thing.api_key = SecureRandom.uuid
+    end
     if kind_options[:role]
       thing.roleid = id
       class << thing
