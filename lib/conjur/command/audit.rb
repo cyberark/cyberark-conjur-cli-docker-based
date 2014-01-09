@@ -1,5 +1,6 @@
 require 'conjur/command'
 require 'active_support/ordered_hash'
+require 'conjur/audit/follower'
 
 class Conjur::Command
   class Audit < self
@@ -8,7 +9,7 @@ class Conjur::Command
     class << self
       private
       SHORT_FORMATS = {
-        'resource:check' => ->(e){ "checked that they can #{e[:privilege]} #{e[:resource]}" },
+        'resource:check' => ->(e){ "checked that they can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
         'resource:create' => ->(e){ "created resource #{e[:resource_id]} owned by #{e[:owner]}" },
         'resource:update' => ->(e){ "gave #{e[:resource]} to #{e[:owner]}"},
         'resource:destroy' => ->(e){ "destroyed resource #{e[:resource]}"},
@@ -16,7 +17,7 @@ class Conjur::Command
         'resource:deny' => ->(e){ "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
         'resource:permitted_roles' => ->(e){ "listed roles permitted to #{e[:permission]} on #{e[:resource]}" },
         'role:check' => -> (e){ 
-          "checked that #{e[:role] == e[:conjur_user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]}" 
+          "checked that #{e[:role] == e[:conjur_user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" 
         },
         'role:grant' => -> (e){ "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin"},
         'role:revoke' => -> (e){ "revoked role #{e[:role]} from #{e[:member]}" },
@@ -77,9 +78,21 @@ class Conjur::Command
           c.desc "Short output format"
           c.switch [:s, :short]
           
+          c.desc "Follow events as they are generated"
+          c.switch [:f, :follow]
+          
           c.action do |global_options, options, args|
-            opts = extract_audit_options options
-            show_audit_events instance_exec(args, opts, &block), opts
+            extract_audit_options options
+            if options[:follow]
+              receiver = self
+              Conjur::Audit::Follower.new do |merge_options|
+                receiver.instance_exec(args, options.merge(merge_options), &block)
+              end.follow do |events|
+                show_audit_events events, options
+              end
+            else
+              show_audit_events instance_exec(args, options, &block), options
+            end
           end
         end
       end
