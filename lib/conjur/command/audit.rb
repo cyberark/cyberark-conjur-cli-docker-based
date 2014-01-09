@@ -7,6 +7,40 @@ class Conjur::Command
     
     class << self
       private
+      SHORT_FORMATS = {
+        'resource:check' => ->(e){ "checked that they can #{e[:privilege]} #{e[:resource]}" },
+        'resource:create' => ->(e){ "created resource #{e[:resource_id]} owned by #{e[:owner]}" },
+        'resource:update' => ->(e){ "gave #{e[:resource]} to #{e[:owner]}"},
+        'resource:destroy' => ->(e){ "destroyed resource #{e[:resource]}"},
+        'resource:permit' => ->(e){ "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
+        'resource:deny' => ->(e){ "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
+        'resource:permitted_roles' => ->(e){ "listed roles permitted to #{e[:permission]} on #{e[:resource]}" },
+        'role:check' => -> (e){ "checked that #{e[:role]} can #{e[:privilege]} #{e[:resource]}" },
+        'role:grant' => -> (e){ "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin"},
+        'role:revoke' => -> (e){ "revoked role #{e[:role]} from #{e[:member]}" },
+        'role:create' => -> (e){ "created role #{e[:role_id]}"}
+      }
+      
+      
+      def short_event_format e
+        e.symbolize_keys!
+        # hack: sometimes resource is a hash.  We don't want that!
+        if e[:resource] && e[:resource].kind_of?(Hash)
+          e[:resource] = e[:resource]['id']
+        end
+        s = "[#{Time.at(e[:timestamp])}] "
+        s << " #{e[:conjur_user]}"
+        s << " (as #{e[:conjur_role]})" if e[:conjur_role] != e[:conjur_user]
+        formatter = SHORT_FORMATS["#{e[:asset]}:#{e[:action]}"]
+        if formatter
+          s << " " << formatter.call(e)
+        else
+          s << " unknown event: #{e[:asset]}:#{e[:action]}!"
+        end
+        s << " (failed with #{e[:error]})" if e[:error]
+        s
+      end
+      
       def extract_int_option(source, name, dest=nil)
         if val = source[name]
           raise "Expected an integer for #{name}, but got #{val}" unless /\d+/ =~ val
@@ -15,15 +49,19 @@ class Conjur::Command
       end
       
       def extract_audit_options options
-        {}.tap do |opts|
-          [:limit, :offset].each do |name|
-            extract_int_option(options, name, opts)
-          end
+        [:limit, :offset].each do |name|
+            options[name] = extract_int_option(options, name)
         end
+        options
       end
       
-      def show_audit_events events
-        puts JSON.pretty_generate(events)
+      def show_audit_events events, options
+        events.reverse!
+        if options[:short]
+          events.each{|e| puts short_event_format(e)}
+        else
+          puts JSON.pretty_generate(events)
+        end
       end
 
       def audit_feed_command kind, &block
@@ -34,9 +72,12 @@ class Conjur::Command
           c.desc "Offset of the first event to return"
           c.flag [:o, :offset]
 
+          c.desc "Short output format"
+          c.switch [:s, :short]
+          
           c.action do |global_options, options, args|
             opts = extract_audit_options options
-            show_audit_events instance_exec(args, opts, &block)
+            show_audit_events instance_exec(args, opts, &block), opts
           end
         end
       end
