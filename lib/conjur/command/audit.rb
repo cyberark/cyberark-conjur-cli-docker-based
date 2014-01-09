@@ -15,7 +15,9 @@ class Conjur::Command
         'resource:permit' => ->(e){ "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
         'resource:deny' => ->(e){ "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
         'resource:permitted_roles' => ->(e){ "listed roles permitted to #{e[:permission]} on #{e[:resource]}" },
-        'role:check' => -> (e){ "checked that #{e[:role]} can #{e[:privilege]} #{e[:resource]}" },
+        'role:check' => -> (e){ 
+          "checked that #{e[:role] == e[:conjur_user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]}" 
+        },
         'role:grant' => -> (e){ "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin"},
         'role:revoke' => -> (e){ "revoked role #{e[:role]} from #{e[:member]}" },
         'role:create' => -> (e){ "created role #{e[:role_id]}"}
