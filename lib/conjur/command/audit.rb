@@ -84,9 +84,8 @@ class Conjur::Command
           c.action do |global_options, options, args|
             extract_audit_options options
             if options[:follow]
-              receiver = self
               Conjur::Audit::Follower.new do |merge_options|
-                receiver.instance_exec(args, options.merge(merge_options), &block)
+                instance_exec(args, options.merge(merge_options), &block)
               end.follow do |events|
                 show_audit_events events, options
               end
