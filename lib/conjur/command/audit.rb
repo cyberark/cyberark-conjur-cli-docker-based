@@ -55,6 +55,11 @@ class Conjur::Command
         [:limit, :offset].each do |name|
             options[name] = extract_int_option(options, name)
         end
+        if options[:follow]
+          if options[:offset] && options[:offset] != 0
+            exit_now! "--offset option not allowed for --follow", 1
+          end
+        end
         options
       end
       
