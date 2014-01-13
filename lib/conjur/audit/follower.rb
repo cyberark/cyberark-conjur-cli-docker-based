@@ -8,8 +8,9 @@ module Conjur
         @fetch = block
       end
       
-      # Follow audit events, yielding arrays of new events to :block: as 
-      # they are fetched.
+      # Follow audit events, yielding non-empty 
+      # arrays of new events to :block: as they 
+      # are fetched.
       def follow &block
         @last_event_id = nil
         
@@ -43,7 +44,7 @@ module Conjur
         
         # Update @last_event_id and return the sliced events, reversing it one
         # last time (because the block given to follow expects events to be reversed)
-        @last_event_id = events.last['event_id']
+        @last_event_id = events.last['event_id'] unless events.empty?
         events[index + 1..-1].reverse
       end
     end
