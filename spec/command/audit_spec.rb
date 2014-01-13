@@ -5,7 +5,7 @@ describe Conjur::Command::Audit, logged_in: true do
 
   def expect_api_call method, *args
     api.should_receive(method.to_sym).with(*args).and_return events
-    described_class.should_receive(:show_audit_events).with(events)
+    described_class.should_receive(:show_audit_events).with(events, an_instance_of(Hash))
   end
 
   def invoke_expecting_api_call method, *args

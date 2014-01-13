@@ -52,15 +52,15 @@ class Conjur::Command
       end
       
       def extract_audit_options options
+        # Do a little song and dance to simplify testing
+        extracted = options.slice :follow, :short
         [:limit, :offset].each do |name|
-            options[name] = extract_int_option(options, name)
+            extract_int_option(options, name, extracted)
         end
-        if options[:follow]
-          if options[:offset] && options[:offset] != 0
+        if extracted[:follow] && extracted[:offset]
             exit_now! "--offset option not allowed for --follow", 1
-          end
         end
-        options
+        extracted
       end
       
       def show_audit_events events, options
@@ -87,7 +87,7 @@ class Conjur::Command
           c.switch [:f, :follow]
           
           c.action do |global_options, options, args|
-            extract_audit_options options
+            options = extract_audit_options options
             if options[:follow]
               Conjur::Audit::Follower.new do |merge_options|
                 instance_exec(args, options.merge(merge_options), &block)
