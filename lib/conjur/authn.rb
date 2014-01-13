@@ -43,7 +43,11 @@ module Conjur::Authn
     end
     
     def netrc
-      @netrc ||= Netrc.read
+      args = []
+      if path = Conjur::Config[:netrc_path]
+        args.unshift(path)
+      end
+      @netrc ||= Netrc.read(*args)
     end
     
     def get_credentials(options = {})
