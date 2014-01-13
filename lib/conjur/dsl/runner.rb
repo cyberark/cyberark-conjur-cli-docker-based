@@ -93,8 +93,8 @@ module Conjur
 
       def create_variable id = nil, options = {}, &block
         options[:id] = id if id
-        mime_type = options.delete(:mime_type)
-        kind = options.delete(:kind)
+        mime_type = options.delete(:mime_type) || 'text/plain'
+        kind = options.delete(:kind) || 'secret'
         var = api.create_variable(mime_type, kind, options)
         do_object var, &block
       end
