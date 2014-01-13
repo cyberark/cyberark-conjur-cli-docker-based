@@ -9,19 +9,17 @@ class Conjur::Command
     class << self
       private
       SHORT_FORMATS = {
-        'resource:check' => ->(e){ "checked that they can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
-        'resource:create' => ->(e){ "created resource #{e[:resource_id]} owned by #{e[:owner]}" },
-        'resource:update' => ->(e){ "gave #{e[:resource]} to #{e[:owner]}"},
-        'resource:destroy' => ->(e){ "destroyed resource #{e[:resource]}"},
-        'resource:permit' => ->(e){ "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
-        'resource:deny' => ->(e){ "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
-        'resource:permitted_roles' => ->(e){ "listed roles permitted to #{e[:permission]} on #{e[:resource]}" },
-        'role:check' => -> (e){ 
-          "checked that #{e[:role] == e[:conjur_user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" 
-        },
-        'role:grant' => -> (e){ "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin"},
-        'role:revoke' => -> (e){ "revoked role #{e[:role]} from #{e[:member]}" },
-        'role:create' => -> (e){ "created role #{e[:role_id]}"}
+        'resource:check' => lambda{|e| "checked that they can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
+        'resource:create' => lambda{|e| "created resource #{e[:resource_id]} owned by #{e[:owner]}" },
+        'resource:update' => lambda{|e| "gave #{e[:resource]} to #{e[:owner]}" },
+        'resource:destroy' => lambda{|e| "destroyed resource #{e[:resource]}" },
+        'resource:permit' => lambda{|e| "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
+        'resource:deny' => lambda{|e| "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
+        'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:permission]} on #{e[:resource]}" },
+        'role:check' => lambda{|e| "checked that #{e[:role] == e[:conjur_user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
+        'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin" },
+        'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
+        'role:create' => lambda{|e| "created role #{e[:role_id]}" }
       }
       
       
