@@ -89,13 +89,15 @@ class Conjur::Command::Roles < Conjur::Command
   arg_name "role member"
   command :grant_to do |c|
     c.desc "Whether to grant with admin option"
-    c.switch :admin
+    c.switch [:a,:admin]
     
     c.action do |global_options,options,args|
       id = require_arg(args, 'role')
       member = require_arg(args, 'member')
       role = api.role(id)
-      role.grant_to member, options[:admin]
+      grant_options = {}
+      grant_options[:admin_option] = true if options[:admin]
+      role.grant_to member, grant_options
       puts "Role granted"
     end
   end

@@ -2,6 +2,21 @@ require 'spec_helper'
 
 describe Conjur::Command::Roles, logged_in: true do
 
+  describe "role:grant_to" do
+    describe_command "role:grant_to test:a test:b" do
+      it "grants the role without options" do
+        Conjur::Role.any_instance.should_receive(:grant_to).with("test:b", {})
+        invoke
+      end
+    end
+    describe_command "role:grant_to --admin test:a test:b" do
+      it "grants the role with admin option" do
+        Conjur::Role.any_instance.should_receive(:grant_to).with("test:b", {admin_option: true})
+        invoke
+      end
+    end
+  end
+
   describe "role:create" do
     describe_command "role:create test:the-role" do
       it "creates the role with no options" do
