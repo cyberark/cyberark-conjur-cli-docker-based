@@ -162,4 +162,29 @@ class Conjur::Command::Resources < Conjur::Command
       puts annots.to_json
     end
   end
+  
+  desc "List all resources"
+  command :list do |c|
+    c.desc "Search id and annotations text"
+    c.flag [:s, :search]
+    
+    c.desc "Maximum number of records to return"
+    c.flag [:l, :limit]
+    
+    c.desc "Offset to start from"
+    c.flag [:o, :offset]
+    
+    c.desc "Show only ids"
+    c.switch [:i, :ids]
+    
+    c.action do |global_options, options, args|
+      opts = options.slice(:search, :limit, :options)
+      resources = api.resources(opts)
+      if options[:ids]
+        puts resources.map(&:resourceid)
+      else
+        puts JSON.pretty_generate resources.map(&:attributes)
+      end
+    end
+  end
 end
