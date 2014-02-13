@@ -129,4 +129,37 @@ class Conjur::Command::Resources < Conjur::Command
       display api.resource(id).permitted_roles(permission)
     end
   end
+  
+  desc "Set an annotation on a resource"
+  arg_name "resource-id name value"
+  command :annotate do |c|
+    c.action do |global_options, options, args|
+      id = full_resource_id require_arg(args, 'resource-id')
+      name = require_arg args, 'name'
+      value = require_arg args, 'value'
+      api.resource(id).annotations[name] = value
+      puts "Set annotation '#{name}' to '#{value}' for resource '#{id}'"
+    end
+  end
+  
+  desc "Show an annotation for a resource"
+  arg_name "resource-id name"
+  command :annotation do |c|
+    c.action do |global_options, options, args|
+      id = full_resource_id require_arg args, 'resource-id'
+      name = require_arg args, 'name'
+      value = api.resource(id).annotations[name]
+      puts value unless value.nil?
+    end
+  end
+  
+  desc "Print annotations as JSON"
+  arg_name 'resource-id'
+  command :annotations do |c|
+    c.action do |go, o, args|
+      id = full_resource_id require_arg args, 'resource-id'
+      annots = api.resource(id).annotations.to_h
+      puts annots.to_json
+    end
+  end
 end
