@@ -165,7 +165,7 @@ class Conjur::Command::Resources < Conjur::Command
   
   desc "List all resources"
   command :list do |c|
-    c.desc "Search id and annotations text"
+    c.desc "Search id, kind and annotations text"
     c.flag [:s, :search]
     
     c.desc "Maximum number of records to return"
@@ -177,13 +177,26 @@ class Conjur::Command::Resources < Conjur::Command
     c.desc "Show only ids"
     c.switch [:i, :ids]
     
+    c.desc "Show annotations in 'raw' format"
+    c.switch [:r, :"raw-annotations"]
+    
     c.action do |global_options, options, args|
-      opts = options.slice(:search, :limit, :options)
+      opts = options.slice(:search, :limit, :offset)
       resources = api.resources(opts)
       if options[:ids]
         puts resources.map(&:resourceid)
       else
-        puts JSON.pretty_generate resources.map(&:attributes)
+        resources = resources.map &:attributes
+        unless options[:'raw-annotations']
+          resources = resources.map do |r|
+            r['annotations'] = (r['annotations'] || []).inject({}) do |hash, annot|
+              hash[annot['name']] = annot['value']
+              hash
+            end
+            r
+          end
+        end
+        puts JSON.pretty_generate resources
       end
     end
   end
