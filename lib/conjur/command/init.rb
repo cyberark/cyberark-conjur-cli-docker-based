@@ -61,8 +61,16 @@ class Conjur::Command::Init < Conjur::Command
       
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
-          certificate = `echo | openssl s_client -connect #{hostname}:443  2>/dev/null | openssl x509`
+          certificate = `echo | openssl s_client -connect #{hostname}:443  2>/dev/null | openssl x509 -fingerprint`
           exit_now! "Unable to retrieve certificate from #{hostname}" if certificate.blank?
+          
+          lines = certificate.split("\n")
+          fingerprint = lines[0]
+          certificate = lines[1...-1].join("\n")
+          
+          puts fingerprint
+
+          exit_now! unless hl.ask("Trust this certificate (yes/no): ").strip == "yes"
         end
       end
       
