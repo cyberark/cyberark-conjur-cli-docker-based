@@ -9,10 +9,20 @@ describe Conjur::Command::Init do
     }
     describe_command 'init -a the-account' do
       it "writes config file" do
-        # Stub hostname and cert name
+        # Stub hostname
         HighLine.any_instance.stub(:ask).and_return ""
-        HighLine.any_instance.stub(:ask).and_return []
         File.should_receive(:open)
+        invoke
+      end
+    end
+    describe_command 'init -a the-account -h foobar' do
+      it "can't get the cert" do
+        expect { invoke }.to raise_error(GLI::CustomExit, /unable to retrieve certificate/i)
+      end
+    end
+    describe_command 'init -a the-account -h google.com' do
+      it "writes the config and cert" do
+        File.should_receive(:open).twice
         invoke
       end
     end

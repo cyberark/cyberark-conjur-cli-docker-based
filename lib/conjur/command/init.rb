@@ -58,18 +58,15 @@ class Conjur::Command::Init < Conjur::Command
 
       account = options[:account] || hl.ask("Enter your account name: ")
       hostname = options[:hostname] || hl.ask("Enter the hostname of your Conjur endpoint: ")
+      
       if (certificate = options[:certificate]).blank?
-        certificate = hl.ask("Enter the SSL certificate: ") do |q|
-          q.gather = /^-----END CERTIFICATE-----/
-        end
-        unless certificate.blank?
-          certificate << "-----END CERTIFICATE-----" 
-          certificate = certificate.join("\n")
+        unless hostname.blank?
+          certificate = `echo | openssl s_client -connect #{hostname}:443  2>/dev/null | openssl x509`
+          exit_now! "Unable to retrieve certificate from #{hostname}" if certificate.blank?
         end
       end
       
       exit_now! "account is required" if account.blank?
-      exit_now! "certificate is required for virtual appliance" if !hostname.blank? && certificate.blank?
       
       config = {
         account: account,
