@@ -43,7 +43,7 @@ class Conjur::Command::Init < Conjur::Command
     c.desc "Hostname of the Conjur endpoint (required for virtual appliance)"
     c.flag ["h", "hostname"]
 
-    c.desc "Conjur SSL certificate (required for virtual appliance)"
+    c.desc "Conjur SSL certificate (will be obtained from host unless provided in parameter)"
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
