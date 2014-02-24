@@ -66,7 +66,7 @@ class Conjur::Command::Init < Conjur::Command
           
           lines = certificate.split("\n")
           fingerprint = lines[0]
-          certificate = lines[1...-1].join("\n")
+          certificate = lines[1..-1].join("\n")
           
           puts fingerprint
 
@@ -81,7 +81,7 @@ class Conjur::Command::Init < Conjur::Command
         plugins: %w(environment layer key-pair)
       }
       
-      config[:appliance_url] = "https://#{hostname}" unless hostname.blank?
+      config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?
       
       unless certificate.blank?
         cert_file = File.join(File.dirname(options[:file]), "conjur-#{account}.pem")

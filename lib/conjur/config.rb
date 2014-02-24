@@ -61,7 +61,8 @@ module Conjur
           Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
         end
         if Config[:cert_file]
-          OpenSSL::X509::Store.add_file Config[:cert_file]
+          OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file Config[:cert_file]
+          #OpenSSL::X509::Store.add_file Config[:cert_file]
         end
       end
       
