@@ -25,14 +25,26 @@ module Conjur
     @@attributes = {}
     
     class << self
-      def load
+      def clear
+        @@attributes = {}
+      end
+      
+      def default_config_files
+        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ), '.conjurrc' ]
+      end
+      
+      def load(config_files = default_config_files)
         require 'yaml'
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ), '.conjurrc' ].each do |f|
+        config_files.each do |f|
           if File.exists?(f)
             if Conjur.log
               Conjur.log << "Loading #{f}\n"
             end
-            Conjur::Config.merge YAML.load(IO.read(f))
+            config = YAML.load(IO.read(f)).stringify_keys
+            if config['cert_file']
+              config['cert_file'] = File.expand_path(config['cert_file'], File.dirname(f))
+            end
+            Conjur::Config.merge config
           end
         end
       end
@@ -47,6 +59,9 @@ module Conjur
   
         if Conjur.log
           Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
+        end
+        if Config[:cert_file]
+          OpenSSL::X509::Store.add_file Config[:cert_file]
         end
       end
       
