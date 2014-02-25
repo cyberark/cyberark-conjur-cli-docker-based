@@ -22,6 +22,7 @@ describe Conjur::Command::Init do
     end
     describe_command 'init -a the-account -h google.com' do
       it "writes the config and cert" do
+        HighLine.any_instance.stub(:ask).and_return "yes"
         File.should_receive(:open).twice
         invoke
       end
@@ -43,7 +44,7 @@ plugins:
 - environment
 - layer
 - key-pair
-appliance_url: https://localhost
+appliance_url: https://localhost/api
 cert_file: #{tmpdir}/conjur-the-account.pem
 """
           File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"

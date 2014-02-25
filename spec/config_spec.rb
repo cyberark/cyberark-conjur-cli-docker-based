@@ -16,8 +16,7 @@ describe Conjur::Config do
     let(:cert_file) { "/path/to/cert.pem" }
     it "trusts the cert_file" do
       Conjur::Config.class_variable_set("@@attributes", { 'cert_file' => cert_file })
-      OpenSSL::X509::Store.should_receive(:add_file).with cert_file
-      
+      OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.should_receive(:add_file).with cert_file  
       Conjur::Config.apply
     end
   end

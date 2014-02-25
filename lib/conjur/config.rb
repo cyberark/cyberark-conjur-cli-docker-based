@@ -40,7 +40,7 @@ module Conjur
             if Conjur.log
               Conjur.log << "Loading #{f}\n"
             end
-            config = YAML.load(IO.read(f)).stringify_keys
+            config = YAML.load(IO.read(f)).stringify_keys rescue {}
             if config['cert_file']
               config['cert_file'] = File.expand_path(config['cert_file'], File.dirname(f))
             end
