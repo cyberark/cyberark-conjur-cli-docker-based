@@ -158,7 +158,7 @@ module Conjur
       
       def do_object obj, &block
         begin
-          api_keys[obj.resourceid] = obj.api_key if obj.api_key 
+          api_keys[obj.roleid] = obj.api_key if obj.api_key 
         rescue
         end
         

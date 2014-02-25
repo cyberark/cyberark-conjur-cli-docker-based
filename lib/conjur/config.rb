@@ -36,7 +36,7 @@ module Conjur
       def load(config_files = default_config_files)
         require 'yaml'
         config_files.each do |f|
-          if File.exists?(f)
+          if File.file?(f)
             if Conjur.log
               Conjur.log << "Loading #{f}\n"
             end
