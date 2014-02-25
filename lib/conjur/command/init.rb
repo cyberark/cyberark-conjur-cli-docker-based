@@ -78,7 +78,7 @@ class Conjur::Command::Init < Conjur::Command
       
       config = {
         account: account,
-        plugins: %w(environment layer key-pair)
+        plugins: %w(environment layer key-pair pubkeys)
       }
       
       config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?

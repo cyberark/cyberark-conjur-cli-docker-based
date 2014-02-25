@@ -44,6 +44,7 @@ plugins:
 - environment
 - layer
 - key-pair
+- pubkeys
 appliance_url: https://localhost/api
 cert_file: #{tmpdir}/conjur-the-account.pem
 """
