@@ -28,7 +28,7 @@ module Conjur
       def load
         require 'yaml'
         [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ), '.conjurrc' ].each do |f|
-          if File.exists?(f)
+          if File.file?(f)
             if Conjur.log
               Conjur.log << "Loading #{f}\n"
             end
