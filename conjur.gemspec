@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
   gem.version       = Conjur::VERSION
   
   gem.add_dependency 'conjur-api', '>=4.0'
-  gem.add_dependency 'gli'
+  gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc'
   gem.add_dependency 'methadone'
