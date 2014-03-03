@@ -25,11 +25,11 @@ class Conjur::Command::Policy < Conjur::DSLCommand
   
   class << self
     def default_collection_user
-      ENV['USER']
+      ( ENV['USER'] ).strip
     end
     
     def default_collection_hostname
-      ENV['HOSTNAME'] || `hostname`
+      ( ENV['HOSTNAME'] || `hostname` ).strip
     end
   
     def default_collection_name
@@ -62,45 +62,20 @@ owner of the policy role is the logged-in user (you), as always.
   command :load do |c|
     acting_as_option(c)
     
-    c.desc "Policy collection (default: #{default_collection_name})"
+    c.desc "Policy collection (default: #{default_collection_user}@#{default_collection_hostname})"
     c.arg_name "collection"
     c.flag [:collection]
-    
-    c.desc "Policy id (required)"
-    c.arg_name "id"
-    c.flag [:i, :id]
-    
-    c.desc "Policy name"
-    c.arg_name "name"
-    c.flag [:n, :name]
-    
-    c.desc "Policy version number (required)"
-    c.arg_name "version"
-    c.flag [:v, :version]
     
     c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
     c.arg_name "context"
     c.flag [:c, :context]
     
     c.action do |global_options,options,args|
-      [ :id, :version ].each do |arg|
-        exit_now! "#{arg} is required" unless options[arg]
-      end
-      
       collection = options[:collection] || default_collection_name
-      policy_id = [ options[:id], options[:version] ].join('-')
-      policy_annotations = {}
-      policy_annotations[:name] = options[:name] if options[:name]
       
       run_script args, options do |runner, &block|
         runner.scope collection do
-          runner.role "policy", policy_id do
-            runner.owns do
-              runner.resource "policy", policy_id, annotations: policy_annotations
-
-              block.call
-            end
-          end
+          block.call
         end
       end
     end

@@ -45,13 +45,12 @@ class Conjur::DSLCommand < Conjur::Command
         end
       end
       
-      result = nil
       if block_given?
         block.call(runner) do
-          result = runner.execute
+          runner.execute
         end
       else
-        result = runner.execute
+        runner.execute
       end
       
       if context
@@ -59,7 +58,7 @@ class Conjur::DSLCommand < Conjur::Command
         File.chmod(0600, context)
       end
 
-      puts JSON.pretty_generate(result)
+      puts JSON.pretty_generate(runner.context)
     end
   end
 
