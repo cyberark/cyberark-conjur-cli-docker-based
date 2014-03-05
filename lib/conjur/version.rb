@@ -20,4 +20,5 @@
 #
 module Conjur
   VERSION = "4.6.1"
+  ::Version=VERSION
 end
