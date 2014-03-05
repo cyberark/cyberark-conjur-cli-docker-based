@@ -13,4 +13,5 @@ group :development do
   gem 'conjur-asset-environment-api'
   gem 'conjur-asset-key-pair-api'
   gem 'conjur-asset-layer-api'
+  gem 'conjur-asset-ui-api', github: 'conjurinc/conjur-asset-ui', branch: 'detailed-permissions-view'
 end
