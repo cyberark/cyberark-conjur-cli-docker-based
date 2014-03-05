@@ -73,6 +73,18 @@ module Conjur
         end
       end
       
+      def policy id, &block
+        self.role "policy", id do
+          self.owns do
+            self.resource "policy", id do
+              scope id do
+                block.call if block_given?
+              end
+            end
+          end
+        end
+      end
+      
       alias model namespace
       
       def execute

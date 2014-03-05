@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2014 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -18,23 +18,48 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/authn'
-require 'conjur/command/dsl_command'
+require 'conjur/command'
 
-class Conjur::Command::Script < Conjur::DSLCommand
-  self.prefix = :script
+class Conjur::DSLCommand < Conjur::Command
+  class << self
+    def file_or_stdin_arg(args)
+    end
 
-  desc "Run a Conjur DSL script"
-  arg_name "script"
-  command :execute do |c|
-    acting_as_option(c)
-    
-    c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-    c.arg_name "context"
-    c.flag [:c, :context]
-    
-    c.action do |global_options,options,args|
-      run_script args, options
+    def run_script(args, options, &block)
+      filename = nil
+      script = if script = args.pop
+        filename = script
+        script = File.read(script)
+      else
+        STDIN.read
+      end
+      
+      require 'conjur/dsl/runner'
+      runner = Conjur::DSL::Runner.new(script, filename)
+
+      if context = options[:context]
+        runner.context = begin
+          JSON.parse(File.read(context)) 
+        rescue Errno::ENOENT 
+          {}
+        end
+      end
+      
+      if block_given?
+        block.call(runner) do
+          runner.execute
+        end
+      else
+        runner.execute
+      end
+      
+      if context
+        File.write(context, JSON.pretty_generate(runner.context))
+        File.chmod(0600, context)
+      end
+
+      puts JSON.pretty_generate(runner.context)
     end
   end
+
 end
