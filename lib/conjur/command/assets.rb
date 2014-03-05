@@ -75,7 +75,11 @@ class Conjur::Command::Assets < Conjur::Command
   command :list do |c|
     c.action do |global_options,options,args|
       kind = require_arg(args, "kind").gsub('-', '_')
-      api.send(kind.pluralize).each do |e|
+      if api.respond_to?(kind.pluralize)
+        api.send(kind.pluralize)
+      else
+        api.resources(kind: kind)
+      end.each do |e|
         display(e, options)
       end
     end
