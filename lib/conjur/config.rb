@@ -20,6 +20,7 @@
 #
 require 'active_support/core_ext/hash/deep_merge'
 require 'active_support/core_ext/hash/indifferent_access'
+
 module Conjur
   class Config
     @@attributes = {}

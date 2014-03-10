@@ -47,8 +47,14 @@ module Conjur
         !@objects.empty? ? @objects.last : nil
       end
       
+      # Current scope, used as a path/delimited/prefix to a role or resource id.
       def current_scope
         !@scopes.empty? ? @scopes.join('/') : nil
+      end
+      
+      # Current scope, used for user@scope.
+      def current_user_scope
+        current_scope.gsub(/[^\w]/, '-')
       end
       
       def scope name = nil, &block
@@ -74,7 +80,8 @@ module Conjur
       end
       
       def policy id, &block
-        self.role "policy", id do
+        self.role "policy", id do |role|
+          context["policy"] = role.identifier
           self.owns do
             self.resource "policy", id do
               scope id do
@@ -94,12 +101,12 @@ module Conjur
       end
       
       def resource kind, id, options = {}, &block
-        id = full_resource_id([kind, qualify_id(id) ].join(':'))
+        id = full_resource_id([kind, qualify_id(id, kind) ].join(':'))
         find_or_create :resource, id, options, &block
       end
       
       def role kind, id, options = {}, &block
-        id = full_resource_id([ kind, qualify_id(id) ].join(':'))
+        id = full_resource_id([ kind, qualify_id(id, kind) ].join(':'))
         find_or_create :role, id, options, &block
       end
 
@@ -122,18 +129,23 @@ module Conjur
       
       protected
       
-      def qualify_id id
+      def qualify_id id, kind
         if id[0] == "/"
           id[1..-1]
         else
-          [ current_scope, id ].compact.join('/')
+          case kind.to_sym
+          when :user
+            [ id, current_user_scope ].compact.join('@')
+          else
+            [ current_scope, id ].compact.join('/')
+          end
         end
       end
       
       def method_missing(sym, *args, &block)
         if create_compatible_args?(args) && api.respond_to?(sym)
           id = args[0]
-          id = qualify_id(id) unless sym == :user
+          id = qualify_id(id, sym)
           find_or_create sym, id, args[1] || {}, &block
         elsif current_object && current_object.respond_to?(sym)
           current_object.send(sym, *args, &block)
