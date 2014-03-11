@@ -129,4 +129,78 @@ class Conjur::Command::Resources < Conjur::Command
       display api.resource(id).permitted_roles(permission)
     end
   end
+  
+  desc "Set an annotation on a resource"
+  arg_name "resource-id name value"
+  command :annotate do |c|
+    c.action do |global_options, options, args|
+      id = full_resource_id require_arg(args, 'resource-id')
+      name = require_arg args, 'name'
+      value = require_arg args, 'value'
+      api.resource(id).annotations[name] = value
+      puts "Set annotation '#{name}' to '#{value}' for resource '#{id}'"
+    end
+  end
+  
+  desc "Show an annotation for a resource"
+  arg_name "resource-id name"
+  command :annotation do |c|
+    c.action do |global_options, options, args|
+      id = full_resource_id require_arg args, 'resource-id'
+      name = require_arg args, 'name'
+      value = api.resource(id).annotations[name]
+      puts value unless value.nil?
+    end
+  end
+  
+  desc "Print annotations as JSON"
+  arg_name 'resource-id'
+  command :annotations do |c|
+    c.action do |go, o, args|
+      id = full_resource_id require_arg args, 'resource-id'
+      annots = api.resource(id).annotations.to_h
+      puts annots.to_json
+    end
+  end
+  
+  desc "List all resources"
+  command :list do |c| 
+    c.desc "Filter by kind"
+    c.flag [:k, :kind]
+    
+    c.desc "Full-text search on resource id and annotation values" 
+    c.flag [:s, :search]
+    
+    c.desc "Maximum number of records to return"
+    c.flag [:l, :limit]
+    
+    c.desc "Offset to start from"
+    c.flag [:o, :offset]
+    
+    c.desc "Show only ids"
+    c.switch [:i, :ids]
+    
+    c.desc "Show annotations in 'raw' format"
+    c.switch [:r, :"raw-annotations"]
+    
+    c.action do |global_options, options, args| 
+      opts = options.slice(:search, :limit, :options, :kind) 
+      resources = api.resources(opts)
+      if options[:ids]
+        puts resources.map(&:resourceid)
+      else
+        resources = resources.map &:attributes
+        unless options[:'raw-annotations']
+          resources = resources.map do |r|
+            r['annotations'] = (r['annotations'] || []).inject({}) do |hash, annot|
+              hash[annot['name']] = annot['value']
+              hash
+            end
+            r
+          end
+        end
+        puts JSON.pretty_generate resources
+      end
+    end
+  end
 end
