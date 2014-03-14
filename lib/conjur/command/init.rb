@@ -57,19 +57,23 @@ class Conjur::Command::Init < Conjur::Command
       hl = HighLine.new $stdin, $stderr
 
       account = options[:account] || hl.ask("Enter your account name: ")
-      hostname = options[:hostname] || hl.ask("Enter the hostname of your Conjur endpoint: ")
+      hostname = options[:hostname] || hl.ask("Enter the hostname (and optional port) of your Conjur endpoint: ")
+      hostname << ':443' unless hostname.include? ':'
       
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
-          certificate = `echo | openssl s_client -connect #{hostname}:443  2>/dev/null | openssl x509 -fingerprint`
+          certificate = `echo | openssl s_client -connect #{hostname}  2>/dev/null | openssl x509 -fingerprint`
           exit_now! "Unable to retrieve certificate from #{hostname}" if certificate.blank?
           
           lines = certificate.split("\n")
           fingerprint = lines[0]
           certificate = lines[1..-1].join("\n")
-          
+
+          puts
           puts fingerprint
 
+          puts "\nPlease verify this certificate on the appliance using command:
+                openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
           exit_now! unless hl.ask("Trust this certificate (yes/no): ").strip == "yes"
         end
       end
