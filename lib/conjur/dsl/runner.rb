@@ -54,7 +54,7 @@ module Conjur
       
       # Current scope, used for user@scope.
       def current_user_scope
-        current_scope.gsub(/[^\w]/, '-')
+        current_scope ? current_scope.gsub(/[^\w]/, '-') : nil
       end
       
       def scope name = nil, &block
