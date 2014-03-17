@@ -56,8 +56,9 @@ class Conjur::Command::Init < Conjur::Command
     c.action do |global_options,options,args|
       hl = HighLine.new $stdin, $stderr
 
-      account = options[:account] || hl.ask("Enter your account name: ")
-      hostname = options[:hostname] || hl.ask("Enter the hostname of your Conjur endpoint: ")
+      # using .to_s to overcome https://github.com/JEG2/highline/issues/69
+      account = options[:account] || hl.ask("Enter your account name: ").to_s
+      hostname = options[:hostname] || hl.ask("Enter the hostname of your Conjur endpoint: ").to_s
       
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
