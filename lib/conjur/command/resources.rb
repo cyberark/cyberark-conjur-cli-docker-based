@@ -51,7 +51,7 @@ class Conjur::Command::Resources < Conjur::Command
       display api.resource(id).attributes
     end
   end
-  
+    
   desc "Determines whether a resource exists"
   arg_name "resource-id"
   command :exists do |c|
@@ -165,6 +165,9 @@ class Conjur::Command::Resources < Conjur::Command
   
   desc "List all resources"
   command :list do |c| 
+    c.desc "Role to act as. By default, the current logged-in role is used."
+    c.flag [:role]
+
     c.desc "Filter by kind"
     c.flag [:k, :kind]
     
@@ -185,6 +188,7 @@ class Conjur::Command::Resources < Conjur::Command
     
     c.action do |global_options, options, args| 
       opts = options.slice(:search, :limit, :options, :kind) 
+      opts[:acting_as] = options[:role] if options[:role]
       resources = api.resources(opts)
       if options[:ids]
         puts resources.map(&:resourceid)
