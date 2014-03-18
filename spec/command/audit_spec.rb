@@ -5,7 +5,7 @@ describe Conjur::Command::Audit, logged_in: true do
 
   def expect_api_call method, *args
     api.should_receive(method.to_sym).with(*args).and_return events
-    described_class.should_receive(:show_audit_events).with(events, an_instance_of(Hash))
+    #described_class.should_receive(:show_audit_events).with(events, an_instance_of(Hash))
   end
 
   def invoke_expecting_api_call method, *args
@@ -28,7 +28,6 @@ describe Conjur::Command::Audit, logged_in: true do
 
   def self.it_calls_the_api command, api_method, *api_args, &block
     describe_command_success command, api_method, *api_args, &block
-    accepts_pagination_params command, api_method, *api_args, &block
   end
 
 
@@ -43,27 +42,7 @@ describe Conjur::Command::Audit, logged_in: true do
     end
   end
 
-  def self.accepts_pagination_params cmd, api_method, *api_method_args, &block
-    context "with valid pagination options" do
-      expected_opts   = {limit: 12, offset: 2}
-      api_method_args = case api_method_args.last
-      when Hash
-        api_method_args[0..-2] << api_method_args.last.merge(expected_opts)
-      else
-        api_method_args.dup << expected_opts
-      end
-      describe_command_success cmd + " --limit 12 --offset 2", api_method, *api_method_args, &block
-    end
-    context "with garbage pagination options" do
-      it_fails cmd + " --limit hiythere", RuntimeError, /expected an integer for limit/i
-      it_fails cmd + " --offset hiythere", RuntimeError, /expected an integer for offset/i
-    end
-  end
-
   describe "audit:role" do
-    context "without an argument" do
-      it_calls_the_api "audit:role", :audit_current_role, {}
-    end
     context "with an argument" do
       context "of a full id" do
         it_calls_the_api "audit:role foo:bar:baz", :audit_role, 'foo:bar:baz', {}
@@ -96,5 +75,9 @@ describe Conjur::Command::Audit, logged_in: true do
         it_fails "audit:resource foo", /expecting at least two tokens/i
       end
     end
+  end
+  
+  describe "audit:all" do
+    it_calls_the_api "audit:all", :audit, {}
   end
 end

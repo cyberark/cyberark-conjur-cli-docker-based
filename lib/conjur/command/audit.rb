@@ -29,10 +29,10 @@ class Conjur::Command
         if e[:resource] && e[:resource].kind_of?(Hash)
           e[:resource] = e[:resource]['id']
         end
-        s = "[#{Time.at(e[:timestamp])}] "
+        s = "[#{Time.parse(e[:timestamp])}] "
         s << " #{e[:conjur_user]}"
         s << " (as #{e[:conjur_role]})" if e[:conjur_role] != e[:conjur_user]
-        formatter = SHORT_FORMATS["#{e[:asset]}:#{e[:action]}"]
+        formatter = SHORT_FORMATS["#{e[:kind]}:#{e[:action]}"]
         if formatter
           s << " " << formatter.call(e)
         else
@@ -62,11 +62,11 @@ class Conjur::Command
       end
       
       def show_audit_events events, options
-        events.reverse!
+        events = [events] unless events.kind_of?(Array)
         if options[:short]
-          events.each{|e| puts short_event_format(e)}
+          events.map(&:to_h).each{|e| puts short_event_format(e)}
         else
-          puts JSON.pretty_generate(events)
+          events.map(&:to_h).each{|e| puts JSON.pretty_generate(e) }
         end
       end
 
@@ -85,38 +85,30 @@ class Conjur::Command
           c.switch [:f, :follow]
           
           c.action do |global_options, options, args|
-            options = extract_audit_options options
-            if options[:follow]
-              Conjur::Audit::Follower.new do |merge_options|
-                instance_exec(args, options.merge(merge_options), &block)
-              end.follow do |events|
-                show_audit_events events, options
-              end
-            else
-              show_audit_events instance_exec(args, options, &block), options
-            end
+            options = extract_audit_options options 
+            instance_exec(args, options, &block)
           end
         end
       end
     end
 
+    desc "Show all audit events visible to the current user"
+    audit_feed_command :all do |args, options|
+      api.audit(options){ |es| show_audit_events es, options }
+    end
     
     desc "Show audit events related to a role"
-    arg_name 'role?'
+    arg_name 'role'
     audit_feed_command :role do |args, options|
-      if id = args.shift 
-        method_name, method_args = :audit_role, [full_resource_id(id), options]
-      else
-        method_name, method_args = :audit_current_role, [options]
-      end
-      api.send method_name, *method_args
+      id = full_resource_id(require_arg(args, "role"))
+      api.audit_role(id, options){ |es| show_audit_events es, options }
     end
     
     desc "Show audit events related to a resource"
     arg_name 'resource'
     audit_feed_command :resource do |args, options|
       id = full_resource_id(require_arg args, "resource")
-      api.audit_resource id, options
+      api.audit_resource(id, options){|es| show_audit_events es, options} 
     end
   end
 end
