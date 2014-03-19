@@ -58,14 +58,17 @@ class Conjur::Command::Init < Conjur::Command
 
       # using .to_s to overcome https://github.com/JEG2/highline/issues/69
       account = options[:account] || hl.ask("Enter your account name: ").to_s
-      hostname = options[:hostname] || hl.ask(
-        "Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
-      hostname << ':443' unless hostname.include? ':'
+      hostname = options[:hostname] || hl.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
       
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
+          connect_hostname = if hostname.include?(':')
+            hostname
+          else
+            hostname + ':443'
+          end
           certificate = \
-            `echo | openssl s_client -connect #{hostname}  2>/dev/null | openssl x509 -fingerprint`
+            `echo | openssl s_client -connect #{connect_hostname}  2>/dev/null | openssl x509 -fingerprint`
           exit_now! "Unable to retrieve certificate from #{hostname}" if certificate.blank?
           
           lines = certificate.split("\n")
