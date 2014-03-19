@@ -82,4 +82,19 @@ class Conjur::Command::Variables < Conjur::Command
       $stdout.write api.variable(id).value(options[:version])
     end
   end
+
+  desc "Store value into temporary file and print out it's name" 
+  arg_name "variable"
+  command :"to_file" do |c|
+    c.desc "Version number"
+    c.flag [:v, :version]
+    c.action do |global_options,options,args|
+      id = require_arg(args, 'variable')
+      value = api.variable(id).value(options[:version])
+      tempfile = `mktemp /dev/shm/conjur.XXXXXX`.strip
+      File.open(tempfile,'w') { |f| f.write(value) }
+      puts tempfile
+    end
+    
+  end
 end
