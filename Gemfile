@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in conjur.gemspec
 gemspec
 
-gem 'conjur-api', git: 'https://github.com/inscitiv/api-ruby.git', branch: 'update-audit-commands'
+gem 'conjur-api', git: 'https://github.com/inscitiv/api-ruby.git', branch: 'master'
 group :test, :development do
   gem 'pry'
 end
