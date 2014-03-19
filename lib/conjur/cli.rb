@@ -35,9 +35,19 @@ module Conjur
       def apply_config
         Conjur::Config.apply
       end
+
+      # Automatically load any plugins that might be installed.
+      # You can still add a plugin to the rc file to have conjur complain if missing.
+      def autoload_plugins
+        files = Gem.find_files('/conjur-asset-*.rb').reject { |p| p =~ /-version.rb$/ }
+        files.each do |f|
+          require f
+        end
+      end
     end
           
     load_config
+    autoload_plugins
 
     Conjur::Config.plugins.each do |plugin|
       begin
