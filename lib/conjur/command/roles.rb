@@ -52,7 +52,7 @@ class Conjur::Command::Roles < Conjur::Command
     end
   end
 
-  desc "Lists role memberships"
+  desc "Lists role memberships. The role membership list is recursively expanded."
   arg_name "role"
   command :memberships do |c|
     c.action do |global_options,options,args|
@@ -62,7 +62,7 @@ class Conjur::Command::Roles < Conjur::Command
     end
   end
 
-  desc "Lists all members of the role"
+  desc "Lists all direct members of the role. The membership list is not recursively expanded."
   arg_name "role"
   command :members do |c|
     c.desc "Verbose output"
@@ -102,7 +102,7 @@ class Conjur::Command::Roles < Conjur::Command
     end
   end
 
-  desc "Revoke a role from another role."
+  desc "Revoke a role from another role. You must have admin permission on the revoking role."
   arg_name "role member"
   command :revoke_from do |c|
     c.action do |global_options,options,args|

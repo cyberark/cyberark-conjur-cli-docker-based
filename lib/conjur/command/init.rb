@@ -37,13 +37,13 @@ class Conjur::Command::Init < Conjur::Command
   end
 
   Conjur::CLI.command :init do |c|
-    c.desc "Conjur account name (required)"
-    c.flag ["a", "account"]
-    
     c.desc "Hostname of the Conjur endpoint (required for virtual appliance)"
     c.flag ["h", "hostname"]
 
-    c.desc "Conjur SSL certificate (will be obtained from host unless provided in parameter)"
+    c.desc "Conjur account name (will be obtained from the host unless provided by this option)"
+    c.flag ["a", "account"]
+    
+    c.desc "Conjur SSL certificate (will be obtained from host unless provided by this option)"
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
@@ -56,9 +56,19 @@ class Conjur::Command::Init < Conjur::Command
     c.action do |global_options,options,args|
       hl = HighLine.new $stdin, $stderr
 
-      # using .to_s to overcome https://github.com/JEG2/highline/issues/69
-      account = options[:account] || hl.ask("Enter your account name: ").to_s
       hostname = options[:hostname] || hl.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
+      exit_now! "Hostname should not include the protocol" if hostname =~ /^https?\:/
+      if hostname
+        Conjur.configuration.core_url = "https://#{hostname}/api"
+      end
+      
+      account = options[:account]
+      account ||= if hostname
+        account = Conjur::Core::API.info['account'] or raise "Exepcting 'account' in Core info"
+      else
+        # using .to_s to overcome https://github.com/JEG2/highline/issues/69
+        hl.ask("Enter your account name: ").to_s
+      end
       
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
@@ -80,7 +90,7 @@ class Conjur::Command::Init < Conjur::Command
 
           puts "\nPlease verify this certificate on the appliance using command:
                 openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
-          exit_now! unless hl.ask("Trust this certificate (yes/no): ").strip == "yes"
+          exit_now! "You decided not to trust the certificate" unless hl.ask("Trust this certificate (yes/no): ").strip == "yes"
         end
       end
       

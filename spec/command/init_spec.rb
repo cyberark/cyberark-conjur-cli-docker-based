@@ -7,12 +7,25 @@ describe Conjur::Command::Init do
     before {
       File.stub(:exists?).and_return false
     }
-    describe_command 'init -a the-account' do
-      it "writes config file" do
-        # Stub hostname
-        HighLine.any_instance.stub(:ask).and_return ""
-        File.should_receive(:open)
-        invoke
+    context "auto-fetching fingerprint" do
+      before {
+        HighLine.any_instance.stub(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
+        Object.any_instance.should_receive(:`).with("echo | openssl s_client -connect the-host:443  2>/dev/null | openssl x509 -fingerprint").and_return "the-fingerprint"
+        HighLine.any_instance.stub(:ask).with(/^Trust this certificate/).and_return "yes"
+      }
+      describe_command 'init' do
+        it "fetches account and writes config file" do
+          # Stub hostname
+          Conjur::Core::API.should_receive(:info).and_return "account" => "the-account"
+          File.should_receive(:open)
+          invoke
+        end
+      end
+      describe_command 'init -a the-account' do
+        it "writes config file" do
+          File.should_receive(:open)
+          invoke
+        end
       end
     end
     describe_command 'init -a the-account -h foobar' do
