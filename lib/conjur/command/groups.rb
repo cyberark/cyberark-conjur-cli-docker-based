@@ -33,7 +33,7 @@ class Conjur::Command::Groups < Conjur::Command
       id = require_arg(args, 'id')
       
       group = api.create_group(id, options)
-      puts "Created #{group}"
+      display(group, options)
     end
   end
 
