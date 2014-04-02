@@ -37,6 +37,37 @@ class Conjur::Command::Groups < Conjur::Command
     end
   end
 
+  desc "List groups"
+  command :list do |c|
+    command_options_for_list c
+
+    c.action do |global_options, options, args|
+      command_impl_for_list global_options, options.merge(kind: "group"), args
+    end
+  end
+
+  desc "Show a group"
+  arg_name "id"
+  command :show do |c|
+    c.action do |global_options,options,args|
+      id = require_arg(args, 'id')
+      display(api.group(id), options)
+    end
+  end
+
+  desc "Lists all direct members of the group. The membership list is not recursively expanded."
+  arg_name "group"
+  command "members" do |c|
+    c.desc "Verbose output"
+    c.switch [:V,:verbose]
+
+    c.action do |global_options,options,args|
+      group = require_arg(args, 'group')
+      
+      display_members api.group(group).role.members, options
+    end
+  end
+
   desc "Add a new group member"
   arg_name "group member"
   command :"members:add" do |c|

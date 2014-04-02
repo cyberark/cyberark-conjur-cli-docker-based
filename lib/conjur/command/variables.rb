@@ -25,7 +25,7 @@ class Conjur::Command::Variables < Conjur::Command
   self.prefix = :variable
   
   desc "Create and store a variable"
-  arg_name "id?"
+  arg_name "id"
   command :create do |c|
     c.arg_name "mime_type"
     c.flag [:m, :"mime-type"], default_value: "text/plain"
@@ -33,11 +33,19 @@ class Conjur::Command::Variables < Conjur::Command
     c.arg_name "kind"
     c.flag [:k, :"kind"], default_value: "secret"
     
+    c.arg_name "value"
+    c.desc "Initial value"
+    c.flag [:v, :"value"]
+    
     acting_as_option(c)
     
     c.action do |global_options,options,args|
       id = args.shift
       options[:id] = id if id
+      
+      unless id
+        ActiveSupport::Deprecation.warn "id argument will be required in future releases"
+      end
       
       mime_type = options.delete(:m)
       kind = options.delete(:k)
@@ -59,6 +67,15 @@ class Conjur::Command::Variables < Conjur::Command
     end
   end
 
+  desc "List variables"
+  command :list do |c|
+    command_options_for_list c
+
+    c.action do |global_options, options, args|
+      command_impl_for_list global_options, options.merge(kind: "variable"), args
+    end
+  end
+  
   desc "Add a value"
   arg_name "variable ( value | STDIN )"
   command :"values:add" do |c|

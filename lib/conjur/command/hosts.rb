@@ -25,7 +25,7 @@ class Conjur::Command::Hosts < Conjur::Command
   self.prefix = :host
 
   desc "Create a new host"
-  arg_name "host"
+  arg_name "id"
   command :create do |c|
     c.arg_name "password"
     c.flag [:p,:password]
@@ -35,7 +35,30 @@ class Conjur::Command::Hosts < Conjur::Command
     c.action do |global_options,options,args|
       id = args.shift
       options[:id] = id if id
+
+      unless id
+        ActiveSupport::Deprecation.warn "id argument will be required in future releases"
+      end
+      
       display api.create_host(options), options
+    end
+  end
+  
+  desc "Show a host"
+  arg_name "id"
+  command :show do |c|
+    c.action do |global_options,options,args|
+      id = require_arg(args, 'id')
+      display(api.host(id), options)
+    end
+  end
+
+  desc "List hosts"
+  command :list do |c|
+    command_options_for_list c
+
+    c.action do |global_options, options, args|
+      command_impl_for_list global_options, options.merge(kind: "host"), args
     end
   end
   

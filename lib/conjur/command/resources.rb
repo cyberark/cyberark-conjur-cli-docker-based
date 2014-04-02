@@ -165,46 +165,13 @@ class Conjur::Command::Resources < Conjur::Command
   
   desc "List all resources"
   command :list do |c| 
-    c.desc "Role to act as. By default, the current logged-in role is used."
-    c.flag [:role]
-
     c.desc "Filter by kind"
     c.flag [:k, :kind]
     
-    c.desc "Full-text search on resource id and annotation values" 
-    c.flag [:s, :search]
-    
-    c.desc "Maximum number of records to return"
-    c.flag [:l, :limit]
-    
-    c.desc "Offset to start from"
-    c.flag [:o, :offset]
-    
-    c.desc "Show only ids"
-    c.switch [:i, :ids]
-    
-    c.desc "Show annotations in 'raw' format"
-    c.switch [:r, :"raw-annotations"]
-    
+    command_options_for_list c
+
     c.action do |global_options, options, args| 
-      opts = options.slice(:search, :limit, :options, :kind) 
-      opts[:acting_as] = options[:role] if options[:role]
-      resources = api.resources(opts)
-      if options[:ids]
-        puts resources.map(&:resourceid)
-      else
-        resources = resources.map &:attributes
-        unless options[:'raw-annotations']
-          resources = resources.map do |r|
-            r['annotations'] = (r['annotations'] || []).inject({}) do |hash, annot|
-              hash[annot['name']] = annot['value']
-              hash
-            end
-            r
-          end
-        end
-        puts JSON.pretty_generate resources
-      end
+      command_impl_for_list global_options, options, args
     end
   end
 end

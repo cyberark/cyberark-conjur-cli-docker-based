@@ -70,18 +70,7 @@ class Conjur::Command::Roles < Conjur::Command
     
     c.action do |global_options,options,args|
       role = args.shift || api.user(api.username).roleid
-      result = if options[:V]
-        api.role(role).members.collect {|member|
-          {
-            member: member.member.roleid,
-            grantor: member.grantor.roleid,
-            admin_option: member.admin_option
-          }
-        }
-      else
-        api.role(role).members.map(&:member).map(&:roleid)
-      end
-      display result
+      display_members api.role(role).members, options
     end
   end
 

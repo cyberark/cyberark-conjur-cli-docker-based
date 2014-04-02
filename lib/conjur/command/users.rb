@@ -59,6 +59,24 @@ class Conjur::Command::Users < Conjur::Command
     end
   end
 
+  desc "Show a user"
+  arg_name "id"
+  command :show do |c|
+    c.action do |global_options,options,args|
+      id = require_arg(args, 'id')
+      display(api.user(id), options)
+    end
+  end
+
+  desc "List users"
+  command :list do |c|
+    command_options_for_list c
+
+    c.action do |global_options, options, args|
+      command_impl_for_list global_options, options.merge(kind: "user"), args
+    end
+  end
+
   desc "Update the password of the logged-in user"
   command :update_password do |c|
     c.desc "Password to use, otherwise you will be prompted"
