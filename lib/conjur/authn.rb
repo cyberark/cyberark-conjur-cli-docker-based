@@ -19,6 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'highline'
+require 'active_support'
+require 'active_support/deprecation'
 require 'conjur/api'
 require 'netrc'
 
