@@ -25,6 +25,8 @@ class Conjur::Command::Field < Conjur::Command
   
   desc "(Deprecated. See standalone jsonfield command instead.)"
   command :select do |c|
+    def c.nodoc; true end
+
     c.action do |global_options,options,args|
       pattern = require_arg(args, 'pattern')
       value = args.shift || STDIN.read

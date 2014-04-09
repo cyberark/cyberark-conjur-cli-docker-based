@@ -56,6 +56,7 @@ class Conjur::Command::Assets < Conjur::Command
   desc "Show an asset"
   arg_name "id"
   command :show do |c|
+    def c.nodoc; true end
     c.action do |global_options,options,args|
       kind, id = get_kind_and_id_from_args(args, 'id')
       display api.send(kind, id).attributes
@@ -65,6 +66,7 @@ class Conjur::Command::Assets < Conjur::Command
   desc "Checks for the existance of an asset"
   arg_name "id"
   command :exists do |c|
+    def c.nodoc; true end
     c.action do |global_options,options,args|
       kind, id = get_kind_and_id_from_args(args, 'id')
       puts api.send(kind, id).exists?

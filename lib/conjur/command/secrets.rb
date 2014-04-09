@@ -27,6 +27,8 @@ class Conjur::Command::Secrets < Conjur::Command
   desc "Create and store a secret"
   arg_name "secret"
   command :create do |c|
+    def c.nodoc; true end
+
     acting_as_option(c)
 
     c.action do |global_options,options,args|
@@ -38,6 +40,7 @@ class Conjur::Command::Secrets < Conjur::Command
   desc "Retrieve a secret"
   arg_name "id"
   command :value do |c|
+    def c.nodoc; true end
     c.action do |global_options,options,args|
       id = args.shift or raise "Missing parameter: id"
       puts api.secret(id).value
