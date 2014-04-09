@@ -62,6 +62,15 @@ class Conjur::Command::Hosts < Conjur::Command
     end
   end
   
+  desc "List the layers to which the host belongs"
+  arg_name "id"
+  command :layers do |c|
+    c.action do |global_options, options, args|
+      id = require_arg(args, 'id')
+      display api.host(id).role.all.select{|r| r.kind == "layer"}.map(&:identifier), options
+    end
+  end
+  
   desc "Enroll a new host into conjur"
   arg_name "host"
   command :enroll do |c|
