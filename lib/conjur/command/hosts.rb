@@ -75,5 +75,7 @@ class Conjur::Command::Hosts < Conjur::Command
         $stderr.puts "curl -L #{enrollment_url} | bash"
       end
     end
+
+    hosts.default_command :list
   end
 end

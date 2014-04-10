@@ -22,84 +22,88 @@ require 'conjur/authn'
 require 'conjur/command'
 
 class Conjur::Command::Roles < Conjur::Command
-  self.prefix = :role
-  
-  desc "Create a new role"
-  arg_name "role"
-  command :create do |c|
-    acting_as_option(c)
 
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'role')
-      role = api.role(id)
-      
-      if ownerid = options.delete(:ownerid)
-        options[:acting_as] = ownerid
+  desc "Manage roles"
+  command :role do |role|
+
+    role.desc "Create a new role"
+    role.arg_name "role"
+    role.command :create do |c|
+      acting_as_option(c)
+
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'role')
+        role = api.role(id)
+
+        if ownerid = options.delete(:ownerid)
+          options[:acting_as] = ownerid
+        end
+
+        role.create(options)
+        display(role, options)
       end
-      
-      role.create(options)
-      display(role, options)
     end
-  end
-  
-  desc "Determines whether a role exists"
-  arg_name "role"
-  command :exists do |c|
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'role')
-      role = api.role(id)
-      puts role.exists?
+
+    role.desc "Determines whether a role exists"
+    role.arg_name "role"
+    role.command :exists do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'role')
+        role = api.role(id)
+        puts role.exists?
+      end
+    end
+
+    role.desc "Lists role memberships. The role membership list is recursively expanded."
+    role.arg_name "role"
+    role.command :memberships do |c|
+      c.action do |global_options,options,args|
+        roleid = args.shift
+        role = roleid.nil? && api.current_role || api.role(roleid)
+        display role.all.map(&:roleid)
+      end
+    end
+
+    role.desc "Lists all direct members of the role. The membership list is not recursively expanded."
+    role.arg_name "role"
+    role.command :members do |c|
+      c.desc "Verbose output"
+      c.switch [:V,:verbose]
+
+      c.action do |global_options,options,args|
+        role = args.shift || api.user(api.username).roleid
+        display_members api.role(role).members, options
+      end
+    end
+
+    role.desc "Grant a role to another role. You must have admin permission on the granting role."
+    role.arg_name "role member"
+    role.command :grant_to do |c|
+      c.desc "Whether to grant with admin option"
+      c.switch [:a,:admin]
+
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'role')
+        member = require_arg(args, 'member')
+        role = api.role(id)
+        grant_options = {}
+        grant_options[:admin_option] = true if options[:admin]
+        role.grant_to member, grant_options
+        puts "Role granted"
+      end
+    end
+
+    role.desc "Revoke a role from another role. You must have admin permission on the revoking role."
+    role.arg_name "role member"
+    role.command :revoke_from do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'role')
+        member = require_arg(args, 'member')
+        role = api.role(id)
+        role.revoke_from member
+        puts "Role revoked"
+      end
     end
   end
 
-  desc "Lists role memberships. The role membership list is recursively expanded."
-  arg_name "role"
-  command :memberships do |c|
-    c.action do |global_options,options,args|
-      roleid = args.shift
-      role = roleid.nil? && api.current_role || api.role(roleid)
-      display role.all.map(&:roleid)
-    end
-  end
-
-  desc "Lists all direct members of the role. The membership list is not recursively expanded."
-  arg_name "role"
-  command :members do |c|
-    c.desc "Verbose output"
-    c.switch [:V,:verbose]
-    
-    c.action do |global_options,options,args|
-      role = args.shift || api.user(api.username).roleid
-      display_members api.role(role).members, options
-    end
-  end
-
-  desc "Grant a role to another role. You must have admin permission on the granting role."
-  arg_name "role member"
-  command :grant_to do |c|
-    c.desc "Whether to grant with admin option"
-    c.switch [:a,:admin]
-    
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'role')
-      member = require_arg(args, 'member')
-      role = api.role(id)
-      grant_options = {}
-      grant_options[:admin_option] = true if options[:admin]
-      role.grant_to member, grant_options
-      puts "Role granted"
-    end
-  end
-
-  desc "Revoke a role from another role. You must have admin permission on the revoking role."
-  arg_name "role member"
-  command :revoke_from do |c|
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'role')
-      member = require_arg(args, 'member')
-      role = api.role(id)
-      role.revoke_from member
-      puts "Role revoked"
-    end
-  end
 end
