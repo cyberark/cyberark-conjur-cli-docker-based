@@ -4,8 +4,6 @@ require 'conjur/audit/follower'
 
 class Conjur::Command
   class Audit < self
-    self.prefix = 'audit'
-    
     class << self
       private
       SHORT_FORMATS = {
@@ -66,8 +64,8 @@ class Conjur::Command
         end
       end
 
-      def audit_feed_command kind, &block
-        command kind do |c|
+      def audit_feed_command parent, kind, &block
+        parent.command kind do |c|
           c.desc "Maximum number of events to fetch"
           c.flag [:l, :limit]
 
@@ -88,23 +86,28 @@ class Conjur::Command
       end
     end
 
-    desc "Show all audit events visible to the current user"
-    audit_feed_command :all do |args, options|
-      api.audit(options){ |es| show_audit_events es, options }
-    end
-    
-    desc "Show audit events related to a role"
-    arg_name 'role'
-    audit_feed_command :role do |args, options|
-      id = full_resource_id(require_arg(args, "role"))
-      api.audit_role(id, options){ |es| show_audit_events es, options }
-    end
-    
-    desc "Show audit events related to a resource"
-    arg_name 'resource'
-    audit_feed_command :resource do |args, options|
-      id = full_resource_id(require_arg args, "resource")
-      api.audit_resource(id, options){|es| show_audit_events es, options} 
+    desc "Show audit events"
+    command  :audit do |audit|
+      audit.desc "Show all audit events visible to the current user"
+      audit_feed_command audit, :all do |args, options|
+        api.audit(options){ |es| show_audit_events es, options }
+      end
+
+
+      audit.desc "Show audit events related to a role"
+      audit.arg_name 'role'
+      audit_feed_command audit, :role do |args, options|
+        id = full_resource_id(require_arg(args, "role"))
+        api.audit_role(id, options){ |es| show_audit_events es, options }
+      end
+
+
+      audit.desc "Show audit events related to a resource"
+      audit.arg_name 'resource'
+      audit_feed_command audit, :resource do |args, options|
+        id = full_resource_id(require_arg args, "resource")
+        api.audit_resource(id, options){|es| show_audit_events es, options}
+      end
     end
   end
 end

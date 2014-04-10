@@ -36,7 +36,10 @@ module Conjur
         Conjur::Config.apply
       end
     end
-          
+
+    # Set this so that subcommands can have independent options
+    self.subcommand_option_handling :normal
+
     load_config
 
     Conjur::Config.plugins.each do |plugin|
