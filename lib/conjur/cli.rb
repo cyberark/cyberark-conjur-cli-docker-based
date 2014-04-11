@@ -31,10 +31,21 @@ module Conjur
       def load_config
         Conjur::Config.load
       end
-      
+
       def apply_config
         Conjur::Config.apply
       end
+
+      # Horible hack!
+      # We want to support legacy commands like host:list, but we don't want to
+      # do too much effort, and GLIs support for aliasing doesn't work out so well with
+      # subcommands.
+
+      def run args
+       args = args.shift.split(':') + args unless args.empty?
+        super args
+      end
+
     end
 
     # Set this so that subcommands can have independent options
@@ -54,8 +65,7 @@ module Conjur
     commands_from 'conjur/command'
 
     pre do |global,command,options,args|
-
-      if command.name_for_help.first == "init" and options.has_key?("account") 
+      if command.name_for_help.first == "init" and options.has_key?("account")
         ENV["CONJUR_ACCOUNT"]=options["account"]
       end
       apply_config

@@ -40,6 +40,8 @@ class Conjur::Command::Roles < Conjur::Command
         end
 
         role.create(options)
+        puts role
+        puts role.to_json
         display(role, options)
       end
     end

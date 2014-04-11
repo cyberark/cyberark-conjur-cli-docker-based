@@ -91,7 +91,7 @@ class Conjur::Command::Assets < Conjur::Command
     asset.command :members do |members|
       members.desc "Add a member to an asset"
       members.arg_name "id role-name member"
-      members.command :"members:add" do |c|
+      members.command :add do |c|
         hide_docs(c)
         c.desc "Grant with admin option"
         c.flag [:a, :admin]
@@ -109,7 +109,7 @@ class Conjur::Command::Assets < Conjur::Command
 
       members.desc "Remove a member from an asset"
       members.arg_name "id role-name member"
-      members.command :"members:remove" do |c|
+      members.command :remove do |c|
         hide_docs c
         c.action do |global_options, options, args|
           kind, id = get_kind_and_id_from_args(args, 'id')
