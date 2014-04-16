@@ -16,4 +16,32 @@ task :jenkins => ['ci:setup:rspec', :spec, 'ci:setup:cucumber_report_cleanup'] d
   File.write('build_number', ENV['BUILD_NUMBER']) if ENV['BUILD_NUMBER']
 end
 
+task :completions do
+  # having 'lib' in the load path, which happens to be the case when running rake,
+  # messes up GLIs commands_from
+  $:.delete('lib')
+  require 'conjur/cli'
+  require 'yaml'
+
+  Conjur::CLI.init!
+  def ignore? name
+    name = name.to_s
+    # Ignore GLIs internal commands and one of our deprecated ones
+    name.start_with?('_') or name.include?(':')
+  end
+
+  def visit cmd
+    child = {}
+    cmd.commands.each do |name, ccmd|
+      next if ignore?(name)
+      child[name] = visit(ccmd)
+      child[name] = true if child[name].empty?
+    end
+    child
+  end
+
+  commands = visit Conjur::CLI
+  YAML.dump(commands, STDOUT)
+end
+
 task default: [:spec, :features]
