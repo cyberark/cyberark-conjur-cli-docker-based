@@ -44,4 +44,4 @@ task :completions do
   YAML.dump(commands, STDOUT)
 end
 
-task default: [:spec, :features]
+task default: [:completions, :spec, :features]
