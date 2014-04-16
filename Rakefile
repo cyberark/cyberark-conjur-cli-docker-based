@@ -41,7 +41,10 @@ task :completions do
   end
 
   commands = visit Conjur::CLI
-  YAML.dump(commands, STDOUT)
+
+  File.open("#{File.dirname(__FILE__)/bin/_conjur_completions.yaml}", "w") do |io|
+    YAML.dump(commands, io)
+  end
 end
 
 task default: [:completions, :spec, :features]
