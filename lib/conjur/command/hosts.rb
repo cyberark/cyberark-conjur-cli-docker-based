@@ -18,12 +18,10 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/authn'
-require 'conjur/command'
 
 class Conjur::Command::Hosts < Conjur::Command
   desc "Manage hosts"
-  command :hosts do |hosts|
+  command :host do |hosts|
     hosts.desc "Create a new host"
     hosts.arg_name "id"
     hosts.command :create do |c|

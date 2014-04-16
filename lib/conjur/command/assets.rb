@@ -17,9 +17,6 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-require 'conjur/authn'
-require 'conjur/command'
 
 class Conjur::Command::Assets < Conjur::Command
   # Toplevel command
@@ -120,18 +117,5 @@ class Conjur::Command::Assets < Conjur::Command
         end
       end
     end
-
-
-
   end
-
-  # deprecated syntax
-  # command :"asset:create" => ["asset create"]
-  # command :"asset:show" => ["asset show"]
-  # command :"asset:exists" => ["asset exists"]
-  # command :"asset:list" => ["asset list"]
-  # command :"asset:members:add" => [ "asset members add" ]
-  # command :"asset:members:remove" => ["asset members remove"]
-
-
 end

@@ -1,4 +1,3 @@
-require 'conjur/identifier_manipulation'
 
 module Conjur
   module DSL

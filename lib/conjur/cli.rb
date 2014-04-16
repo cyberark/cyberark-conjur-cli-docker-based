@@ -19,11 +19,25 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'gli'
-require 'conjur/config'
-require 'conjur/log'
-require 'conjur/identifier_manipulation'
+# need this to prevent an active support bug in some versions
+require 'active_support'
+require 'active_support/deprecation'
+
 
 module Conjur
+  autoload :Config,                 'conjur/config'
+  autoload :Log,                    'conjur/log'
+  autoload :IdentifierManipulation, 'conjur/identifier_manipulation'
+  autoload :Authn,                  'conjur/authn'
+  autoload :Command,                'conjur/command'
+  autoload :DSL,                    'conjur/dsl/runner'
+  autoload :DSLCommand,             'conjur/command/dsl_command'
+
+  module Audit
+    autoload :Follower,             'conjur/audit/follower'
+  end
+
+
   class CLI
     extend GLI::App
 
@@ -62,18 +76,19 @@ module Conjur
       end
     end
 
-    commands_from 'conjur/command'
 
+    commands_from File.absolute_path("#{File.dirname(__FILE__)}/command")
     pre do |global,command,options,args|
+      require 'conjur/api'
+
       if command.name_for_help.first == "init" and options.has_key?("account")
         ENV["CONJUR_ACCOUNT"]=options["account"]
       end
       apply_config
-
       require 'active_support/core_ext'
       options.delete_if{|k,v| v.blank?}
       options.symbolize_keys!
-      
+
       if as_group = options.delete(:"as-group")
         group = Conjur::Command.api.group(as_group)
         role = Conjur::Command.api.role(group.roleid)
@@ -90,6 +105,7 @@ module Conjur
     end
     
     on_error do |exception|
+      require 'rest-client'
       if exception.is_a?(RestClient::Exception)
         begin
           body = JSON.parse(exception.response.body)
@@ -98,7 +114,7 @@ module Conjur
           $stderr.puts exception.response.body if exception.response
         end
       end
-      
+      require 'conjur/log'
       if Conjur.log
         Conjur.log << "error: #{exception}\n#{exception.backtrace.join("\n") rescue 'NO BACKTRACE?'}"
       end

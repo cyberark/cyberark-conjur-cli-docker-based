@@ -1,7 +1,3 @@
-require 'conjur/command'
-require 'active_support/ordered_hash'
-require 'conjur/audit/follower'
-
 class Conjur::Command
   class Audit < self
     class << self

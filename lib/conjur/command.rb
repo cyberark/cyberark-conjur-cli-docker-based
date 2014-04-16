@@ -20,7 +20,7 @@
 #
 module Conjur
   class Command
-    extend IdentifierManipulation
+    extend Conjur::IdentifierManipulation
     
     @@api = nil
     

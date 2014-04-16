@@ -59,6 +59,7 @@ module Conjur
         end
   
         if Conjur.log
+          require 'conjur/api'
           Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
         end
         if Config[:cert_file]

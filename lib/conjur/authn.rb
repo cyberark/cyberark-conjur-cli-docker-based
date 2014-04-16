@@ -18,13 +18,12 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'highline'
-require 'active_support'
 require 'active_support/deprecation'
 require 'conjur/api'
 require 'netrc'
 
 module Conjur::Authn
+  autoload :API,      'conjur/authn-api'
   class << self
     def login(options = {})
       delete_credentials
@@ -32,6 +31,7 @@ module Conjur::Authn
     end
     
     def authenticate(options = {})
+      require 'conjur/api'
       Conjur::API.authenticate(*get_credentials(options))
     end
     
@@ -74,12 +74,17 @@ module Conjur::Authn
     def ask_for_credentials(options = {})
       raise "No credentials provided or found" if options[:noask]
 
+
       # also use stderr here, because we might be prompting for a password as part
       # of a command like user:create that we'd want to send to a file.
+      require 'highline'
+      require 'conjur/api'
+
       hl = HighLine.new $stdin, $stderr
 
       user = options[:username] || hl.ask("Enter your username to log into Conjur: ")
       pass = options[:password] || hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
+
       api_key = if cas_server = options[:"cas-server"]
         Conjur::API.login_cas(user, pass, cas_server)
       else
@@ -87,8 +92,12 @@ module Conjur::Authn
       end
       @credentials = [user, api_key]
     end
-    
-    def connect(cls = Conjur::API, options = {})
+
+    def connect(cls = nil, options = {})
+      if cls.nil?
+        require 'conjur/api'
+        cls = Conjur::API
+      end
       cls.new_from_key(*get_credentials(options))
     end
   end
