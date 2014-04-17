@@ -96,6 +96,7 @@ module Conjur::Authn
     def connect(cls = nil, options = {})
       if cls.nil?
         require 'conjur/api'
+        require 'conjur/base'
         cls = Conjur::API
       end
       cls.new_from_key(*get_credentials(options))
