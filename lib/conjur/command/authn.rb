@@ -20,6 +20,7 @@
 
 
 class Conjur::Command::Authn < Conjur::Command
+  desc "Login and logout"
   command :authn do |authn|
     authn.desc "Logs in and caches credentials to netrc"
     authn.long_desc <<-DESC

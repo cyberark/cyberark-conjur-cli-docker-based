@@ -23,6 +23,7 @@ class Conjur::Command::Secrets < Conjur::Command
 
   desc "Manage secrets"
   command :secret do |secret|
+    hide_docs(secret)
     secret.desc "Create and store a secret"
     secret.arg_name "secret"
     secret.command :create do |c|

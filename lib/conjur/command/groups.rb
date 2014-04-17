@@ -46,7 +46,7 @@ class Conjur::Command::Groups < Conjur::Command
 
     group.desc "Show a group"
     group.arg_name "id"
-    command :show do |c|
+    group.command :show do |c|
       c.action do |global_options,options,args|
         id = require_arg(args, 'id')
         display(api.group(id), options)

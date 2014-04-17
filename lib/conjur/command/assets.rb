@@ -22,6 +22,7 @@ class Conjur::Command::Assets < Conjur::Command
   # Toplevel command
   desc "Manage assets"
   command :asset do |asset|
+    hide_docs(asset)
     asset.desc "Create an asset"
     asset.arg_name "kind:id"
     asset.command :create do |create|
