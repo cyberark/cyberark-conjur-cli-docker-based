@@ -64,7 +64,7 @@ class Conjur::Command::Init < Conjur::Command
       
       account = options[:account]
       account ||= if hostname
-        account = Conjur::Core::API.info['account'] or raise "Exepcting 'account' in Core info"
+        account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
       else
         # using .to_s to overcome https://github.com/JEG2/highline/issues/69
         hl.ask("Enter your account name: ").to_s
