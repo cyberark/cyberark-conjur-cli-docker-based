@@ -42,7 +42,7 @@ task :completions do
 
   commands = visit Conjur::CLI
 
-  File.open("#{File.dirname(__FILE__)/bin/_conjur_completions.yaml}", "w") do |io|
+  File.open("#{File.dirname(__FILE__)}/bin/_conjur_completions.yaml", "w") do |io|
     YAML.dump(commands, io)
   end
 end
