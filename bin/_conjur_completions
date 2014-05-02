@@ -19,6 +19,15 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+
+# You can use this file by adding the following to something that gets sourced (like .bashrc)
+#
+# _conjur()
+# {
+#     COMPREPLY=($(_conjur_completions $COMP_CWORD ${COMP_WORDS[@]}))
+# }
+# complete -F _conjur conjur
+
 require 'yaml'
 completions = File.open("#{File.dirname(__FILE__)}/_conjur_completions.yaml"){ |_| YAML.load(_) }
 # ARGV[0] is the index into ARGV[1...] of the current word
