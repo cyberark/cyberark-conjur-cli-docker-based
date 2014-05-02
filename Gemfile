@@ -9,3 +9,11 @@ group :test, :development do
   gem 'pry'
   gem 'ruby-prof'
 end
+
+
+group :development do
+  gem 'conjur-asset-environment-api'
+  gem 'conjur-asset-key-pair-api'
+  gem 'conjur-asset-layer-api'
+  gem 'conjur-asset-pubkeys-api'
+end
