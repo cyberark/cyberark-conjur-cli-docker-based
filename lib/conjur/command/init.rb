@@ -57,7 +57,8 @@ class Conjur::Command::Init < Conjur::Command
       hl = HighLine.new $stdin, $stderr
 
       hostname = options[:hostname] || hl.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
-      exit_now! "Hostname should not include the protocol" if hostname =~ /^https?\:/
+      protocol, hostname = (hostname.scan %r(^(?:(.*)://)?(.*))).first
+      exit_now! "only https protocol supported" unless protocol.nil? || protocol == 'https'
       if hostname
         Conjur.configuration.core_url = "https://#{hostname}/api"
       end
