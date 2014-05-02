@@ -40,7 +40,7 @@ class Conjur::Command::Init < Conjur::Command
     c.desc "Hostname of the Conjur endpoint (required for virtual appliance)"
     c.flag ["h", "hostname"]
 
-    c.desc "Conjur account name (will be obtained from the host unless provided by this option)"
+    c.desc "Conjur organization account name (not required for appliance)"
     c.flag ["a", "account"]
     
     c.desc "Conjur SSL certificate (will be obtained from host unless provided by this option)"
@@ -68,7 +68,7 @@ class Conjur::Command::Init < Conjur::Command
         account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
       else
         # using .to_s to overcome https://github.com/JEG2/highline/issues/69
-        hl.ask("Enter your account name: ").to_s
+        hl.ask("Enter your organization account name: ").to_s
       end
       
       if (certificate = options[:certificate]).blank?
