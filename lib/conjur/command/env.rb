@@ -29,13 +29,15 @@ class Conjur::Command::Init < Conjur::Command
 # Commented lines and empty lines are ignored
 
 # All environment variable names are converted to uppercase
-# There are two ways to set up environment variable:
 
 # Environment variable name and Conjur variable ID may be specified explicitly 
+
 ENVIRONMENT_VARIABLE_NAME=CONJUR_VARIABLE_ID
 
 # Line without '=' is considered to be ID of Conjur Environment. 
+
 # All variables from Conjur Environment are converted to environment variables with appropriate (uppercased) names
+
 ENVIRONMENT_NAME  
 
 "
