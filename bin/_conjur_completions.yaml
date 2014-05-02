@@ -1,0 +1,73 @@
+---
+:help: true
+:asset:
+  :create: true
+  :show: true
+  :exists: true
+  :list: true
+  :members:
+    :add: true
+    :remove: true
+:audit:
+  :all: true
+  :role: true
+  :resource: true
+:authn:
+  :login: true
+  :authenticate: true
+  :logout: true
+  :whoami: true
+:group:
+  :create: true
+  :list: true
+  :members:
+    :list: true
+    :add: true
+    :remove: true
+:show: true
+:host:
+  :create: true
+  :show: true
+  :list: true
+  :enroll: true
+:id:
+  :create: true
+:init: true
+:policy:
+  :load: true
+:resource:
+  :create: true
+  :show: true
+  :exists: true
+  :permit: true
+  :deny: true
+  :check: true
+  :give: true
+  :permitted_roles: true
+  :annotate: true
+  :annotation: true
+  :annotations: true
+  :list: true
+:role:
+  :create: true
+  :exists: true
+  :memberships: true
+  :members: true
+  :grant_to: true
+  :revoke_from: true
+:script:
+  :execute: true
+:secret:
+  :create: true
+  :value: true
+:user:
+  :create: true
+  :show: true
+  :list: true
+  :update_password: true
+:variable:
+  :create: true
+  :show: true
+  :list: true
+  :value: true
+  :to_file: true

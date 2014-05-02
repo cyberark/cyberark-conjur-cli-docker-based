@@ -54,30 +54,35 @@ module Conjur
       # We want to support legacy commands like host:list, but we don't want to
       # do too much effort, and GLIs support for aliasing doesn't work out so well with
       # subcommands.
-
       def run args
        args = args.shift.split(':') + args unless args.empty?
         super args
       end
 
-    end
-
-    # Set this so that subcommands can have independent options
-    self.subcommand_option_handling :normal
-
-    load_config
-
-    Conjur::Config.plugins.each do |plugin|
-      begin
-        filename = "conjur-asset-#{plugin}"
-        require filename
-      rescue LoadError
-        warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+      def load_plugins
+        Conjur::Config.plugins.each do |plugin|
+          begin
+            filename = "conjur-asset-#{plugin}"
+            require filename
+          rescue LoadError
+            warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+          end
+        end
       end
+
+      # This makes our generate-commands script a little bit cleaner.  We can call this from that script
+      # to ensure that commands for all plugins are loaded.
+      def init!
+        subcommand_option_handling :normal
+        load_config
+        load_plugins
+        commands_from 'conjur/command'
+      end
+
     end
 
+    init!
 
-    commands_from File.absolute_path("#{File.dirname(__FILE__)}/command")
     pre do |global,command,options,args|
       require 'conjur/api'
 

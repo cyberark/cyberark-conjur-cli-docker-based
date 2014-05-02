@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+#
+# Copyright (C) 2013 Conjur Inc
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+require 'yaml'
+completions = File.open("#{File.dirname(__FILE__)}/_conjur_completions.yaml"){ |_| YAML.load(_) }
+# ARGV[0] is the index into ARGV[1...] of the current word
+index = ARGV[0].to_i - 1
+words = ARGV[2..-1]
+parents = words[0...index]
+word = words[index] || ""
+
+current = completions
+previous = current
+until parents.empty? or current.nil?
+  previous = current
+  current = current[parents.shift.to_sym]
+end
+
+if current.kind_of?(Hash)
+  puts current.keys.map(&:to_s).select{|k| k.start_with?(word)}.sort.join("\n")
+end
