@@ -22,6 +22,28 @@ module Conjur
       [kind, tokens.join(':')]
     end
 
+    # removes kind for specific commands
+    def remove_kind_from_id id, kindname
+      tokens = id.split ':' unless id.nil?
+      raise "At largest 2 tokens expected in #{id}" if tokens.size > 2
+      if tokens.size == 2
+        raise "Expecting kind name is only #{kindname}" unless tokens[0] == kindname
+        id = tokens[1]
+      else
+        id = tokens.shift
+      end
+      id
+    end
+
+    # adds kind for specific commands
+    def add_kind_to_id id, kindname
+      tokens = id.split ':' unless id.nil?
+      if tokens.count == 1
+        id = [kindname, tokens].join(':')
+      end
+      id
+    end
+
     def conjur_account
       Conjur::Core::API.conjur_account
     end

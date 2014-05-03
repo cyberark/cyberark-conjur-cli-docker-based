@@ -83,6 +83,8 @@ class Conjur::Command::Groups < Conjur::Command
     c.action do |global_options,options,args|
       group = require_arg(args, 'group')
       member = require_arg(args, 'member')
+      member = add_kind_to_id member, 'user'
+      group = add_kind_to_id group, 'group'
       
       group = api.group(group)
       opts = nil

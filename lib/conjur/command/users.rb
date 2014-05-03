@@ -48,7 +48,8 @@ class Conjur::Command::Users < Conjur::Command
     
     c.action do |global_options,options,args|
       login = require_arg(args, 'login')
-      
+      login = remove_kind_from_id login, 'user'
+
       opts = options.slice(:ownerid)
 
       if options[:p]
@@ -90,3 +91,4 @@ class Conjur::Command::Users < Conjur::Command
     end
   end
 end
+

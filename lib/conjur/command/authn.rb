@@ -45,6 +45,8 @@ DESC
     c.flag [:"cas-server"]
     
     c.action do |global_options,options,args|
+      options[:u] = remove_kind_from_id(options[:u], 'user') unless options[:u].nil?
+      options[:username] = remove_kind_from_id(options[:username], 'user') unless options[:u].nil?
       Conjur::Authn.login(options)
     end
   end
