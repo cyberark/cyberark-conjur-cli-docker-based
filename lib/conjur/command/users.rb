@@ -49,6 +49,11 @@ class Conjur::Command::Users < Conjur::Command
     c.action do |global_options,options,args|
       login = require_arg(args, 'login')
       
+      if /[\/\:]/.match(login)
+        raise ArgumentError, "Sorry, characters ':' and '/' are not allowed in login"
+      end     
+
+ 
       opts = options.slice(:ownerid)
 
       if options[:p]
