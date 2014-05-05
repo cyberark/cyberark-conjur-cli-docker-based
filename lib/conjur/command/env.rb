@@ -20,9 +20,7 @@
 #
 require 'conjur/command'
 
-""" 
-"""
-class Conjur::Command::Init < Conjur::Command
+class Conjur::Command::Env < Conjur::Command
   desc "Obtain values and set up environment variables according to .conjurenv settings, than run external command"
   long_desc "Format of .conjurenv file: 
 
@@ -49,24 +47,29 @@ ENVIRONMENT_NAME
     File.readlines(filepath).each { |line| 
       line.strip!
       next if line.match(/^#/) or line.empty?
-      conjur_environments.push(line) unless row.match(/^(.*)=(.*)$/) { |fields| 
+      raise "Malformed line in #{filepath} (key=value pairs are expected): #{line}" unless line.match(/^(.*)=(.*)$/) { |fields| 
           environment_variable_name, conjur_variable_name = fields[1,2]
           conjur_variables[environment_variable_name]=conjur_variable_name    
       }  
     }
-
-    return { variables: conjur_variables,
-             environments: conjur_environments
-           } 
+    return conjur_variables
   end
 
-  def self.expand_environments environments
-    vars = {}
-    environments.each { |e| 
-      contents = api.environment(e).attributes["variables"]
-      contents.each { |k,v| vars[k]=v }
-    }
-    return vars
+  def self.obtain_values conjur_variables
+    runtime_environment={}
+    variable_ids=conjur_variables.values
+    begin  
+      # returns hash of id=>value
+      conjur_values=api.variables(variable_ids)
+      conjur_variables.each{ |environment_name, id| 
+        runtime_environment[environment_name.upcase]=conjur_values[id]
+      }
+    rescue # whatever
+      conjur_variables.each { |environment_name, id| 
+        runtime_environment[environment_name.upcase]=api.variable(id).value
+      }
+    end
+    return runtime_environment
   end
 
   arg_name "-- command [arg1, arg2 ...] "
@@ -81,17 +84,8 @@ ENVIRONMENT_NAME
       exit_now! "File does not exist: #{filename}" unless File.exists? filename
       exit_now! "External command should be provided (with optional args)" if args.empty?
 
-      conjurenv = parse_conjurenv(filename)
-
-      
-      conjur_variables = conjurenv[:variables].merge(expand_environments conjurenv[:environments])
-
-      runtime_environment={}
-
-      conjur_variables.each { |environment_name, id| 
-        runtime_environment[environment_name.upcase]=api.variable(id).value
-      }
-      exec runtime_environment, args
+      runtime_environment = obtain_values( parse_conjurenv(filename) )
+      Kernel.exec(runtime_environment, args)
     end
   end
 end
