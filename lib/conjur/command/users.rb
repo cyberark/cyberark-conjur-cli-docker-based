@@ -89,4 +89,13 @@ class Conjur::Command::Users < Conjur::Command
       Conjur::API.update_password username, password, new_password
     end
   end
+
+  desc "Revoke all roles from the user" 
+  arg_name "username"
+  command :deprovision do |c|
+    c.action do |global_options,options,args|
+      id = "user:"+require_arg(args, 'id')
+      api.role(id).all.each { |r|  r.revoke_from id }
+    end
+  end
 end
