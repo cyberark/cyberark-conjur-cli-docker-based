@@ -11,13 +11,13 @@ Gem::Specification.new do |gem|
   gem.files         = `git ls-files`.split($\) + Dir['build_number']
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.name          = "conjur-cli"
+  gem.name          = "conjur-cli-dalek"
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
 
 
   gem.add_dependency 'activesupport'
-  gem.add_dependency 'conjur-api', '>=4.7.2'
+  gem.add_dependency 'conjur-api-dalek', '>=4.7.2'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc'
