@@ -20,11 +20,11 @@
 :group:
   :create: true
   :list: true
+  :show: true
   :members:
     :list: true
     :add: true
     :remove: true
-:show: true
 :host:
   :create: true
   :show: true
@@ -33,6 +33,18 @@
 :id:
   :create: true
 :init: true
+:layer:
+  :create: true
+  :list: true
+  :show: true
+  :members: true
+  :provision: true
+  :hosts:
+    :permit: true
+    :permitted_roles: true
+    :add: true
+    :remove: true
+:deny: true
 :policy:
   :load: true
 :resource:

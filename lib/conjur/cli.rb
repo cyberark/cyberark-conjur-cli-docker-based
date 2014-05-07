@@ -60,7 +60,9 @@ module Conjur
       end
 
       def load_plugins
-        Conjur::Config.plugins.each do |plugin|
+        plugins = Conjur::Config.plugins - %w(layer pubkeys)
+        plugins.each do |plugin|
+          puts "loading #{plugin}"
           begin
             filename = "conjur-asset-#{plugin}"
             require filename
