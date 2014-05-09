@@ -35,6 +35,7 @@ class Conjur::DSLCommand < Conjur::Command
       
       require 'conjur/dsl/runner'
       runner = Conjur::DSL::Runner.new(script, filename)
+      runner.owner = options[:ownerid] if options[:ownerid]
 
       if context = options[:context]
         runner.context = begin
