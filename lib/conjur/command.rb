@@ -83,7 +83,7 @@ module Conjur
         opts[:acting_as] = options[:role] if options[:role]
         resources = api.resources(opts)
         if options[:ids]
-          puts resources.map(&:resourceid)
+          puts JSON.pretty_generate(resources.map(&:resourceid))
         else
           resources = resources.map &:attributes
           unless options[:'raw-annotations']
