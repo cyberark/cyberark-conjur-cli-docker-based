@@ -65,21 +65,15 @@ class Conjur::Command::Layers < Conjur::Command
       end
     end
 
-
     layer.desc "Lists all direct members of the layer. The membership list is not recursively expanded."
     layer.arg_name "layer"
     layer.command :members do |c|
-      c.desc "Verbose output"
-      #c.switch [:V,:verbose]
-
       c.action do |global_options,options,args|
         layer = require_arg(args, 'layer')
 
         display_members api.layer(layer).members, options
       end
     end
-
-
 
     layer.desc "Provision a layer by creating backing resources in an IaaS / PaaS system"
     layer.arg_name "layer"
