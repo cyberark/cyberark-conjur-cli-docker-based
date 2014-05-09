@@ -74,6 +74,5 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-    hosts.default_command :list
   end
 end

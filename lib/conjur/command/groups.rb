@@ -120,10 +120,8 @@ class Conjur::Command::Groups < Conjur::Command
         end
       end
 
-      members.default_command :list
     end
 
-    group.default_command :list
   end
 end
 

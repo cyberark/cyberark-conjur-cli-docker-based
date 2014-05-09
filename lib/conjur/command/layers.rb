@@ -34,7 +34,6 @@ class Conjur::Command::Layers < Conjur::Command
 
   desc "Operations on layers"
   command :layer do |layer|
-    layer.default_command :list
 
     layer.desc "Create a new layer"
     layer.arg_name "id"

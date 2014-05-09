@@ -30,6 +30,5 @@ class Conjur::Command::Id < Conjur::Command
       end
     end
 
-    id.default_command :create
   end
 end

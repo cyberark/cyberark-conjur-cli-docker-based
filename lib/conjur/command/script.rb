@@ -35,7 +35,5 @@ class Conjur::Command::Script < Conjur::DSLCommand
         run_script args, options
       end
     end
-
-    script.default_command :execute
   end
 end

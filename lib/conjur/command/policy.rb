@@ -78,7 +78,5 @@ owner of the policy role is the logged-in user (you), as always.
         end
       end
     end
-
-    policy.default_command :load
   end
 end
