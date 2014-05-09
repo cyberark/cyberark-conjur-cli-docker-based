@@ -74,15 +74,18 @@ class Conjur::Command::Variables < Conjur::Command
       end
     end
 
-    var.desc "Add a value"
-    var.arg_name "variable ( value | STDIN )"
-    var.command :"values:add" do |c|
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'variable')
-        value = args.shift || STDIN.read
+    var.desc "Access varialbe values"
+    var.command :values do |values|
+      values.desc "Add a value"
+      values.arg_name "variable ( value | STDIN )"
+      values.command :add do |c|
+        c.action do |global_options,options,args|
+          id = require_arg(args, 'variable')
+          value = args.shift || STDIN.read
 
-        api.variable(id).add_value(value)
-        puts "Value added"
+          api.variable(id).add_value(value)
+          puts "Value added"
+        end
       end
     end
 
