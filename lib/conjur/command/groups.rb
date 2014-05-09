@@ -20,6 +20,13 @@
 #
 
 class Conjur::Command::Groups < Conjur::Command
+  def self.assume_user_kind(role)
+    if role.split(':').length == 1
+      role = [ "user", role ].join(':')
+    end
+    role
+  end
+  
   desc "Manage groups"
   command :group do |group|
     group.desc "Create a new group"
@@ -82,6 +89,7 @@ class Conjur::Command::Groups < Conjur::Command
         c.action do |global_options,options,args|
           group = require_arg(args, 'group')
           member = require_arg(args, 'member')
+          member = assume_user_kind(member)
 
           group = api.group(group)
           opts = nil
@@ -105,6 +113,7 @@ class Conjur::Command::Groups < Conjur::Command
         c.action do |global_options,options,args|
           group = require_arg(args, 'group')
           member = require_arg(args, 'member')
+          member = assume_user_kind(member)
 
           api.group(group).remove_member member
           puts "Membership revoked"
