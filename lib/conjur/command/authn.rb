@@ -22,10 +22,15 @@
 class Conjur::Command::Authn < Conjur::Command
   desc "Login and logout"
   command :authn do |authn|
-    authn.desc "Logs in and caches credentials to netrc"
+    authn.desc "Logs in and caches credentials to netrc."
+    authn.arg_name "login-name"
     authn.long_desc <<-DESC
-After successful login, subsequent commands automatically use the cached credentials. To switch users, login again using the new user credentials.
-To erase credentials, use the authn:logout command.
+Logins in a user. Login name can be provided as the command argument, as -u or --username, or the command will prompt
+for the username. Password can be provided as -p, --password, or the command will prompt for the password.
+
+On successful login, the password is exchanged for the API key, which is cached in the operating system user's
+.netrc file. Subsequent "conjur" commands will authenticate with the cached login name and API key. To switch users, 
+login again using the new user credentials. To erase credentials, use the 'authn logout' command.
 
 If specified, the CAS server URL should be in the form https://<hostname>/v1.
 It should be running the CAS RESTful services at the /v1 path
@@ -43,7 +48,13 @@ It should be running the CAS RESTful services at the /v1 path
       c.flag [:"cas-server"]
 
       c.action do |global_options,options,args|
-        Conjur::Authn.login(options)
+        if options[:username].blank? && !args.empty?
+          options[:username] = args.pop
+        end
+        
+        Conjur::Authn.login(options.slice(:username, :password))
+        
+        puts "Logged in"
       end
     end
 
@@ -67,6 +78,8 @@ It should be running the CAS RESTful services at the /v1 path
     authn.command :logout do |c|
       c.action do
         Conjur::Authn.delete_credentials
+
+        puts "Logged out"
       end
     end
 

@@ -24,6 +24,11 @@ module Conjur
         @objects = Array.new
       end
       
+      def owner=(owner)
+        raise "Owner should only be set once" unless @owners.empty?
+        @owners.push owner
+      end
+      
       # Provides a hash to export various application specific
       # asset ids (or anything else you want)
       def assets
