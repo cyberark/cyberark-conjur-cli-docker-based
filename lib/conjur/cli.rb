@@ -60,6 +60,7 @@ module Conjur
       end
 
       def load_plugins
+        # These used to be plugins but now they are in the core CLI
         plugins = Conjur::Config.plugins - %w(layer pubkeys)
         plugins.each do |plugin|
           begin

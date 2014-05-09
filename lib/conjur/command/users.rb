@@ -49,11 +49,11 @@ class Conjur::Command::Users < Conjur::Command
         login = require_arg(args, 'login')
 
         opts = options.slice(:ownerid)
-
+        
         if options[:p]
           opts[:password] = prompt_for_password
         end
-
+        
         display api.create_user(login, opts)
       end
     end

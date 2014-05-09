@@ -7,7 +7,7 @@ class Conjur::Command::Layers < Conjur::Command
   # Or interpret a fully-qualified role id
   def self.require_hostid_arg(args)
     hostid = require_arg(args, 'host')
-    if hostid.index(':') == 0
+    unless hostid.index(':')
       hostid = [ Conjur::Core::API.conjur_account, 'host', hostid ].join(':')
     end
     hostid
@@ -34,6 +34,8 @@ class Conjur::Command::Layers < Conjur::Command
 
   desc "Operations on layers"
   command :layer do |layer|
+    layer.default_command :list
+
     layer.desc "Create a new layer"
     layer.arg_name "id"
     layer.command :create do |c|
@@ -65,21 +67,15 @@ class Conjur::Command::Layers < Conjur::Command
       end
     end
 
-
     layer.desc "Lists all direct members of the layer. The membership list is not recursively expanded."
     layer.arg_name "layer"
     layer.command :members do |c|
-      c.desc "Verbose output"
-      #c.switch [:V,:verbose]
-
       c.action do |global_options,options,args|
         layer = require_arg(args, 'layer')
 
         display_members api.layer(layer).members, options
       end
     end
-
-
 
     layer.desc "Provision a layer by creating backing resources in an IaaS / PaaS system"
     layer.arg_name "layer"
@@ -119,7 +115,6 @@ class Conjur::Command::Layers < Conjur::Command
 
     layer.desc "Operations on hosts"
     layer.command :hosts do |hosts|
-
       hosts.desc "Permit a privilege on hosts in the layer"
       hosts.long_desc <<-DESC
 Privilege may be : execute, update
@@ -133,18 +128,15 @@ Privilege may be : execute, update
         end
       end
 
-
       hosts.desc "Remove a privilege on hosts in the layer"
       hosts.arg_name "layer role privilege"
-      command :deny do |c|
+      hosts.command :deny do |c|
         c.action do |global_options,options,args|
           id, role_name, role = parse_layer_permission_args(global_options, options, args)
           api.layer(id).remove_member role_name, role
           puts "Permission removed"
         end
       end
-
-
 
       hosts.desc "List roles that have permission on the hosts"
       hosts.arg_name "layer privilege"
