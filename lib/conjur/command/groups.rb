@@ -113,6 +113,8 @@ class Conjur::Command::Groups < Conjur::Command
 
       members.default_command :list
     end
+
+    group.default_command :list
   end
 end
 
