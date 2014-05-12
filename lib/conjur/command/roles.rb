@@ -56,11 +56,19 @@ class Conjur::Command::Roles < Conjur::Command
 
     role.desc "Lists role memberships. The role membership list is recursively expanded."
     role.arg_name "role"
+
     role.command :memberships do |c|
+      c.desc "Whether to show system (internal) roles"
+      c.switch [:s, :system]
+
       c.action do |global_options,options,args|
         roleid = args.shift
         role = roleid.nil? && api.current_role || api.role(roleid)
-        display role.all.map(&:roleid)
+        memberships = role.all.map(&:roleid)
+        unless options[:system]
+          memberships.reject!{|id| id =~ /^.+?:@/}
+        end
+        display memberships
       end
     end
 
