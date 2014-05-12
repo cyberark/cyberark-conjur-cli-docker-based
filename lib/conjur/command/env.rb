@@ -20,6 +20,7 @@
 #
 require 'conjur/authn'
 require 'conjur/command'
+require 'tempfile'
 
 class Conjur::Command::Env < Conjur::Command
   def self.parse_conjurenv filepath
@@ -30,19 +31,39 @@ class Conjur::Command::Env < Conjur::Command
     end
     return contents
   end
+
+  def self.to_tempfile value
+    container = Tempfile.open("/dev/shm/conjur")
+    container.write(value)
+    container.chmod(0600)
+    container.close
+    container.path.tap { |p| $stderr.puts "DEBUG: returning path #{p}" }
+  end
+
   def self.obtain_values conjur_variables
     runtime_environment={}
-    variable_ids=conjur_variables.values
+    variable_ids=conjur_variables.values.map {|v| v.gsub(/^@/,'') } # cut off prefices
     begin  
       # returns hash of id=>value
       conjur_values=api.variable_values(variable_ids)
       conjur_variables.each{ |environment_name, id| 
-        runtime_environment[environment_name.upcase]=conjur_values[id]
+        runtime_environment[environment_name.upcase]= if id.starts_with?("@") 
+                                                        plain_id=id.gsub(/^@/,'')
+                                                        to_tempfile( conjur_values[plain_id] )
+                                                      else
+                                                        conjur_values[id]
+                                                      end
       }
     rescue # whatever
       $stderr.puts "Warning: batch retrieval failed, processing variables one by one"
       conjur_variables.each { |environment_name, id| 
-        runtime_environment[environment_name.upcase]=api.variable(id).value
+        runtime_environment[environment_name.upcase]= if id.starts_with?("@")
+                                                        plain_id=id.gsub(/^@/,'')
+                                                        to_tempfile( api.variable(plain_id).value )
+                                                      else
+                                                        api.variable(id).value
+                                                      end
+        $stderr.puts "DEBUG: runtime_environment is #{runtime_environment}"
       }
     end
     return runtime_environment
@@ -50,6 +71,7 @@ class Conjur::Command::Env < Conjur::Command
   def self.check_variables conjur_variables
     all_ok=true
     conjur_variables.values.each { |v|  
+      v.gsub!(/^@/,"") 
       variable_ok = api.resource("variable:"+v).permitted? :execute
       puts "#{v}: #{if variable_ok then "" else "not " end }available"
       all_ok=false unless variable_ok
