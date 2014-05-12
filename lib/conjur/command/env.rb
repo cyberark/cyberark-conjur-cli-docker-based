@@ -37,7 +37,7 @@ class Conjur::Command::Env < Conjur::Command
     container.write(value)
     container.chmod(0600)
     container.close
-    container.path.tap { |p| $stderr.puts "DEBUG: returning path #{p}" }
+    container.path
   end
 
   def self.obtain_values conjur_variables
@@ -63,7 +63,6 @@ class Conjur::Command::Env < Conjur::Command
                                                       else
                                                         api.variable(id).value
                                                       end
-        $stderr.puts "DEBUG: runtime_environment is #{runtime_environment}"
       }
     end
     return runtime_environment
