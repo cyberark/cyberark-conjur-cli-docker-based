@@ -220,39 +220,9 @@ variable_b: '@conjur/variable/2'
       describe "if variable_values method fails" do
         before { api.should_receive(:variable_values).with(conjur_variables.keys).and_return { raise RestClient::Forbidden } }
 
-        #it "issues a warning" do
-        #  api.stub(:variable).and_return(double(value:1))
-        #  Kernel.stub(:exec).and_return(true)
-        #  expect { invoke }.to_not raise_error
-        #  expect { invoke }.to write("Warning: batch retrieval failed, processing variables one by one").to(:stderr)
-        #end
-
-        it "checks variables one by one, ignoring '@' prefix"  do
-          Kernel.stub(:exec).and_return(true)
-          File.stub(:write).and_return(true)
-          api.should_receive(:variable).with("conjur/variable/1").and_return(double(value:1))
-          api.should_receive(:variable).with("conjur/variable/2").and_return(double(value:2))
-          expect { invoke }.to_not raise_error
-        end
-
-        describe "if some variable is unavailable" do
-          before { 
-            api.should_receive(:variable).with("conjur/variable/1").and_return(double(value:1))
-            api.should_receive(:variable).with("conjur/variable/2").and_return { raise RestClient::Forbidden } 
-          }
-          it "does not call external command and crashes" do
-            Kernel.should_not_receive(:exec)
-            File.should_not_receive(:write)
-            expect { invoke }.to raise_error RestClient::Forbidden 
-          end
-        end
-        describe "if all variables are available" do
-          before { 
-            api.should_receive(:variable).with("conjur/variable/1").and_return(double(value:1))
-            api.should_receive(:variable).with("conjur/variable/2").and_return(double(value:2))
-          }
-          it_behaves_like "launches external command with expected variables"
-        end
+        it "re-raises exception" do
+          expect { invoke }.to raise_error RestClient::Forbidden
+        end 
       end
     end
 

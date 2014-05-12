@@ -43,28 +43,15 @@ class Conjur::Command::Env < Conjur::Command
   def self.obtain_values conjur_variables
     runtime_environment={}
     variable_ids=conjur_variables.values.map {|v| v.gsub(/^@/,'') } # cut off prefices
-    begin  
-      # returns hash of id=>value
-      conjur_values=api.variable_values(variable_ids)
-      conjur_variables.each{ |environment_name, id| 
-        runtime_environment[environment_name.upcase]= if id.starts_with?("@") 
-                                                        plain_id=id.gsub(/^@/,'')
-                                                        to_tempfile( conjur_values[plain_id] )
-                                                      else
-                                                        conjur_values[id]
-                                                      end
-      }
-    rescue # whatever
-      $stderr.puts "Warning: batch retrieval failed, processing variables one by one"
-      conjur_variables.each { |environment_name, id| 
-        runtime_environment[environment_name.upcase]= if id.starts_with?("@")
-                                                        plain_id=id.gsub(/^@/,'')
-                                                        to_tempfile( api.variable(plain_id).value )
-                                                      else
-                                                        api.variable(id).value
-                                                      end
-      }
-    end
+    conjur_values=api.variable_values(variable_ids)
+    conjur_variables.each{ |environment_name, id| 
+      runtime_environment[environment_name.upcase]= if id.starts_with?("@") 
+                                                      plain_id=id.gsub(/^@/,'')
+                                                      to_tempfile( conjur_values[plain_id] )
+                                                    else
+                                                      conjur_values[id]
+                                                    end
+    }
     return runtime_environment
   end
   def self.check_variables conjur_variables
