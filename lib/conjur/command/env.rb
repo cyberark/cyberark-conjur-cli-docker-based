@@ -23,41 +23,67 @@ require 'conjur/command'
 require 'tempfile'
 
 class Conjur::Command::Env < Conjur::Command
+
+
+  class CustomTag
+    def initialize id 
+      @id=id
+    end
+    def init_with(coder)
+      initialize(coder.scalar)
+    end
+    def conjur_id
+      @id
+    end
+  end
+
+  class ConjurVariable < CustomTag
+    def evaluate value
+      value
+    end
+  end
+  class ConjurTempfile < CustomTag
+    def evaluate value
+      @tempfile = Tempfile.new("conjur","/dev/shm")
+      @tempfile.write(value)
+      @tempfile.chmod(0600)
+      @tempfile.close
+      @tempfile.path
+    end
+  end
+
+
   def self.parse_conjurenv filepath
+    YAML.add_tag("var", ConjurVariable)
+    YAML.add_tag("tmp", ConjurTempfile)
+
     contents = YAML.load(File.read(filepath)) # File.read to make testing easier
-    values_ok = contents.values.all? {|v| v.kind_of?(String) } rescue false
+    values_ok = contents.values.all? {|v| v.kind_of?(String) or v.kind_of?(CustomTag) } rescue false
     unless values_ok
-      exit_now! "File #{filepath} should contain one-level Hash with strings as values"
+      exit_now! "File #{filepath} should contain one-level Hash with scalar values"
     end
     return contents
   end
 
-  def self.to_tempfile value
-    container = Tempfile.open("/dev/shm/conjur")
-    container.write(value)
-    container.chmod(0600)
-    container.close
-    container.path
-  end
-
-  def self.obtain_values conjur_variables
+  def self.obtain_values definition
     runtime_environment={}
-    variable_ids=conjur_variables.values.map {|v| v.gsub(/^@/,'') } # cut off prefices
+    variable_ids= definition.values.map { |v| v.conjur_id rescue nil }.compact
+
     conjur_values=api.variable_values(variable_ids)
-    conjur_variables.each{ |environment_name, id| 
-      runtime_environment[environment_name.upcase]= if id.starts_with?("@") 
-                                                      plain_id=id.gsub(/^@/,'')
-                                                      to_tempfile( conjur_values[plain_id] )
+
+    definition.each{ |environment_name, reference| 
+      runtime_environment[environment_name.upcase]= if reference.respond_to?(:evaluate)
+                                                      reference.evaluate( conjur_values[reference.conjur_id] )
                                                     else
-                                                      conjur_values[id]
+                                                      reference # is a literal value
                                                     end
     }
     return runtime_environment
   end
-  def self.check_variables conjur_variables
+
+  def self.check_variables definition
     all_ok=true
-    conjur_variables.values.each { |v|  
-      v.gsub!(/^@/,"") 
+    definition.values.map { |v| v.conjur_id rescue nil }.compact.each { |v|
       variable_ok = api.resource("variable:"+v).permitted? :execute
       puts "#{v}: #{if variable_ok then "" else "not " end }available"
       all_ok=false unless variable_ok

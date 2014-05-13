@@ -11,7 +11,7 @@ end
 shared_context "stub temp file" do
   before {
     stubfile=double(File, chmod: true, write: true, close:true, path: "/dev/shm/conjur-stub")
-    Tempfile.stub(:open).with("/dev/shm/conjur").and_return(stubfile)
+    Tempfile.stub(:new).with("conjur","/dev/shm").and_return(stubfile)
   }
 end
 
@@ -19,7 +19,7 @@ shared_examples_for "rejects malformed file" do
   it 'crashes' do
     api.should_not_receive(:variable)
     api.should_not_receive(:variable_values)
-    expect { invoke }.to raise_error /File .* should contain one-level Hash with strings as values/
+    expect { invoke }.to raise_error /File .* should contain one-level Hash with scalar values/
   end
 end
 
@@ -98,14 +98,13 @@ shared_examples_for "launches external command with expected variables" do
   describe "calls #exec with appropriate environment and arguments" do
     let(:stubfile) { "/dev/shm/conjur-tempfile" }
     before { 
-      # variable with @ prefix is stored into temporary file, and filepath is provided as value for the environment
       tempfile = double(File, path: stubfile, close:true)
-      Tempfile.should_receive(:open).with("/dev/shm/conjur").and_return(tempfile)
+      Tempfile.should_receive(:new).with("conjur","/dev/shm").and_return(tempfile)
       tempfile.should_receive(:chmod).with(0600).and_return(true)
-      tempfile.should_receive(:write).with(2).and_return(true)  # value of variable b
+      tempfile.should_receive(:write).with("val2").and_return(true)  # value of variable b
     }
 
-    let(:expected_environment) {{ "VARIABLE_A"=> 1, "VARIABLE_B" => stubfile }}
+    let(:expected_environment) {{ "VARIABLE_A"=> "literal/1", "VARIABLE_B" => stubfile, "VARIABLE_C"=> "val3" }}
     describe "without extra args" do
       it "passes external command to #exec" do
         Kernel.should_receive(:exec).with( expected_environment, [ external_command ] ).and_return (true)
@@ -132,14 +131,15 @@ describe Conjur::Command::Env, logged_in: true do
     let(:extra_args) { [] }
     let(:file_contents) { """
 --- 
-variable_a: conjur/variable/1
-variable_b: '@conjur/variable/2'
+variable_a: literal/1
+variable_b: !<tmp> conjur/variable/2
+variable_c: !<var> conjur/variable/3
   """
     }
     let(:conjur_variables) { 
       { 
-        "conjur/variable/1"=>1,
-        "conjur/variable/2"=>2
+        "conjur/variable/2"=>"val2",
+        "conjur/variable/3"=>"val3"
       }
     }
     let(:invoke) {
@@ -168,17 +168,18 @@ variable_b: '@conjur/variable/2'
       it_behaves_like "reads configuration file"  
       include_context "stub config file"
       let(:command_options) { [ "--check" ] }
-      it "checks variables one by one, ignoring '@' prefix" do
+      it "checks variables one by one" do
         api.should_not_receive(:variable_values)
         api.should_not_receive(:variable)
-        api.should_receive(:resource).with("variable:conjur/variable/1").and_return(double(permitted?:true)) 
-        api.should_receive(:resource).with("variable:conjur/variable/2").and_return(double(permitted?:true))
+        api.should_not_receive(:resource).with("variable:conjur/variable/1") # literal
+        api.should_receive(:resource).with("variable:conjur/variable/2").and_return(double(permitted?:true)) 
+        api.should_receive(:resource).with("variable:conjur/variable/3").and_return(double(permitted?:true))
         invoke
       end 
       describe "if all variables are available" do
         before { api.should_receive(:resource).twice.and_return(double(permitted?:true)) }
         it 'prints status' do
-          expect { invoke }.to write "conjur/variable/1: available\nconjur/variable/2: available\n"
+          expect { invoke }.to write "conjur/variable/2: available\nconjur/variable/3: available\n"
         end
         it 'does not crash' do
           expect { invoke }.to_not raise_error
@@ -186,12 +187,13 @@ variable_b: '@conjur/variable/2'
       end
       describe "if some variables are available" do 
         before { 
-          api.should_receive(:resource).with("variable:conjur/variable/1").and_return(double(permitted?:false))
-          api.should_receive(:resource).with("variable:conjur/variable/2").and_return(double(permitted?:true))
+          api.should_not_receive(:resource).with("variable:conjur/variable/1") # literal
+          api.should_receive(:resource).with("variable:conjur/variable/2").and_return(double(permitted?:false))
+          api.should_receive(:resource).with("variable:conjur/variable/3").and_return(double(permitted?:true))
         }
         it 'prints status for all variables' do 
           GLI.stub(:exit_now!).and_return { raise "custom exit" }
-          expect { invoke rescue true }.to write "conjur/variable/1: not available\nconjur/variable/2: available\n"
+          expect { invoke rescue true }.to write "conjur/variable/2: not available\nconjur/variable/3: available\n"
         end
         it 'crashes in the end' do
           expect { invoke }.to raise_error "Some variables are not available"
