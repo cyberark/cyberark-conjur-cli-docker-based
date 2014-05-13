@@ -132,8 +132,8 @@ describe Conjur::Command::Env, logged_in: true do
     let(:file_contents) { """
 --- 
 variable_a: literal/1
-variable_b: !<tmp> conjur/variable/2
-variable_c: !<var> conjur/variable/3
+variable_b: !tmp conjur/variable/2
+variable_c: !var conjur/variable/3
   """
     }
     let(:conjur_variables) { 

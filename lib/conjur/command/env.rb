@@ -54,8 +54,8 @@ class Conjur::Command::Env < Conjur::Command
 
 
   def self.parse_conjurenv filepath
-    YAML.add_tag("var", ConjurVariable)
-    YAML.add_tag("tmp", ConjurTempfile)
+    YAML.add_tag("!var", ConjurVariable)
+    YAML.add_tag("!tmp", ConjurTempfile)
 
     contents = YAML.load(File.read(filepath)) # File.read to make testing easier
     values_ok = contents.values.all? {|v| v.kind_of?(String) or v.kind_of?(CustomTag) } rescue false
