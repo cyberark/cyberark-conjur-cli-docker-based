@@ -75,7 +75,7 @@ end
 shared_examples_for "reads configuration file" do
   before { 
     api.stub(:variable).and_return(double(value:1))
-    api.stub(:variable_values).and_return({"a"=>"b"})
+    api.stub(:variable_values).and_return(conjur_variables)
     api.stub(:resource).and_return(double(permitted?:true))
     Kernel.stub(:exec).and_return(true)
   }
@@ -107,14 +107,14 @@ shared_examples_for "launches external command with expected variables" do
     let(:expected_environment) {{ "VARIABLE_A"=> "literal/1", "VARIABLE_B" => stubfile, "VARIABLE_C"=> "val3" }}
     describe "without extra args" do
       it "passes external command to #exec" do
-        Kernel.should_receive(:exec).with( expected_environment, [ external_command ] ).and_return (true)
+        Kernel.should_receive(:exec).with( expected_environment, external_command ).and_return (true)
         invoke
       end
     end
     describe "with extra args" do
       let(:extra_args) { ["--arg1","val1","--arg2"] }
       it "passes extra args to #exec" do
-        Kernel.should_receive(:exec).with( expected_environment, [ external_command ] + extra_args ).and_return(true)
+        Kernel.should_receive(:exec).with( expected_environment, external_command, *extra_args ).and_return(true)
         invoke
       end
     end

@@ -39,7 +39,7 @@ class Conjur::Command::Env < Conjur::Command
 
   class ConjurVariable < CustomTag
     def evaluate value
-      value
+      value.chomp
     end
   end
   class ConjurTempfile < CustomTag
@@ -67,6 +67,7 @@ class Conjur::Command::Env < Conjur::Command
 
   def self.obtain_values definition
     runtime_environment={}
+    $stderr.puts "DEBUG: #{definition}"
     variable_ids= definition.values.map { |v| v.conjur_id rescue nil }.compact
 
     conjur_values=api.variable_values(variable_ids)
@@ -114,7 +115,8 @@ class Conjur::Command::Env < Conjur::Command
 
       unless options[:check] 
         runtime_environment = obtain_values( parse_conjurenv(filename) )
-        Kernel.exec(runtime_environment, args)
+        $stderr.puts "Runtime environment: #{runtime_environment}, args: #{args}"
+        Kernel.exec(runtime_environment, *args)
       else
         check_variables( parse_conjurenv(filename) )
       end
