@@ -21,5 +21,6 @@
 #
 
 require 'conjur/cli'
+require 'active_support'
 
 exit Conjur::CLI.run(ARGV)
