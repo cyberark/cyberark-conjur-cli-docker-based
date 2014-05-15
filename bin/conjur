@@ -20,7 +20,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-require 'conjur/cli'
 require 'active_support'
+require 'conjur/cli'
 
 exit Conjur::CLI.run(ARGV)
