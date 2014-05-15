@@ -67,7 +67,6 @@ class Conjur::Command::Env < Conjur::Command
 
   def self.obtain_values definition
     runtime_environment={}
-    $stderr.puts "DEBUG: #{definition}"
     variable_ids= definition.values.map { |v| v.conjur_id rescue nil }.compact
 
     conjur_values=api.variable_values(variable_ids)
