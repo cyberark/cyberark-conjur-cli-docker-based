@@ -114,7 +114,9 @@ class Conjur::Command::Env < Conjur::Command
 
       unless options[:check] 
         runtime_environment = obtain_values( parse_conjurenv(filename) )
-        $stderr.puts "Runtime environment: #{runtime_environment}, args: #{args}"
+        if Conjur.log 
+          Conjur.log << "Running command in the environment: #{args}"
+        end
         Kernel.exec(runtime_environment, *args)
       else
         check_variables( parse_conjurenv(filename) )
