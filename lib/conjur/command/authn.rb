@@ -69,7 +69,7 @@ It should be running the CAS RESTful services at the /v1 path
         if options[:header]
           puts "Authorization: Token token=\"#{Base64.strict_encode64(token.to_json)}\""
         else
-          puts token
+          display token
         end
       end
     end
