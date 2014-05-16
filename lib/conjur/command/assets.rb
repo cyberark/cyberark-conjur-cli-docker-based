@@ -92,7 +92,6 @@ class Conjur::Command::Assets < Conjur::Command
   desc "Add a member to an asset"
   arg_name "id role-name member"
   command :"members:add" do |c|
-    def c.nodoc; true end
     c.desc "Grant with admin option"
     c.flag [:a, :admin]
 
@@ -110,7 +109,6 @@ class Conjur::Command::Assets < Conjur::Command
   desc "Remove a member from an asset"
   arg_name "id role-name member"
   command :"members:remove" do |c|
-    def c.nodoc; true end
     c.action do |global_options, options, args|
       kind, id = get_kind_and_id_from_args(args, 'id')
       role_name = require_arg(args, 'role-name')
