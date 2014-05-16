@@ -121,7 +121,11 @@ module Conjur
         elsif obj.respond_to?(:id)
           obj.id
         else
-          obj.to_json(JSON::PRETTY_STATE_PROTOTYPE.dup)
+          begin
+            JSON.pretty_generate(obj)
+          rescue JSON::GeneratorError
+            obj.to_json
+          end
         end
         puts str
       end

@@ -28,6 +28,9 @@ class Conjur::Command::Roles < Conjur::Command
     role.arg_name "role"
     role.command :create do |c|
       acting_as_option(c)
+      
+      c.desc "Output a JSON response with a single field, roleid"
+      c.switch "json"
 
       c.action do |global_options,options,args|
         id = require_arg(args, 'role')
@@ -38,17 +41,32 @@ class Conjur::Command::Roles < Conjur::Command
         end
 
         role.create(options)
-        puts "Created role #{role.roleid}"
+        if options[:json]
+          display({
+            roleid: role.roleid
+          })
+        else
+          puts "Created role #{role.roleid}"
+        end
       end
     end
 
     role.desc "Determines whether a role exists"
     role.arg_name "role"
     role.command :exists do |c|
+      c.desc "Output a JSON response with a single field, exists"
+      c.switch "json"
+      
       c.action do |global_options,options,args|
         id = require_arg(args, 'role')
         role = api.role(id)
-        puts role.exists?
+        if options[:json]
+          display({
+            exists: role.exists?
+          })
+        else
+          puts role.exists?
+        end
       end
     end
 
