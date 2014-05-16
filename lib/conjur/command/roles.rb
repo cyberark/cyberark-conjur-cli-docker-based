@@ -38,7 +38,7 @@ class Conjur::Command::Roles < Conjur::Command
       end
       
       role.create(options)
-      display(role, options)
+      puts "Created role #{role.roleid}"
     end
   end
   
