@@ -52,6 +52,7 @@ module Conjur
       end
       
       def apply
+        require 'conjur/configuration'
         keys = Config.keys.dup
         keys.delete(:plugins)
         keys.each do |k|

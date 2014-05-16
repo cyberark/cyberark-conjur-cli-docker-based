@@ -34,7 +34,6 @@ class Conjur::Command::Assets < Conjur::Command
         id = nil if id.blank?
         kind.gsub!('-', '_')
 
-
         m = "create_#{kind}"
         record = if [ 1, -1 ].member?(api.method(m).arity)
                    if id

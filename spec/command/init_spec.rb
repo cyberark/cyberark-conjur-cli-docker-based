@@ -40,6 +40,13 @@ describe Conjur::Command::Init do
         invoke
       end
     end
+    describe_command 'init -a the-account -h https://google.com' do
+      it "writes the config and cert" do
+        HighLine.any_instance.stub(:ask).and_return "yes"
+        File.should_receive(:open).twice
+        invoke
+      end
+    end
     describe_command 'init -a the-account -h localhost -c the-cert' do
       it "writes config and cert files" do
         File.should_receive(:open).twice

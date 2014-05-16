@@ -39,7 +39,7 @@ class Conjur::Command::Init < Conjur::Command
     c.desc "Hostname of the Conjur endpoint (required for virtual appliance)"
     c.flag ["h", "hostname"]
 
-    c.desc "Conjur account name (will be obtained from the host unless provided by this option)"
+    c.desc "Conjur organization account name (not required for appliance)"
     c.flag ["a", "account"]
     
     c.desc "Conjur SSL certificate (will be obtained from host unless provided by this option)"
@@ -56,17 +56,18 @@ class Conjur::Command::Init < Conjur::Command
       hl = HighLine.new $stdin, $stderr
 
       hostname = options[:hostname] || hl.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
-      exit_now! "Hostname should not include the protocol" if hostname =~ /^https?\:/
+      protocol, hostname = (hostname.scan %r(^(?:(.*)://)?(.*))).first
+      exit_now! "only https protocol supported" unless protocol.nil? || protocol == 'https'
       if hostname
         Conjur.configuration.core_url = "https://#{hostname}/api"
       end
       
       account = options[:account]
       account ||= if hostname
-        account = Conjur::Core::API.info['account'] or raise "Exepcting 'account' in Core info"
+        account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
       else
         # using .to_s to overcome https://github.com/JEG2/highline/issues/69
-        hl.ask("Enter your account name: ").to_s
+        hl.ask("Enter your organization account name: ").to_s
       end
       
       if (certificate = options[:certificate]).blank?

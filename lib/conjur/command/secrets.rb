@@ -20,7 +20,6 @@
 #
 
 class Conjur::Command::Secrets < Conjur::Command
-
   desc "Manage secrets"
   command :secret do |secret|
     hide_docs(secret)

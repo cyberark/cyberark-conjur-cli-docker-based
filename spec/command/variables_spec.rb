@@ -44,5 +44,4 @@ describe Conjur::Command::Variables, logged_in: true do
   end
 
 
-
 end

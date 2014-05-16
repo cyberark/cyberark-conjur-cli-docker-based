@@ -28,20 +28,20 @@ describe Conjur::Command::Roles, logged_in: true do
     describe_command "role:create --as-role test:foo test:the-role" do
       it "creates the role with acting_as option" do
         api.should_receive(:role).with("test:foo").and_return double("test:foo", exists?: true, roleid: "test:test:foo")
-        api.should_receive(:role).with("test:the-role").and_return role = double("new-role")
+        api.should_receive(:role).with("test:the-role").and_return role = double("new-role", roleid: "test:the-role")
         role.should_receive(:create).with({acting_as: "test:test:foo"})
         
-        invoke
+        expect { invoke }.to write("Created role test:the-role")
       end
     end
     describe_command "role:create --as-group the-group test:the-role" do
       it "creates the role with with acting_as option" do
         api.should_receive(:group).with("the-group").and_return group = double("the-group", roleid: "test:group:the-group")
         api.should_receive(:role).with(group.roleid).and_return double("group:the-group", exists?: true, roleid: "test:group:the-group")
-        api.should_receive(:role).with("test:the-role").and_return role = double("new-role")
+        api.should_receive(:role).with("test:the-role").and_return role = double("new-role", roleid: "test:the-role")
         role.should_receive(:create).with({acting_as: "test:group:the-group"})
         
-        invoke
+        expect { invoke }.to write("Created role test:the-role")
       end
     end
   end

@@ -11,7 +11,7 @@ describe Conjur::Command::Users, logged_in: true do
     end
 
     [ "user:create", "user create" ].each do |cmd|
-      describe_command "#{cmd} the-user -p" do
+      describe_command "#{cmd} -p the-user" do
         it "Creates a user with a password obtained by prompting the user" do
           Conjur::API.any_instance.should_receive(:create_user).with("the-user", password: "the-password").and_return new_user
           Conjur::Command::Users.should_receive(:prompt_for_password).and_return "the-password"
@@ -19,7 +19,7 @@ describe Conjur::Command::Users, logged_in: true do
           invoke
         end
       end
-      describe_command "#{cmd} the-user -p new-password" do
+      describe_command "#{cmd} the-user" do
         it "Creates a user without a password" do
           Conjur::API.any_instance.should_receive(:create_user).with("the-user", {}).and_return new_user
           invoke

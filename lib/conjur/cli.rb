@@ -37,7 +37,6 @@ module Conjur
     autoload :Follower,             'conjur/audit/follower'
   end
 
-
   class CLI
     extend GLI::App
 
@@ -62,6 +61,7 @@ module Conjur
       def load_plugins
         # These used to be plugins but now they are in the core CLI
         plugins = Conjur::Config.plugins - %w(layer pubkeys)
+        
         plugins.each do |plugin|
           begin
             filename = "conjur-asset-#{plugin}"
@@ -77,10 +77,10 @@ module Conjur
       def init!
         subcommand_option_handling :normal
         load_config
+        apply_config
         load_plugins
         commands_from 'conjur/command'
       end
-
     end
 
     init!
