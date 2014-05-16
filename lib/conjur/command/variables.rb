@@ -87,6 +87,7 @@ class Conjur::Command::Variables < Conjur::Command
       puts "Value added"
     end
   end
+  
 
   desc "Get a value"
   arg_name "variable"
