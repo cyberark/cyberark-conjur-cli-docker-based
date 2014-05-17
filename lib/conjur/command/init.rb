@@ -47,7 +47,7 @@ class Conjur::Command::Init < Conjur::Command
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
-    c.default_value File.join(ENV['HOME'], '.conjurrc')
+    c.default_value File.expand_path('~/.conjurrc')
     c.flag ["f","file"]
     
     c.desc "Force overwrite of existing files"

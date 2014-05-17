@@ -3,6 +3,10 @@ require 'spec_helper'
 tmpdir = Dir.mktmpdir
 
 describe Conjur::Command::Init do
+  it "properly defaults to a file path" do
+    expect(Conjur::CLI.commands[:init].flags[:f].default_value).to eq("#{ENV['HOME']}/.conjurrc")
+  end
+
   context logged_in: false do
     before {
       File.stub(:exists?).and_return false

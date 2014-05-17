@@ -31,7 +31,7 @@ module Conjur
       end
       
       def default_config_files
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.join(ENV['HOME'], ".conjurrc") ), '.conjurrc' ]
+        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.expand_path("~/.conjurrc") ), '.conjurrc' ]
       end
       
       def load(config_files = default_config_files)
