@@ -58,16 +58,13 @@ describe Conjur::Command::Init do
         it "writes config and cert files" do
           invoke
           
-          File.read(File.join(tmpdir, ".conjurrc")).should == """---
-account: the-account
-plugins:
-- environment
-- layer
-- key-pair
-- pubkeys
-appliance_url: https://localhost/api
-cert_file: #{tmpdir}/conjur-the-account.pem
-"""
+          expect(YAML.load(File.read(File.join(tmpdir, ".conjurrc")))).to eq({
+            account: 'the-account',
+            plugins: %w(environment layer key-pair pubkeys),
+            appliance_url: "https://localhost/api",
+            cert_file: "#{tmpdir}/conjur-the-account.pem"
+          }.stringify_keys)
+
           File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"
         end
       end
