@@ -78,13 +78,7 @@ class Conjur::Command::Init < Conjur::Command
           else
             hostname + ':443'
           end
-          certificate = \
-            `echo | openssl s_client -connect #{connect_hostname}  2>/dev/null | openssl x509 -fingerprint`
-          exit_now! "Unable to retrieve certificate from #{hostname}" if certificate.blank?
-          
-          lines = certificate.split("\n")
-          fingerprint = lines[0]
-          certificate = lines[1..-1].join("\n")
+          fingerprint, certificate = get_certificate connect_hostname
 
           puts
           puts fingerprint
@@ -118,5 +112,15 @@ class Conjur::Command::Init < Conjur::Command
       end
       puts "Wrote configuration to #{options[:file]}"
     end
+  end
+
+  def self.get_certificate connect_hostname
+    certificate = `echo | openssl s_client -connect #{connect_hostname}  2>/dev/null | openssl x509 -fingerprint`
+    exit_now! "Unable to retrieve certificate from #{connect_hostname}" if certificate.blank?
+
+    lines = certificate.split("\n")
+    fingerprint = lines[0]
+    certificate = lines[1..-1].join("\n")
+    [fingerprint, certificate]
   end
 end
