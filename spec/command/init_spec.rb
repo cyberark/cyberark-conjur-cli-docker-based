@@ -60,7 +60,7 @@ describe Conjur::Command::Init do
     context "auto-fetching fingerprint" do
       before {
         HighLine.any_instance.stub(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
-        Object.any_instance.should_receive(:`).with("echo | openssl s_client -connect the-host:443  2>/dev/null | openssl x509 -fingerprint").and_return "the-fingerprint"
+        Conjur::Command::Init.stub get_certificate: ["the-fingerprint", nil]
         HighLine.any_instance.stub(:ask).with(/^Trust this certificate/).and_return "yes"
       }
       describe_command 'init' do

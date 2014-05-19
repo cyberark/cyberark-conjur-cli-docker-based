@@ -19,6 +19,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'conjur/command'
+require 'openssl'
+require 'socket'
 
 class Conjur::Command::Init < Conjur::Command
   desc "Initialize the Conjur configuration"
@@ -115,12 +117,24 @@ class Conjur::Command::Init < Conjur::Command
   end
 
   def self.get_certificate connect_hostname
-    certificate = `echo | openssl s_client -connect #{connect_hostname}  2>/dev/null | openssl x509 -fingerprint`
-    exit_now! "Unable to retrieve certificate from #{connect_hostname}" if certificate.blank?
+    include OpenSSL::SSL
+    host, port = connect_hostname.split ':'
+    port ||= 443
 
-    lines = certificate.split("\n")
-    fingerprint = lines[0]
-    certificate = lines[1..-1].join("\n")
-    [fingerprint, certificate]
+    sock = TCPSocket.new host, port.to_i
+    ssock = SSLSocket.new sock
+    ssock.connect
+    cert = ssock.peer_cert
+    fp = Digest::SHA1.digest cert.to_der
+
+    # convert to hex, then split into bytes with :
+    hexfp = (fp.unpack 'H*').first.upcase.scan(/../).join(':')
+
+    ["SHA1 Fingerprint=#{hexfp}", cert.to_pem]
+  rescue
+    exit_now! "Unable to retrieve certificate from #{connect_hostname}"
+  ensure
+    ssock.close if ssock
+    sock.close if sock
   end
 end
