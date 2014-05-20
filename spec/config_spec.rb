@@ -5,6 +5,27 @@ describe Conjur::Config do
   after {
     Conjur::Config.clear
   }
+
+  describe ".default_config_files" do
+    subject { Conjur::Config.default_config_files }
+    around do |example|
+      realhome = ENV.delete 'HOME'
+      ENV['HOME'] = '/home/isfake'
+      example.run
+      ENV['HOME'] = realhome
+    end
+
+    context "when CONJURRC is not set" do
+      around do |example|
+        oldrc = ENV.delete 'CONJURRC'
+        example.run
+        ENV['CONJURRC'] = oldrc
+      end
+
+      it { should include('/home/isfake/.conjurrc') }
+    end
+  end
+
   describe "#load" do
     it "resolves the cert_file" do
       Conjur::Config.load([ File.expand_path('conjurrc', File.dirname(__FILE__)) ])
