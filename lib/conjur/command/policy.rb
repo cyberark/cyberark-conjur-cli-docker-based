@@ -18,14 +18,19 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+require 'conjur/command/dsl_command'
+
+require 'etc'
+require 'socket'
+
 class Conjur::Command::Policy < Conjur::DSLCommand
   class << self
     def default_collection_user
-      ( ENV['USER'] ).strip
+      Etc.getlogin
     end
     
     def default_collection_hostname
-      ( ENV['HOSTNAME'] || `hostname` ).strip
+      Socket.gethostname
     end
   
     def default_collection_name

@@ -2,6 +2,18 @@ require 'spec_helper'
 require 'conjur/dsl/runner'
 
 describe Conjur::Command::Policy do
+  describe ".default_collection_user" do
+    it "returns the current username" do
+      expect(Conjur::Command::Policy.default_collection_user).to eq(`whoami`.strip)
+    end
+  end
+
+  describe ".default_collection_hostname" do
+    it "returns the current hostname" do
+      expect(Conjur::Command::Policy.default_collection_hostname).to eq(`hostname`.strip)
+    end
+  end
+
   context logged_in: true do
     let(:role) do
       double("role", exists?: true, api_key: "the-api-key", roleid: "the-role")

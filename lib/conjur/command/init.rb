@@ -19,6 +19,10 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'highline'
+require 'conjur/command'
+require 'openssl'
+require 'socket'
+
 class Conjur::Command::Init < Conjur::Command
   desc "Initialize the Conjur configuration"
 
@@ -46,7 +50,7 @@ class Conjur::Command::Init < Conjur::Command
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
-    c.default_value File.join(ENV['HOME'], '.conjurrc')
+    c.default_value File.expand_path('~/.conjurrc')
     c.flag ["f","file"]
     
     c.desc "Force overwrite of existing files"
@@ -77,13 +81,7 @@ class Conjur::Command::Init < Conjur::Command
           else
             hostname + ':443'
           end
-          certificate = \
-            `echo | openssl s_client -connect #{connect_hostname}  2>/dev/null | openssl x509 -fingerprint`
-          exit_now! "Unable to retrieve certificate from #{hostname}" if certificate.blank?
-          
-          lines = certificate.split("\n")
-          fingerprint = lines[0]
-          certificate = lines[1..-1].join("\n")
+          fingerprint, certificate = get_certificate connect_hostname
 
           puts
           puts fingerprint
@@ -117,5 +115,27 @@ class Conjur::Command::Init < Conjur::Command
       end
       puts "Wrote configuration to #{options[:file]}"
     end
+  end
+
+  def self.get_certificate connect_hostname
+    include OpenSSL::SSL
+    host, port = connect_hostname.split ':'
+    port ||= 443
+
+    sock = TCPSocket.new host, port.to_i
+    ssock = SSLSocket.new sock
+    ssock.connect
+    cert = ssock.peer_cert
+    fp = Digest::SHA1.digest cert.to_der
+
+    # convert to hex, then split into bytes with :
+    hexfp = (fp.unpack 'H*').first.upcase.scan(/../).join(':')
+
+    ["SHA1 Fingerprint=#{hexfp}", cert.to_pem]
+  rescue
+    exit_now! "Unable to retrieve certificate from #{connect_hostname}"
+  ensure
+    ssock.close if ssock
+    sock.close if sock
   end
 end
