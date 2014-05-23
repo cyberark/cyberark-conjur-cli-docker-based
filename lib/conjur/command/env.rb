@@ -79,7 +79,7 @@ RUNLONGDESC
       if Conjur.log 
         Conjur.log << "Running command in the prepared environment: #{args}"
       end
-      Kernel.exec(runtime_environment, *args)
+      Kernel.system(runtime_environment, *args) or exit($?.to_i) # keep original exit code in case of failure
     end
   end
 

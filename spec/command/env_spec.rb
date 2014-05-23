@@ -5,7 +5,7 @@ require 'tempfile'
 
 shared_examples_for "processes environment definition" do |cmd, options|
   before {  # suspend all interaction with the environment
-    Kernel.stub(:exec).and_return(true) 
+    Kernel.stub(:system).and_return(true) 
   }
   let(:stub_object) { double(obtain:{}, check:{}) }
 
@@ -83,7 +83,7 @@ describe Conjur::Command::Env, logged_in: true do
     it_behaves_like "processes environment definition", "run","-- extcmd"
     describe_command "env:run" do
       it 'fails because of missing argument' do 
-        Kernel.should_not_receive(:exec)
+        Kernel.should_not_receive(:system)
         expect { invoke }.to raise_error "External command with optional arguments should be provided" 
       end 
     end
@@ -98,7 +98,7 @@ describe Conjur::Command::Env, logged_in: true do
           stub_env.should_receive(:obtain).with(an_instance_of(Conjur::API)).and_return(stub_result)
         }
         it "performs #exec with environment (names in uppercase)" do
-          Kernel.should_receive(:exec).with({"A"=>"value_a", "B"=>"value_b"}, "extcmd", "--arg1","arg2").and_return(true)
+          Kernel.should_receive(:system).with({"A"=>"value_a", "B"=>"value_b"}, "extcmd", "--arg1","arg2").and_return(true)
           invoke 
         end
       end
