@@ -101,7 +101,7 @@ class Conjur::Command::Init < Conjur::Command
       config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?
       
       unless certificate.blank?
-        cert_file = File.join(File.dirname(options[:file]), "conjur-#{account}.pem")
+        cert_file = File.join(File.dirname(options[:file]), "conjur.pem")
         config[:cert_file] = cert_file
         write_file(cert_file, options[:force]) do |f|
           f.puts certificate
