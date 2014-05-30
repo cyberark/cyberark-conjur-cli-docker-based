@@ -18,109 +18,156 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/authn'
-require 'conjur/command'
+#require 'conjur/authn'
+#require 'conjur/command'
+require 'conjur/conjurenv'
 require 'tempfile'
 
 class Conjur::Command::Env < Conjur::Command
+  
+  desc "Use values of Conjur variables in local context"
+  #self.prefix = :env
 
-
-  class CustomTag
-    def initialize id 
-      @id=id
-    end
-    def init_with(coder)
-      initialize(coder.scalar)
-    end
-    def conjur_id
-      @id
-    end
-  end
-
-  class ConjurVariable < CustomTag
-    def evaluate value
-      value.chomp
-    end
-  end
-  class ConjurTempfile < CustomTag
-    def evaluate value
-      @tempfile = Tempfile.new("conjur","/dev/shm")
-      @tempfile.write(value)
-      @tempfile.chmod(0600)
-      @tempfile.close
-      @tempfile.path
-    end
-  end
-
-
-  def self.parse_conjurenv filepath
-    YAML.add_tag("!var", ConjurVariable)
-    YAML.add_tag("!tmp", ConjurTempfile)
-
-    contents = YAML.load(File.read(filepath)) # File.read to make testing easier
-    values_ok = contents.values.all? {|v| v.kind_of?(String) or v.kind_of?(CustomTag) } rescue false
-    unless values_ok
-      exit_now! "File #{filepath} should contain one-level Hash with scalar values"
-    end
-    return contents
-  end
-
-  def self.obtain_values definition
-    runtime_environment={}
-    variable_ids= definition.values.map { |v| v.conjur_id rescue nil }.compact
-
-    conjur_values=api.variable_values(variable_ids)
-
-    definition.each{ |environment_name, reference| 
-      runtime_environment[environment_name.upcase]= if reference.respond_to?(:evaluate)
-                                                      reference.evaluate( conjur_values[reference.conjur_id] )
-                                                    else
-                                                      reference # is a literal value
-                                                    end
-    }
-    return runtime_environment
-  end
-
-  def self.check_variables definition
-    all_ok=true
-    definition.values.map { |v| v.conjur_id rescue nil }.compact.each { |v|
-      variable_ok = api.resource("variable:"+v).permitted? :execute
-      puts "#{v}: #{if variable_ok then "" else "not " end }available"
-      all_ok=false unless variable_ok
-    }
-    exit_now! "Some variables are not available" unless all_ok
-  end
-
-  desc "Obtain values and set up environment variables according to .conjurenv settings, than run external command"
-  arg_name "-- command [arg1, arg2 ...] "
-  Conjur::CLI.command :env do |c|
+  def self.common_parameters c
     c.desc "Environment configuration file"
-    c.default_value '.conjurenv'
-    c.flag ["f", "file"]
+    c.default_value ".conjurenv"
+    c.flag ["c"]
+    
+    c.desc "Environment configuration as inline yaml"
+    c.flag ["yaml"]
+  end
 
-    c.desc "Perform check of variables availability and exit"  
-    c.switch ["check"]
+  def self.get_env_object options
+    if options[:yaml] and options[:c]!='.conjurenv'
+      exit_now! "Options -c and --yaml can not be provided together"
+    end
 
-    c.action do |global_options,options,args|
+    env = if options[:yaml] 
+            Conjur::Env.new(yaml: options[:yaml])
+          else
+            Conjur::Env.new(file: (options[:c]||'.conjurenv'))
+          end
+    return env
+  end
 
-      if options[:check] and not args.empty? 
-        exit_now! "Options '--check' and '#{args}' can not be provided together"
-      elsif args.empty? and not options[:check]
-        exit_now! "Either --check or '-- external_command' option should be provided"
-      end
+  command :env do |env|
+    env.desc "Execute external command with environment variables populated from Conjur"
+    env.long_desc <<'RUNLONGDESC' 
+Processes environment configuration (see env:help for details), and executes a command (with optional arguments) in the modified environment.
+Local names are uppercased and used as names of environment variables. 
 
-      filename=options[:file] || '.conjurenv'
-      exit_now! "File does not exist: #{filename}" unless File.exists? filename
+Consider following environment configuration: 
 
-      unless options[:check] 
-        runtime_environment = obtain_values( parse_conjurenv(filename) )
-        if Conjur.log 
-          Conjur.log << "Running command in the environment: #{args}"
+{ key_pair_name: jenkins_key, ssh_keypair_path: !tmp jenkins/private_key, api_key: !var jenkins/api_key }
+
+Values of the variables "jenkins/private_key" and "jenkins/api_key" will be obtained from Conjur. Value of "jenkins/api_key" will be associated with local name 'api_key'. Value of "jenkins/private_key" will be stored in the temporary file, which name will be associated with local name "ssh_keypair_path". 
+
+Than, external command with appropriate arguments will be launched in the environment which has following variables:
+
+KEY_PAIR_NAME="jenkins_key",
+SSH_KEYPAIR_PATH="/dev/shm/temp_file_with_key_obtained_from_Conjur",
+API_KEY="api key obtained from Conjur"
+RUNLONGDESC
+    env.arg_name "-- command [arg1, arg2 ...] "
+    env.command :run do |c|
+      common_parameters(c)
+
+      c.action do |global_options,options,args|
+        if args.empty? 
+          exit_now! "External command with optional arguments should be provided"
         end
-        Kernel.exec(runtime_environment, *args)
-      else
-        check_variables( parse_conjurenv(filename) )
+        env = get_env_object(options)
+        runtime_environment = Hash[ env.obtain(api).map {|k,v| [k.upcase, v] } ]
+        if Conjur.log 
+          Conjur.log << "Running command in the prepared environment: #{args}"
+        end
+        Kernel.system(runtime_environment, *args) or exit($?.to_i) # keep original exit code in case of failure
       end
     end
+
+    env.desc "Check availability of Conjur variables" 
+    env.long_desc "Checks availability of Conjur variables mentioned in an environment configuration (see env:help for details), and prints out each local name and appropriate status"
+    env.command :check do |c|
+      common_parameters(c)
+      c.action do |global_options,options,args|
+        env = get_env_object(options)
+        result = env.check(api)
+        result.each { |k,v| puts "#{k}: #{v}" }
+        raise "Some variables are not available" unless result.values.select {|v| v == :unavailable }.empty?
+      end
+    end # command
+
+    env.desc "Render ERB template with variables obtained from Conjur"
+    env.long_desc <<'TEMPLATEDESC' 
+Processes environment configuration (see env:help for details), and creates a temporary file, which contains result of ERB template rendering in appropriate context.
+Template should refer to Conjur values by local name as "%<= conjurenv['local_name'] %>".
+
+Consider following environment configuration: 
+
+{ key_pair_name: jenkins_key, ssh_keypair_path: !tmp jenkins/private_key, api_key: !var jenkins/api_key }
+
+Values of the variables "jenkins/private_key" and "jenkins/api_key" will be obtained from Conjur. Value of "jenkins/api_key" will be associated with local name 'api_key'. Value of "jenkins/private_key" will be stored in the temporary file, which name will be associated with local name "ssh_keypair_path". 
+
+Than, following template 
+
+key_pair=<%= conjurenv["key_pair_name"] %>, path_to_ssh_key= <%= conjurenv["ssh_keypair_path"] %>, api_key = '<%= conjurenv["api_key"] %>'
+
+will be rendered to 
+
+key_pair=jenkins_key, path_to_ssh_key=/dev/shm/temp_file_with_key_obtained_from_Conjur, api_key='api key obtained from Conjur'
+
+Result of the rendering will be stored in temporary file, which location is than printed to stdout
+TEMPLATEDESC
+    env.arg_name "template.erb" 
+
+    env.command :template do |c|
+      common_parameters(c)
+
+      c.action do |global_options,options,args|
+        template_file = args.first
+        exit_now! "Location of readable ERB template should be provided" unless template_file and File.readable?(template_file)
+        template = File.read(template_file)
+        env = get_env_object(options)
+        conjurenv = env.obtain(api)  # needed for binding
+        rendered = ERB.new(template).result(binding)
+
+        # 
+        tempfile = if File.directory?("/dev/shm") and File.writable?("/dev/shm")
+                      Tempfile.new("conjur","/dev/shm")
+                   else
+                      Tempfile.new("conjur")
+                   end
+        tempfile.write(rendered)
+        tempfile.close()
+        old_path = tempfile.path
+        new_path = old_path+".saved"
+        FileUtils.copy(old_path, new_path) # prevent garbage collection
+        puts new_path
+      end
+    end
+
+    env.desc "Print description of environment configuration format" 
+    env.command :help do |c|
+      c.action do |global_options,options,args|
+        puts """
+Environment configuration (either stored in file referred by -f option or provided inline with --yaml option) should be a YAML document describing one-level Hash.
+Keys of the hash are 'local names', used to refer to variable values in convenient manner.  (See help for env:run and env:template for more details about how they are interpreted).
+
+Values of the hash may take one of the following forms: a) string b) string preceeded with !var tag c) string preceeded with !tmp tag.
+
+a) Plain string is just associated with local name without any calls to Conjur.
+
+b) String preceeded by !var tag is interpreted as an ID of the Conjur variable, which value should be obtained and associated with appropriate local name.
+
+c) String preceeded by !tmp tag is interpreted as an ID of the Conjur variable, which value should be stored in temporary file, which location should in turn be associated with appropriate local name.
+
+Example of environment configuration: 
+
+{ local_variable_1: 'literal value', local_variable_2: !var id/of/Conjur/Variable , local_variable_3: !tmp id/of/another/Conjur/variable }
+
+""" 
+      end
+    end
+
   end
 end
