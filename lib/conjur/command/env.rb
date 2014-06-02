@@ -129,18 +129,13 @@ TEMPLATEDESC
       conjurenv = env.obtain(api)  # needed for binding
       rendered = ERB.new(template).result(binding)
 
-      # 
-      tempfile = if File.directory?("/dev/shm") and File.writable?("/dev/shm")
-                    Tempfile.new("conjur","/dev/shm")
-                 else
-                    Tempfile.new("conjur")
-                 end
+      dir = File.directory?("/dev/shm") && File.writable?("/dev/shm") && "/dev/shm" || nil
+
+      # Tempfile::create does not unlink
+      tempfile = Tempfile.create "conjur", dir
       tempfile.write(rendered)
       tempfile.close()
-      old_path = tempfile.path
-      new_path = old_path+".saved"
-      FileUtils.copy(old_path, new_path) # prevent garbage collection
-      puts new_path
+      puts tempfile.path
     end
   end
 
