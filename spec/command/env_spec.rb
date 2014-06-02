@@ -140,12 +140,9 @@ other variable <%= conjurenv['b'] %>
       }
 
       it "creates persistent tempfile, saves rendered template into it, prints out name of the file" do 
-        stubpath="/tmp/temp.file"
-        tempfile=double(close: true, path: stubpath)
-        Tempfile.should_receive(:new).and_return(tempfile)
-        tempfile.should_receive(:write).with("\nvariable value_a\nother variable value_b\n")  
-        FileUtils.should_receive(:copy).with(stubpath,stubpath+'.saved') # avoid garbage collection
-        expect { invoke }.to write stubpath+".saved"
+        path = STDOUT.grab { invoke } .strip
+        File.unstub :read
+        expect(File.read path).to eq("\nvariable value_a\nother variable value_b\n")
       end
     end
   end
