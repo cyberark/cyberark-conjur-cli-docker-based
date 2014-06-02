@@ -2,6 +2,11 @@ require "rubygems"
 require "bundler/setup"
 require 'tempfile'
 require 'ostruct'
+require 'io/grab'
+
+RSpec.configure do |c|
+  c.treat_symbols_as_metadata_keys_with_true_values = true
+end
 
 require "simplecov"
 SimpleCov.start

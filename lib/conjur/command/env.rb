@@ -124,23 +124,24 @@ TEMPLATEDESC
     c.action do |global_options,options,args|
       template_file = args.first
       exit_now! "Location of readable ERB template should be provided" unless template_file and File.readable?(template_file)
-      template = File.read(template_file)
-      env = get_env_object(options)
-      conjurenv = env.obtain(api)  # needed for binding
-      rendered = ERB.new(template).result(binding)
 
-      # 
-      tempfile = if File.directory?("/dev/shm") and File.writable?("/dev/shm")
-                    Tempfile.new("conjur","/dev/shm")
-                 else
-                    Tempfile.new("conjur")
-                 end
+      template = File.read(template_file)
+      erb = ERB.new(template, 3)
+      erb.filename = template_file
+
+      env = get_env_object(options)
+      ebind = TOPLEVEL_BINDING.dup
+      ebind.local_variable_set :conjurenv, env.obtain(api)
+
+      rendered = erb.result(ebind)
+
+      dir = File.directory?("/dev/shm") && File.writable?("/dev/shm") && "/dev/shm" || nil
+
+      # Tempfile::create does not unlink
+      tempfile = Tempfile.create "conjur", dir
       tempfile.write(rendered)
       tempfile.close()
-      old_path = tempfile.path
-      new_path = old_path+".saved"
-      FileUtils.copy(old_path, new_path) # prevent garbage collection
-      puts new_path
+      puts tempfile.path
     end
   end
 
