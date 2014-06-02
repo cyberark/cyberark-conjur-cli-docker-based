@@ -114,7 +114,7 @@ describe Conjur::Command::Env, logged_in: true do
       before { # prevent real operation
         File.stub(:readable?).with("config.erb").and_return(true)
         File.stub(:read).with("config.erb").and_return("template")
-        ERB.stub(:new).and_return(double(result:''))
+        ERB.stub(:new).and_return(double(result:'').as_null_object)
         Tempfile.stub(:new).and_return(double(write: true, close: true, path: 'somepath'))
         FileUtils.stub(:copy).and_return(true)
       }
@@ -127,22 +127,42 @@ describe Conjur::Command::Env, logged_in: true do
       end 
     end
     describe_command "env:template config.erb" do
-      let(:erb_template) { """
-variable <%= conjurenv['a'] %>
-other variable <%= conjurenv['b'] %>
-"""
-      }
       before { 
         File.stub(:readable?).with("config.erb").and_return(true)
+        File.stub(:read).and_call_original
         File.stub(:read).with("config.erb").and_return(erb_template)
         Conjur::Env.should_receive(:new).and_return(stub_env)
         stub_env.should_receive(:obtain).with(an_instance_of(Conjur::API)).and_return( {"a"=>"value_a","b"=>"value_b","c"=>"value_c"} )
       }
 
-      it "creates persistent tempfile, saves rendered template into it, prints out name of the file" do 
-        path = STDOUT.grab { invoke } .strip
-        File.unstub :read
-        expect(File.read path).to eq("\nvariable value_a\nother variable value_b\n")
+      context "with legal template" do
+        let(:erb_template) do
+          <<-EOF.gsub /^\s+/, ''
+            variable <%= conjurenv['a'] %>
+            other variable <%= conjurenv['b'] %>
+          EOF
+        end
+        it "creates persistent tempfile, saves rendered template into it, prints out name of the file" do
+          path = STDOUT.grab { invoke } .strip
+          File.unstub :read
+          expect(File.read path).to eq("variable value_a\nother variable value_b\n")
+        end
+      end
+
+      context "with malicious template" do
+        let(:erb_template) { "0wnz0red <%= File.read '/etc/passwd' %> " }
+
+        it "fails" do
+          expect { invoke } .to raise_error
+        end
+      end
+
+      context "with funny template" do
+        let(:erb_template) { "0wnz0red <%= api %> " }
+
+        it "fails" do
+          expect { invoke } .to raise_error
+        end
       end
     end
   end

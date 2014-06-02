@@ -124,10 +124,16 @@ TEMPLATEDESC
     c.action do |global_options,options,args|
       template_file = args.first
       exit_now! "Location of readable ERB template should be provided" unless template_file and File.readable?(template_file)
+
       template = File.read(template_file)
+      erb = ERB.new(template, 3)
+      erb.filename = template_file
+
       env = get_env_object(options)
-      conjurenv = env.obtain(api)  # needed for binding
-      rendered = ERB.new(template).result(binding)
+      ebind = TOPLEVEL_BINDING.dup
+      ebind.local_variable_set :conjurenv, env.obtain(api)
+
+      rendered = erb.result(ebind)
 
       dir = File.directory?("/dev/shm") && File.writable?("/dev/shm") && "/dev/shm" || nil
 
