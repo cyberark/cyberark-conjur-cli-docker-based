@@ -79,6 +79,7 @@ class Conjur::Command::Layers < Conjur::Command
     layer.desc "Provision a layer by creating backing resources in an IaaS / PaaS system"
     layer.arg_name "layer"
     layer.command :provision do |c|
+      hide_docs(c)
       c.desc "Provisioner to use (aws)"
       c.arg_name "provisioner"
       c.flag [ :provisioner ]
