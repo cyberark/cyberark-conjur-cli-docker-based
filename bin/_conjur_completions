@@ -38,7 +38,7 @@ word = words[index] || ""
 
 current = completions
 previous = current
-until parents.empty? or current.nil?
+until parents.empty? or current.nil? or not current.kind_of?(Hash) # make sure to stop if we hit a 'true' entry
   previous = current
   current = current[parents.shift.to_sym]
 end
