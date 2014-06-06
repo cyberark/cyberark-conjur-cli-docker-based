@@ -18,14 +18,12 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/command'
-
 class Conjur::Command::Field < Conjur::Command
   self.prefix = :field
   
   desc "(Deprecated. See standalone jsonfield command instead.)"
   command :select do |c|
-    def c.nodoc; true end
+    hide_docs(c)
 
     c.action do |global_options,options,args|
       pattern = require_arg(args, 'pattern')

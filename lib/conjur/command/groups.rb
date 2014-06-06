@@ -18,97 +18,110 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/authn'
-require 'conjur/command'
 
 class Conjur::Command::Groups < Conjur::Command
-  self.prefix = :group
+  def self.assume_user_kind(role)
+    if role.split(':').length == 1
+      role = [ "user", role ].join(':')
+    end
+    role
+  end
   
-  desc "Create a new group"
-  arg_name "id"
-  command :create do |c|
-    acting_as_option(c)
-    
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'id')
-      
-      group = api.create_group(id, options)
-      display(group, options)
-    end
-  end
+  desc "Manage groups"
+  command :group do |group|
+    group.desc "Create a new group"
+    group.arg_name "id"
+    group.command :create do |c|
+      acting_as_option(c)
 
-  desc "List groups"
-  command :list do |c|
-    command_options_for_list c
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'id')
 
-    c.action do |global_options, options, args|
-      command_impl_for_list global_options, options.merge(kind: "group"), args
-    end
-  end
-
-  desc "Show a group"
-  arg_name "id"
-  command :show do |c|
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'id')
-      display(api.group(id), options)
-    end
-  end
-
-  desc "Lists all direct members of the group. The membership list is not recursively expanded."
-  arg_name "group"
-  command "members" do |c|
-    c.desc "Verbose output"
-    c.switch [:V,:verbose]
-
-    c.action do |global_options,options,args|
-      group = require_arg(args, 'group')
-      
-      display_members api.group(group).role.members, options
-    end
-  end
-
-  desc "Add a new group member"
-  arg_name "group member"
-  command :"members:add" do |c|
-    c.desc "Also grant the admin option"
-    c.switch [:a, :admin]
-
-    # perhaps this belongs to member:remove, but then either
-    # it would be possible to grant membership with member:revoke,
-    # or we would need two round-trips to authz
-    c.desc "Revoke the grant option if it's granted"
-    c.switch [:r, :'revoke-admin']
-    
-    c.action do |global_options,options,args|
-      group = require_arg(args, 'group')
-      member = require_arg(args, 'member')
-      
-      group = api.group(group)
-      opts = nil
-      message = "Membership granted"
-      if options[:admin] then
-        opts = { admin_option: true }
-        message = "Adminship granted"
-      elsif options[:'revoke-admin'] then
-        opts = { admin_option: false }
-        message = "Adminship revoked"
+        group = api.create_group(id, options)
+        display(group, options)
       end
-      
-      group.add_member member, opts
-      puts message
     end
-  end
 
-  desc "Remove a group member"
-  arg_name "group member"
-  command :"members:remove" do |c|
-    c.action do |global_options,options,args|
-      group = require_arg(args, 'group')
-      member = require_arg(args, 'member')
-      
-      api.group(group).remove_member member
-      puts "Membership revoked"
+    group.desc "List groups"
+    group.command :list do |c|
+      command_options_for_list c
+
+      c.action do |global_options, options, args|
+        command_impl_for_list global_options, options.merge(kind: "group"), args
+      end
     end
+
+    group.desc "Show a group"
+    group.arg_name "id"
+    group.command :show do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'id')
+        display(api.group(id), options)
+      end
+    end
+
+    group.desc "Show and manage group members"
+    group.command :members do |members|
+
+      members.desc "Lists all direct members of the group. The membership list is not recursively expanded."
+      members.arg_name "group"
+      members.command :list do |c|
+        c.desc "Verbose output"
+        c.switch [:V,:verbose]
+        c.action do |global_options,options,args|
+          group = require_arg(args, 'group')
+          display_members api.group(group).role.members, options
+        end
+      end
+
+      members.desc "Add a new group member"
+      members.arg_name "group member"
+      members.command :add do |c|
+        c.desc "Also grant the admin option"
+        c.switch [:a, :admin]
+
+        # perhaps this belongs to member:remove, but then either
+        # it would be possible to grant membership with member:revoke,
+        # or we would need two round-trips to authz
+        c.desc "Revoke the grant option if it's granted"
+        c.switch [:r, :'revoke-admin']
+
+        c.action do |global_options,options,args|
+          group = require_arg(args, 'group')
+          member = require_arg(args, 'member')
+          member = assume_user_kind(member)
+
+          group = api.group(group)
+          opts = nil
+          message = "Membership granted"
+          if options[:admin] then
+            opts = { admin_option: true }
+            message = "Adminship granted"
+          elsif options[:'revoke-admin'] then
+            opts = { admin_option: false }
+            message = "Adminship revoked"
+          end
+
+          group.add_member member, opts
+          puts message
+        end
+      end
+
+      members.desc "Remove a group member"
+      members.arg_name "group member"
+      members.command :remove do |c|
+        c.action do |global_options,options,args|
+          group = require_arg(args, 'group')
+          member = require_arg(args, 'member')
+          member = assume_user_kind(member)
+
+          api.group(group).remove_member member
+          puts "Membership revoked"
+        end
+      end
+
+    end
+
   end
 end
+

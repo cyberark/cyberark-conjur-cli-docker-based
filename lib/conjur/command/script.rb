@@ -18,23 +18,22 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/authn'
-require 'conjur/command/dsl_command'
 
 class Conjur::Command::Script < Conjur::DSLCommand
-  self.prefix = :script
+  desc "Execute Conjur DSL scripts"
+  command :script do |script|
+    script.desc "Run a Conjur DSL script"
+    script.arg_name "script"
+    script.command :execute do |c|
+      acting_as_option(c)
 
-  desc "Run a Conjur DSL script"
-  arg_name "script"
-  command :execute do |c|
-    acting_as_option(c)
-    
-    c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-    c.arg_name "context"
-    c.flag [:c, :context]
-    
-    c.action do |global_options,options,args|
-      run_script args, options
+      c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
+      c.arg_name "context"
+      c.flag [:c, :context]
+
+      c.action do |global_options,options,args|
+        run_script args, options
+      end
     end
   end
 end

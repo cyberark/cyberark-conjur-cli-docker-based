@@ -1,11 +1,5 @@
-require 'conjur/command'
-require 'active_support/ordered_hash'
-require 'conjur/audit/follower'
-
 class Conjur::Command
   class Audit < self
-    self.prefix = 'audit'
-    
     class << self
       private
       SHORT_FORMATS = {
@@ -15,7 +9,7 @@ class Conjur::Command
         'resource:destroy' => lambda{|e| "destroyed resource #{e[:resource]}" },
         'resource:permit' => lambda{|e| "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
         'resource:deny' => lambda{|e| "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
-        'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:permission]} on #{e[:resource]}" },
+        'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:privilege]} on #{e[:resource]}" },
         'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
         'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin" },
         'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
@@ -66,8 +60,8 @@ class Conjur::Command
         end
       end
 
-      def audit_feed_command kind, &block
-        command kind do |c|
+      def audit_feed_command parent, kind, &block
+        parent.command kind do |c|
           c.desc "Maximum number of events to fetch"
           c.flag [:l, :limit]
 
@@ -88,23 +82,28 @@ class Conjur::Command
       end
     end
 
-    desc "Show all audit events visible to the current user"
-    audit_feed_command :all do |args, options|
-      api.audit(options){ |es| show_audit_events es, options }
-    end
-    
-    desc "Show audit events related to a role"
-    arg_name 'role'
-    audit_feed_command :role do |args, options|
-      id = full_resource_id(require_arg(args, "role"))
-      api.audit_role(id, options){ |es| show_audit_events es, options }
-    end
-    
-    desc "Show audit events related to a resource"
-    arg_name 'resource'
-    audit_feed_command :resource do |args, options|
-      id = full_resource_id(require_arg args, "resource")
-      api.audit_resource(id, options){|es| show_audit_events es, options} 
+    desc "Show audit events"
+    command  :audit do |audit|
+      audit.desc "Show all audit events visible to the current user"
+      audit_feed_command audit, :all do |args, options|
+        api.audit(options){ |es| show_audit_events es, options }
+      end
+
+
+      audit.desc "Show audit events related to a role"
+      audit.arg_name 'role'
+      audit_feed_command audit, :role do |args, options|
+        id = full_resource_id(require_arg(args, "role"))
+        api.audit_role(id, options){ |es| show_audit_events es, options }
+      end
+
+
+      audit.desc "Show audit events related to a resource"
+      audit.arg_name 'resource'
+      audit_feed_command audit, :resource do |args, options|
+        id = full_resource_id(require_arg args, "resource")
+        api.audit_resource(id, options){|es| show_audit_events es, options}
+      end
     end
   end
 end

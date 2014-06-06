@@ -19,11 +19,24 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'gli'
-require 'conjur/config'
-require 'conjur/log'
-require 'conjur/identifier_manipulation'
+# need this to prevent an active support bug in some versions
+require 'active_support'
+require 'active_support/deprecation'
+
 
 module Conjur
+  autoload :Config,                 'conjur/config'
+  autoload :Log,                    'conjur/log'
+  autoload :IdentifierManipulation, 'conjur/identifier_manipulation'
+  autoload :Authn,                  'conjur/authn'
+  autoload :Command,                'conjur/command'
+  autoload :DSL,                    'conjur/dsl/runner'
+  autoload :DSLCommand,             'conjur/command/dsl_command'
+
+  module Audit
+    autoload :Follower,             'conjur/audit/follower'
+  end
+
   class CLI
     extend GLI::App
 
@@ -31,36 +44,58 @@ module Conjur
       def load_config
         Conjur::Config.load
       end
-      
+
       def apply_config
         Conjur::Config.apply
       end
-    end
-          
-    load_config
 
-    Conjur::Config.plugins.each do |plugin|
-      begin
-        filename = "conjur-asset-#{plugin}"
-        require filename
-      rescue LoadError
-        warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+      # Horible hack!
+      # We want to support legacy commands like host:list, but we don't want to
+      # do too much effort, and GLIs support for aliasing doesn't work out so well with
+      # subcommands.
+      def run args
+       args = args.shift.split(':') + args unless args.empty?
+        super args
+      end
+
+      def load_plugins
+        # These used to be plugins but now they are in the core CLI
+        plugins = Conjur::Config.plugins - %w(layer pubkeys)
+        
+        plugins.each do |plugin|
+          begin
+            filename = "conjur-asset-#{plugin}"
+            require filename
+          rescue LoadError
+            warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename}-api gem installed."
+          end
+        end
+      end
+
+      # This makes our generate-commands script a little bit cleaner.  We can call this from that script
+      # to ensure that commands for all plugins are loaded.
+      def init!
+        subcommand_option_handling :normal
+        load_config
+        apply_config
+        load_plugins
+        commands_from 'conjur/command'
       end
     end
 
-    commands_from 'conjur/command'
+    init!
 
     pre do |global,command,options,args|
+      require 'conjur/api'
 
-      if command.name_for_help.first == "init" and options.has_key?("account") 
+      if command.name_for_help.first == "init" and options.has_key?("account")
         ENV["CONJUR_ACCOUNT"]=options["account"]
       end
       apply_config
-
       require 'active_support/core_ext'
       options.delete_if{|k,v| v.blank?}
       options.symbolize_keys!
-      
+
       if as_group = options.delete(:"as-group")
         group = Conjur::Command.api.group(as_group)
         role = Conjur::Command.api.role(group.roleid)
@@ -77,6 +112,7 @@ module Conjur
     end
     
     on_error do |exception|
+      require 'rest-client'
       if exception.is_a?(RestClient::Exception)
         begin
           body = JSON.parse(exception.response.body)
@@ -85,7 +121,7 @@ module Conjur
           $stderr.puts exception.response.body if exception.response
         end
       end
-      
+      require 'conjur/log'
       if Conjur.log
         Conjur.log << "error: #{exception}\n#{exception.backtrace.join("\n") rescue 'NO BACKTRACE?'}"
       end

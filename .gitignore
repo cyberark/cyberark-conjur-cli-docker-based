@@ -27,3 +27,5 @@ tmp
 .idea
 .rvmrc
 update_ci.sh
+.ruby-version
+.ruby-gemset

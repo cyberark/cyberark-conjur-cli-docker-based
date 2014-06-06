@@ -36,6 +36,7 @@ module Conjur
       
       def load(config_files = default_config_files)
         require 'yaml'
+        require 'conjur/log'
         config_files.each do |f|
           if File.file?(f)
             if Conjur.log
@@ -51,6 +52,7 @@ module Conjur
       end
       
       def apply
+        require 'conjur/configuration'
         keys = Config.keys.dup
         keys.delete(:plugins)
         keys.each do |k|
@@ -59,6 +61,7 @@ module Conjur
         end
   
         if Conjur.log
+          require 'conjur/api'
           Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
         end
         if Config[:cert_file]

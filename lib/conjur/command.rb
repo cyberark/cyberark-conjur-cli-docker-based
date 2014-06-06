@@ -20,21 +20,21 @@
 #
 module Conjur
   class Command
-    extend IdentifierManipulation
+    extend Conjur::IdentifierManipulation
     
     @@api = nil
     
     class << self
       attr_accessor :prefix
-      
-      def method_missing *a
-        Conjur::CLI.send *a
+      def method_missing *a, &b
+        Conjur::CLI.send *a, &b
       end
-      
+
       def command name, *a, &block
-        Conjur::CLI.command "#{prefix}:#{name}", *a, &block
+        name = "#{prefix}:#{name}" if prefix
+        Conjur::CLI.command(name, *a, &block)
       end
-      
+
       def require_arg(args, name)
         args.shift or raise "Missing parameter: #{name}"
       end
@@ -42,8 +42,14 @@ module Conjur
       def api
         @@api ||= Conjur::Authn.connect
       end
-      
+
+      # Prevent a deprecated command from being displayed in the help output
+      def hide_docs(command)
+        def command.nodoc; true end
+      end
+
       def acting_as_option(command)
+        return if command.flags.member?(:"as-group") # avoid duplicate flags
         command.arg_name 'Perform all actions as the specified Group'
         command.flag [:"as-group"]
 
@@ -52,6 +58,7 @@ module Conjur
       end
       
       def command_options_for_list(c)
+        return if c.flags.member?(:role) # avoid duplicate flags
         c.desc "Role to act as. By default, the current logged-in role is used."
         c.flag [:role]
     
@@ -74,9 +81,10 @@ module Conjur
       def command_impl_for_list(global_options, options, args)
         opts = options.slice(:search, :limit, :options, :kind) 
         opts[:acting_as] = options[:role] if options[:role]
+        opts[:search]=opts[:search].gsub('-',' ') if opts[:search]
         resources = api.resources(opts)
         if options[:ids]
-          puts resources.map(&:resourceid)
+          puts JSON.pretty_generate(resources.map(&:resourceid))
         else
           resources = resources.map &:attributes
           unless options[:'raw-annotations']
@@ -114,7 +122,11 @@ module Conjur
         elsif obj.respond_to?(:id)
           obj.id
         else
-          JSON.pretty_generate obj
+          begin
+            JSON.pretty_generate(obj)
+          rescue JSON::GeneratorError
+            obj.to_json
+          end
         end
         puts str
       end

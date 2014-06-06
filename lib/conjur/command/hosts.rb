@@ -18,68 +18,68 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/authn'
-require 'conjur/command'
 
 class Conjur::Command::Hosts < Conjur::Command
-  self.prefix = :host
+  desc "Manage hosts"
+  command :host do |hosts|
+    hosts.desc "Create a new host"
+    hosts.arg_name "id"
+    hosts.command :create do |c|
+      c.arg_name "password"
+      c.flag [:p,:password]
 
-  desc "Create a new host"
-  arg_name "id"
-  command :create do |c|
-    c.arg_name "password"
-    c.flag [:p,:password]
-    
-    acting_as_option(c)
+      acting_as_option(c)
 
-    c.action do |global_options,options,args|
-      id = args.shift
-      options[:id] = id if id
+      c.action do |global_options,options,args|
+        id = args.shift
+        options[:id] = id if id
 
-      unless id
-        ActiveSupport::Deprecation.warn "id argument will be required in future releases"
+        unless id
+          ActiveSupport::Deprecation.warn "id argument will be required in future releases"
+        end
+
+        display api.create_host(options), options
       end
-      
-      display api.create_host(options), options
     end
-  end
-  
-  desc "Show a host"
-  arg_name "id"
-  command :show do |c|
-    c.action do |global_options,options,args|
-      id = require_arg(args, 'id')
-      display(api.host(id), options)
-    end
-  end
 
-  desc "List hosts"
-  command :list do |c|
-    command_options_for_list c
+    hosts.desc "Show a host"
+    hosts.arg_name "id"
+    hosts.command :show do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'id')
+        display(api.host(id), options)
+      end
+    end
 
-    c.action do |global_options, options, args|
-      command_impl_for_list global_options, options.merge(kind: "host"), args
+
+
+    hosts.desc "List hosts"
+    hosts.command :list do |c|
+      command_options_for_list c
+      c.action do |global_options, options, args|
+        command_impl_for_list global_options, options.merge(kind: "host"), args
+      end
     end
-  end
-  
-  desc "List the layers to which the host belongs"
-  arg_name "id"
-  command :layers do |c|
-    c.action do |global_options, options, args|
-      id = require_arg(args, 'id')
-      display api.host(id).role.all.select{|r| r.kind == "layer"}.map(&:identifier), options
+
+    hosts.desc "Enroll a new host into conjur"
+    hosts.arg_name "host"
+    hosts.command :enroll do |c|
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'host')
+        enrollment_url = api.host(id).enrollment_url
+        puts enrollment_url
+        $stderr.puts "On the target host, please execute the following command:"
+        $stderr.puts "curl -L #{enrollment_url} | bash"
+      end
     end
-  end
-  
-  desc "Enroll a new host into conjur"
-  arg_name "host"
-  command :enroll do |c|
-    c.action do |global_options, options, args|
-      id = require_arg(args, 'host')
-      enrollment_url = api.host(id).enrollment_url
-      puts enrollment_url
-      $stderr.puts "On the target host, please execute the following command:"
-      $stderr.puts "curl -L #{enrollment_url} | bash"
+
+    hosts.desc "List the layers to which the host belongs"
+    hosts.arg_name "id"
+    hosts.command :layers do |c|
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'id')
+        display api.host(id).role.all.select{|r| r.kind == "layer"}.map(&:identifier), options
+      end
     end
   end
 end
