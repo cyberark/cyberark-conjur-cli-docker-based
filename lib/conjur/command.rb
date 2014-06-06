@@ -81,6 +81,7 @@ module Conjur
       def command_impl_for_list(global_options, options, args)
         opts = options.slice(:search, :limit, :options, :kind) 
         opts[:acting_as] = options[:role] if options[:role]
+        opts[:search]=opts[:search].gsub('-',' ') if opts[:search]
         resources = api.resources(opts)
         if options[:ids]
           puts JSON.pretty_generate(resources.map(&:resourceid))
