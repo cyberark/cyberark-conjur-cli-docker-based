@@ -112,10 +112,10 @@ describe Conjur::Command::Init do
             account: 'the-account',
             plugins: %w(environment layer key-pair pubkeys),
             appliance_url: "https://localhost/api",
-            cert_file: "#{tmpdir}/conjur.pem"
+            cert_file: "#{tmpdir}/conjur-the-account.pem"
           }.stringify_keys)
 
-          File.read(File.join(tmpdir, "conjur.pem")).should == "the-cert\n"
+          File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"
         end
       end
     end
