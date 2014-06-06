@@ -17,6 +17,11 @@
   :authenticate: true
   :logout: true
   :whoami: true
+:env:
+  :run: true
+  :check: true
+  :template: true
+  :help: true
 :group:
   :create: true
   :list: true
@@ -30,6 +35,7 @@
   :show: true
   :list: true
   :enroll: true
+  :layers: true
 :id:
   :create: true
 :init: true
@@ -37,16 +43,20 @@
   :create: true
   :list: true
   :show: true
-  :members: true
   :provision: true
   :hosts:
     :permit: true
+    :deny: true
     :permitted_roles: true
     :add: true
     :remove: true
-:deny: true
 :policy:
   :load: true
+:pubkeys:
+  :show: true
+  :names: true
+  :add: true
+  :delete: true
 :resource:
   :create: true
   :show: true
@@ -81,5 +91,6 @@
   :create: true
   :show: true
   :list: true
+  :values:
+    :add: true
   :value: true
-  :to_file: true
