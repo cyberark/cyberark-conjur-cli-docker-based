@@ -110,7 +110,6 @@ describe Conjur::Command::Init do
           
           expect(YAML.load(File.read(File.join(tmpdir, ".conjurrc")))).to eq({
             account: 'the-account',
-            plugins: %w(environment layer key-pair pubkeys),
             appliance_url: "https://localhost/api",
             cert_file: "#{tmpdir}/conjur-the-account.pem"
           }.stringify_keys)
