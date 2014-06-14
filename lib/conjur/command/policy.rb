@@ -65,7 +65,7 @@ owner of the policy role is the logged-in user (you), as always.
     policy.command :load do |c|
       acting_as_option(c)
 
-      c.desc "Policy collection"
+      c.desc "Policy collection, defaulting to $USER@$HOSTNAME"
       c.arg_name "collection"
       c.flag [:collection]
 
