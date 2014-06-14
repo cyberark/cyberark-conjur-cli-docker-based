@@ -74,7 +74,7 @@ class Conjur::Command::Variables < Conjur::Command
       end
     end
 
-    var.desc "Access varialbe values"
+    var.desc "Access variable values"
     var.command :values do |values|
       values.desc "Add a value"
       values.arg_name "variable ( value | STDIN )"
