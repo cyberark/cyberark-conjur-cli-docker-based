@@ -80,4 +80,18 @@ describe Conjur::Command::Audit, logged_in: true do
   describe "audit:all" do
     it_calls_the_api "audit:all", :audit, {}
   end
+
+  describe_command "audit:send '[{\"action\":\"login\",\"user\":\"alice\"},{\"action\":\"sudo\",\"user\":\"alice\"}]' " do
+    it 'calls api.audit_send with provided parameter' do
+      api.should_receive(:audit_send).with("'[{\"action\":\"login\",\"user\":\"alice\"},{\"action\":\"sudo\",\"user\":\"alice\"}]'")
+      expect { invoke }.to write "Events sent successfully"
+    end 
+
+    it 'does not hide exceptions coming from API' do
+      api.should_receive(:audit_send).and_return { raise ArgumentError }
+      expect { invoke }.to raise_error(ArgumentError)
+    end
+  end
+
+
 end

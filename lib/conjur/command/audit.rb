@@ -82,7 +82,7 @@ class Conjur::Command
       end
     end
 
-    desc "Show audit events"
+    desc "Read and write audit events"
     command  :audit do |audit|
       audit.desc "Show all audit events visible to the current user"
       audit_feed_command audit, :all do |args, options|
@@ -103,6 +103,17 @@ class Conjur::Command
       audit_feed_command audit, :resource do |args, options|
         id = full_resource_id(require_arg args, "resource")
         api.audit_resource(id, options){|es| show_audit_events es, options}
+      end 
+
+      audit.desc "Send custom event(s) to audit system"
+      audit.long_desc "Send custom event(s) to audit system. Events should be provided in JSON format, describing either single hash or array of hashes."
+      audit.arg_name "( json_string | STDIN )"
+      audit.command :send do |c| 
+        c.action do |global_options, options, args|
+          json = ( args.shift || STDIN.read )
+          api.audit_send json 
+          puts "Events sent successfully"
+        end
       end
     end
   end

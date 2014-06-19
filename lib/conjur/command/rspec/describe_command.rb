@@ -3,6 +3,7 @@ module RSpec::Core::DSL
     describe *argv do
       let(:invoke) do
         Conjur::CLI.error_device = $stderr
+        # TODO: allow proper handling of description like "audit:send 'hello world'"
         Conjur::CLI.run argv.first.split(' ')
       end
       instance_eval &block
