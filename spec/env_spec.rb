@@ -62,9 +62,9 @@ describe Conjur::Env do
       expect { Conjur::Env.new(yaml: "[ 1,2,3 ]") }.to raise_error "Definition should be a Hash"
     end
 
-    it "fails if values are not literal, !tmp or !var" do
+    it "fails if values are not literal, number, !tmp or !var" do
       expect { Conjur::Env.new(yaml: "{a: literal, b: !tmp tempfile, c: !var conjurvar, d: { x: another literal }}") }.to raise_error /^Definition can not include values of types/
-      expect { Conjur::Env.new(yaml: "{a: literal, b: !tmp tempfile, c: !var conjurvar}") }.to_not raise_error 
+      expect { Conjur::Env.new(yaml: "{a: literal, b: 123, c: !tmp tempfile, d: !var conjurvar}") }.to_not raise_error 
     end 
 
     it 'does not allow empty values for !tmp and !var' do
@@ -80,6 +80,12 @@ describe Conjur::Env do
       result["b"].should be_a_kind_of(Conjur::Env::ConjurTempfile)
       result["c"].should be_a_kind_of(Conjur::Env::ConjurVariable)
     end
+
+    it "Converts numbers to string literals" do
+      result = Conjur::Env.new(yaml: "{a: 123}").instance_variable_get("@definition")
+      result["a"].should == "123"
+    end
+
   end
 
   describe "#obtain", logged_in: true do

@@ -79,6 +79,8 @@ module Conjur
       YAML.add_tag("!tmp", ConjurTempfile)
       definition = YAML.load(yaml)
       raise "Definition should be a Hash" unless definition.kind_of?(Hash)
+      # convert fixnums to literals -- to make definitions of e.g. ports more convenient
+      definition.keys.select { |k| definition[k].kind_of? Fixnum }.each { |k| definition[k]="#{definition[k]}" }
       bad_types = definition.values.select { |v| not (v.kind_of?(String) or v.kind_of?(CustomTag)) }.map {|v| v.class}.uniq
       raise "Definition can not include values of types: #{bad_types}" unless bad_types.empty?
       definition
