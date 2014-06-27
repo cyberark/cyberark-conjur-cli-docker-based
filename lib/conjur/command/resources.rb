@@ -62,11 +62,18 @@ class Conjur::Command::Resources < Conjur::Command
     resource.desc "Give a privilege on a resource"
     resource.arg_name "resource-id role privilege"
     resource.command :permit do |c|
+      c.desc "allow transfer to other roles"
+      c.switch [:g, :grantable]
       c.action do |global_options,options,args|
         id = full_resource_id( require_arg(args, "resource-id") )
         role = require_arg(args, "role")
         privilege = require_arg(args, "privilege")
-        api.resource(id).permit privilege, role
+        unless options[:g]
+          api.resource(id).permit privilege, role
+        else
+          api.resource(id).permit privilege, role, grant_option: true
+        end
+        
         puts "Permission granted"
       end
     end

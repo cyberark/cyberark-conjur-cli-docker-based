@@ -80,6 +80,13 @@ describe Conjur::Command::Resources, logged_in: true do
     it {  expect { invoke }.to write "Permission granted" }
   end
 
+  describe_command "resource:permit -g #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
+    it 'calls resource.permit() with grant option' do
+      resource_instance.should_receive(:permit).with(PRIVILEGE, ROLE, grant_option: true)
+      invoke_silently
+    end
+  end
+
   describe_command "resource:deny #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
     before(:each) { resource_instance.stub(:deny).and_return(true) }
     it_behaves_like "it obtains resource by id"
