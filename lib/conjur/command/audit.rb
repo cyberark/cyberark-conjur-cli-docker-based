@@ -26,7 +26,18 @@ class Conjur::Command
         if formatter
           s << " " << formatter.call(e)
         else
-          s << " unknown event: #{e[:asset]}:#{e[:action]}!"
+          custom_event=false
+          begin 
+            if e[:request]["params"]["action"]=="inject_audit_event" 
+              s << " "+["custom event",e[:asset],e[:action]].compact.join(" ")
+              custom_event=true
+            end   
+          rescue
+          end
+
+          unless custom_event
+            s << " unknown event: #{e[:asset]}:#{e[:action]}!"  
+          end
         end
         s << " (failed with #{e[:error]})" if e[:error]
         s
