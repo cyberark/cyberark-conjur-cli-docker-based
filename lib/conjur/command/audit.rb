@@ -11,7 +11,7 @@ class Conjur::Command
         'resource:deny' => lambda{|e| "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
         'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:privilege]} on #{e[:resource]}" },
         'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
-        'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin" },
+        'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? 'with' : 'without'} admin" },
         'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
         'role:create' => lambda{|e| "created role #{e[:role]}" }
       }
@@ -36,7 +36,7 @@ class Conjur::Command
           end
 
           unless custom_event
-            s << " unknown event: #{e[:asset]}:#{e[:action]}!"  
+            s << " unknown event: #{e[:kind]}:#{e[:action]}!"  
           end
         end
         s << " (failed with #{e[:error]})" if e[:error]

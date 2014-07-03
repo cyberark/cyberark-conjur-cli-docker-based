@@ -93,5 +93,271 @@ describe Conjur::Command::Audit, logged_in: true do
     end
   end
 
+  describe "output formatting:" do
+    before {
+      api.stub(:audit_event_feed).and_yield([audit_event])
+    }
 
+    let(:default_audit_event) { 
+      {
+        "request" => {
+                    "ip" => "1.2.3.4",
+                    "url"=>"https://conjur/api",
+                    "method"=>"POST",
+                    "uuid" => "abcdef",
+                    "params"=> {
+                      "controller"=>"role",
+                      "action"=>"create",
+                      "account"=>"the-account"
+                      }
+                    },
+        "user" => "account:user:alice",
+        "acting_as" => "account:group:admins",
+        "conjur" =>   { # new behaviour
+                    "user" => "account:user:alice",
+                    "role" => "account:group:admins",
+                    "domain" => "authz",
+                    "env"    => "test",
+                    "account" => "the-account"
+                    },
+        "completely_custom_field" => "with some value",
+        "kind" => "some_asset",
+        "action" => "some_action",
+        "user" => "account:user:alice",
+        "id"   => 12345,
+        "timestamp" => Time.now().to_s,
+        "event_id" => "xaxaxaxaxa",
+        "resources" => ["the-account:layer:resources/production", "layer:resources/frontend"],
+        "roles" => ["the-account:group:roles/qa", "group:roles/ssh_users"]
+      }
+    }
+
+    describe_command "audit all" do
+      let(:audit_event) { default_audit_event }
+      it 'prints full JSON retrieved from API' do
+        expect { invoke }.to write( JSON.pretty_generate(audit_event)  )
+      end
+    end
+
+    describe_command "audit all -s" do
+      let(:common_prefix) { "[#{default_audit_event["timestamp"]}] #{default_audit_event["user"]}" }
+      let(:audit_event) { test_event }
+      shared_examples_for "it supports standard prefix:" do
+        describe "if acting_as is the same as user" do
+          let(:audit_event) { test_event.tap { |e| e["acting_as"]=e["user"] } }
+          it "prints default prefix" do
+            expect { invoke }.to write(common_prefix)
+          end
+          it "does not print 'acting_as' statement" do
+            expect { invoke }.to_not write(common_prefix+" (as ")
+          end
+        end
+
+        describe "if acting_as is different from user" do
+          it 'prints default prefix followed by (acting as..) statement' do
+            expect { invoke }.to write(common_prefix+" (as #{audit_event['acting_as']})")
+          end
+        end
+      end
+
+      shared_examples_for "it recognizes error messages:" do
+        describe "if :error is not empty" do
+          let(:audit_event) { test_event.merge("error"=>"everything's down") }
+          it 'appends (failed with...) statement' do
+            expect { invoke }.to write(" (failed with everything's down)")
+          end
+        end
+        describe "if :error is empty" do
+          it 'does not print "failed with" statement' do
+            expect { invoke }.not_to write(" (failed with ")
+          end
+        end
+        
+      end       
+
+      describe "(unknown kind:action)" do
+        let(:test_event) { default_audit_event }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'unknown event: <kind>:<action>'" do
+          expect { invoke }.to write(" unknown event: some_asset:some_action!")
+        end
+      end
+
+      describe "(resource:check)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource",
+                                                      "action"=>"check", 
+                                                      "privilege"=>"fry", 
+                                                      "resource"=>"food:bacon",
+                                                      "allowed" => "false" 
+                                                     ) 
+                          }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'checked that they...'" do
+          expect { invoke }.to write(" checked that they can fry food:bacon (false)")
+        end
+      
+      end
+
+      describe "(resource:create)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource", "action" => "create",
+                                                      "resource" => "food:bacon", 
+                                                      "owner" => "user:cook" 
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'created resource ... owned by ... '" do
+          expect { invoke }.to write(" created resource food:bacon owned by user:cook")
+        end
+      end
+
+      describe "(resource:update)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource", "action" => "update",
+                                                      "resource" => "food:bacon", 
+                                                      "owner" => "user:cook" 
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'gave .. to .. '" do
+          expect { invoke }.to write(" gave food:bacon to user:cook")
+        end
+      end
+ 
+      describe "(resource:destroy)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource", "action" => "destroy",
+                                                      "resource" => "food:bacon"
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'destroyed resource ... '" do
+          expect { invoke }.to write(" destroyed resource food:bacon")
+        end
+      end
+      
+      describe "(resource:permit)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource", "action" => "permit",
+                                                     "resource" => "food:bacon",
+                                                     "privilege" => "fry",
+                                                     "grantee" => "user:cook"
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'permitted .. to .. (grant option: .. ) '" do
+          expect { invoke }.to write(" permitted user:cook to fry food:bacon (grant option: false)")
+        end
+      end
+
+      
+      describe "(resource:deny)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource", "action" => "deny",
+                                                     "resource" => "food:bacon",
+                                                     "privilege" => "fry",
+                                                     "grantee" => "user:cook"
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'denied .. from .. on ..'" do
+          expect { invoke }.to write(" denied fry from user:cook on food:bacon")
+        end
+      end
+
+      describe "(resource:permitted_roles)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"resource", "action" => "permitted_roles",
+                                                     "resource" => "food:bacon",
+                                                     "privilege" => "fry"
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'listed roles permitted to .. on ..'" do
+          expect { invoke }.to write(" listed roles permitted to fry on food:bacon")
+        end
+      end
+
+      describe "(role:check)" do
+        let(:options_set) { 
+          {
+             "kind"=>"role", "action" => "check",
+             "resource" => "food:bacon",
+             "privilege" => "fry",
+             "allowed" => "false"
+          }
+        }
+        describe 'on themselves' do
+          let(:test_event) { default_audit_event.merge(options_set).merge("role" => default_audit_event["user"]) }
+          it_behaves_like "it supports standard prefix:" 
+          it_behaves_like "it recognizes error messages:"
+          it "prints 'checked that they...'" do
+            expect { invoke }.to write(" checked that they can fry food:bacon (false)")
+          end
+        end
+        describe 'on others' do
+          let(:test_event) { default_audit_event.merge(options_set).merge("role" => "some:other:guy") }
+          it_behaves_like "it supports standard prefix:" 
+          it_behaves_like "it recognizes error messages:"
+          it "prints 'checked that they...'" do
+            expect { invoke }.to write(" checked that some:other:guy can fry food:bacon (false)")
+          end
+        end
+      end
+
+      describe "(role:grant)" do
+        let(:options_set) { 
+          {
+             "kind"=>"role", "action" => "grant",
+             "member" => "other:guy",
+             "role" => "super:user"
+          }
+        }
+        describe 'without admin option' do
+          let(:test_event) { default_audit_event.merge(options_set) }
+          it_behaves_like "it supports standard prefix:" 
+          it_behaves_like "it recognizes error messages:"
+          it "prints 'granted role .. to .. without admin'" do
+            expect { invoke }.to write(" granted role super:user to other:guy without admin")
+          end
+        end
+        describe 'with admin option' do
+          let(:test_event) { default_audit_event.merge(options_set).merge("admin_option" => true) }
+          it_behaves_like "it supports standard prefix:" 
+          it_behaves_like "it recognizes error messages:"
+          it "prints 'granted role .. to .. with admin'" do
+            expect { invoke }.to write(" granted role super:user to other:guy with admin")
+          end
+        end
+      end
+    
+      describe "(role:revoke)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"role", "action" => "revoke",
+                                                     "role" => "super:user",
+                                                     "member" => "other:guy"
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'revoked role .. from .." do
+          expect { invoke }.to write(" revoked role super:user from other:guy")
+        end
+      end
+
+      describe "(role:create)" do
+        let(:test_event) { default_audit_event.merge("kind"=>"role", "action" => "create",
+                                                     "role" => "super:user",
+                                                    ) 
+                         }
+        it_behaves_like "it supports standard prefix:" 
+        it_behaves_like "it recognizes error messages:"
+        it "prints 'created role .. " do
+          expect { invoke }.to write(" created role super:user")
+        end
+      end
+
+    end
+  end
 end
