@@ -13,7 +13,16 @@ class Conjur::Command
         'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
         'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? 'with' : 'without'} admin" },
         'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
-        'role:create' => lambda{|e| "created role #{e[:role]}" }
+        'role:create' => lambda{|e| "created role #{e[:role]}" },
+        'audit' => lambda{|e| 
+                    action_part = [ e[:facility], e[:action] ].compact.join(":")
+                    actor_part = e[:role] ? "by #{e[:role]}" : nil
+                    resource_part = e[:resource_id] ? "on #{e[:resource_id]}" : nil
+                    allowed_part = e.has_key?(:allowed) ? "(allowed: #{e[:allowed]})" : nil
+                    message_part = e[:audit_message] ? "; message: #{e[:audit_message]}" : ""
+                    statement = [ action_part, actor_part, resource_part, allowed_part ].compact.join(" ")
+                    "reported #{statement}"+ message_part
+                  }
       }
       
       
@@ -22,22 +31,11 @@ class Conjur::Command
         s = "[#{Time.parse(e[:timestamp])}]"
         s << " #{e[:user]}"
         s << " (as #{e[:acting_as]})" if e[:acting_as] != e[:user]
-        formatter = SHORT_FORMATS["#{e[:kind]}:#{e[:action]}"]
+        formatter = SHORT_FORMATS["#{e[:kind]}:#{e[:action]}"] || SHORT_FORMATS[e[:kind]]
         if formatter
           s << " " << formatter.call(e)
         else
-          custom_event=false
-          begin 
-            if e[:request]["params"]["action"]=="inject_audit_event" 
-              s << " "+["custom event",e[:asset],e[:action]].compact.join(" ")
-              custom_event=true
-            end   
-          rescue
-          end
-
-          unless custom_event
-            s << " unknown event: #{e[:kind]}:#{e[:action]}!"  
-          end
+          s << " unknown event: #{e[:kind]}:#{e[:action]}!"  
         end
         s << " (failed with #{e[:error]})" if e[:error]
         s
