@@ -1,5 +1,7 @@
 *.policy
 .conjurrc
+*conjurrc*
+.conjurenv
 *.cert
 *.credential
 *.json
