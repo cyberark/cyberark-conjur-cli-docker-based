@@ -425,4 +425,37 @@ describe Conjur::Command::Audit, logged_in: true do
       end
     end
   end
+
+  describe "limit and offset" do
+    let(:events) { (1 .. 5).map { |x| { event: x } } }
+    before {
+      api.stub(:audit_event_feed).and_yield(events)
+    }
+
+    describe_command "audit all" do 
+      it "prints all the elements" do
+        (expect { invoke }.to write).should ==  events.map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"  
+      end
+    end
+
+    describe_command "audit all -l 2" do  
+      it "prints only <limit> elements" do
+        (expect { invoke }.to write).should ==  events[0..1].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"  
+      end
+    end
+
+    describe_command "audit all -o 2" do  
+      it "skips <offset> elements" do
+        (expect { invoke }.to write).should ==  events[2..4].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"   
+      end
+    end
+
+    describe_command "audit all -o 2 -l 2" do
+      it "skips <offset> elements and prints only <limit> of remaining part" do
+        (expect { invoke }.to write).should ==  events[2..3].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"
+      end
+    end
+
+  end
+
 end

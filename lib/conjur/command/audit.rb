@@ -27,6 +27,7 @@ class Conjur::Command
       
       
       def short_event_format e
+        $stderr.puts "DEBUG: processing #{e}"
         e.symbolize_keys!
         s = "[#{Time.parse(e[:timestamp])}]"
         s << " #{e[:user]}"
@@ -62,6 +63,10 @@ class Conjur::Command
       
       def show_audit_events events, options
         events = [events] unless events.kind_of?(Array)
+        # offset and limit options seem to be broken. this is a temporary workaround (should be applied on server-side eventually)
+        events = events.drop(options[:offset]) if options[:offset]
+        events = events.take(options[:limit]) if options[:limit]
+
         if options[:short]
           events.each{|e| puts short_event_format(e)}
         else
