@@ -1,1 +1,2 @@
 cert_file: ./conjur-ci.pem
+appliance_url: https://conjur.example.com
