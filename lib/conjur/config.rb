@@ -55,9 +55,17 @@ module Conjur
         require 'conjur/configuration'
         keys = Config.keys.dup
         keys.delete(:plugins)
+
+        cfg = Conjur.configuration
         keys.each do |k|
+          begin
+            next if cfg.send(k)
+          rescue
+            # we use try..rescue because Conjur.configuration
+            # provides no API to see if key is set
+          end
           value = Config[k]
-          Conjur.configuration.set k, value if value
+          cfg.set k, value if value
         end
   
         if Conjur.log

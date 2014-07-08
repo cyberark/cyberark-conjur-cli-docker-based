@@ -46,13 +46,12 @@ describe Conjur::Config do
       Conjur::Config.apply
     end
 
-    # is it something we want? I just spec it here to document it -div
-    it "shadows envars with rc" do
+    it "shadows rc with envars" do
       url = 'https://other-conjur.example.com'
       ENV['CONJUR_APPLIANCE_URL'] = url
       load!
       Conjur::Config.apply
-      expect(Conjur.configuration.appliance_url).to_not eq url
+      expect(Conjur.configuration.appliance_url).to eq url
     end
   end
 end
