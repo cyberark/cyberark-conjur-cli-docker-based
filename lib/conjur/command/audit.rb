@@ -27,7 +27,6 @@ class Conjur::Command
       
       
       def short_event_format e
-        $stderr.puts "DEBUG: processing #{e}"
         e.symbolize_keys!
         s = "[#{Time.parse(e[:timestamp])}]"
         s << " #{e[:user]}"
