@@ -177,7 +177,7 @@ module Conjur
 
         # TODO: find a way to pass annotations as part of top-level options hash
         #   https://basecamp.com/1949725/projects/4268938-api-version-4-x/todos/84965324-low-dsl-design
-        annotations = options.delete(:annotations)
+        annotations = options.delete(:annotations) || {}
 
         unless (obj = api.send(find_method, id)) && obj.exists?
           options = expand_options(options)
