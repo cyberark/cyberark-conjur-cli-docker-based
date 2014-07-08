@@ -150,7 +150,7 @@ TEMPLATEDESC
     env.command :help do |c|
       c.action do |global_options,options,args|
         puts """
-Environment configuration (either stored in file referred by -f option or provided inline with --yaml option) should be a YAML document describing one-level Hash.
+Environment configuration (either stored in file referred by -c option or provided inline with --yaml option) should be a YAML document describing one-level Hash.
 Keys of the hash are 'local names', used to refer to variable values in convenient manner.  (See help for env:run and env:template for more details about how they are interpreted).
 
 Values of the hash may take one of the following forms: a) string b) string preceeded with !var tag c) string preceeded with !tmp tag.
