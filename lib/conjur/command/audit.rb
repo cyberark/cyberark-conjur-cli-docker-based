@@ -1,30 +1,22 @@
 class Conjur::Command
   class Audit < self
+    SHORT_FORMATS = {
+      'resource:check' => lambda{|e| "checked that they can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
+      'resource:create' => lambda{|e| "created resource #{e[:resource]} owned by #{e[:owner]}" },
+      'resource:update' => lambda{|e| "gave #{e[:resource]} to #{e[:owner]}" },
+      'resource:destroy' => lambda{|e| "destroyed resource #{e[:resource]}" },
+      'resource:permit' => lambda{|e| "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
+      'resource:deny' => lambda{|e| "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
+      'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:privilege]} on #{e[:resource]}" },
+      'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
+      'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? 'with' : 'without'} admin" },
+      'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
+      'role:create' => lambda{|e| "created role #{e[:role]}" }
+    }
+
     class << self
-      private
-      SHORT_FORMATS = {
-        'resource:check' => lambda{|e| "checked that they can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
-        'resource:create' => lambda{|e| "created resource #{e[:resource]} owned by #{e[:owner]}" },
-        'resource:update' => lambda{|e| "gave #{e[:resource]} to #{e[:owner]}" },
-        'resource:destroy' => lambda{|e| "destroyed resource #{e[:resource]}" },
-        'resource:permit' => lambda{|e| "permitted #{e[:grantee]} to #{e[:privilege]} #{e[:resource]} (grant option: #{!!e[:grant_option]})" },
-        'resource:deny' => lambda{|e| "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
-        'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:privilege]} on #{e[:resource]}" },
-        'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
-        'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? 'with' : 'without'} admin" },
-        'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
-        'role:create' => lambda{|e| "created role #{e[:role]}" },
-        'audit' => lambda{|e| 
-                    action_part = [ e[:facility], e[:action] ].compact.join(":")
-                    actor_part = e[:role] ? "by #{e[:role]}" : nil
-                    resource_part = e[:resource_id] ? "on #{e[:resource_id]}" : nil
-                    allowed_part = e.has_key?(:allowed) ? "(allowed: #{e[:allowed]})" : nil
-                    message_part = e[:audit_message] ? "; message: #{e[:audit_message]}" : ""
-                    statement = [ action_part, actor_part, resource_part, allowed_part ].compact.join(" ")
-                    "reported #{statement}"+ message_part
-                  }
-      }
       
+      private
       
       def short_event_format e
         e.symbolize_keys!
@@ -95,13 +87,12 @@ class Conjur::Command
       end
     end
 
-    desc "Read and write audit events"
-    command  :audit do |audit|
+    desc "Fetch audit events"
+    command :audit do |audit|
       audit.desc "Show all audit events visible to the current user"
       audit_feed_command audit, :all do |args, options|
         api.audit(options){ |es| show_audit_events es, options }
       end
-
 
       audit.desc "Show audit events related to a role"
       audit.arg_name 'role'
@@ -110,24 +101,12 @@ class Conjur::Command
         api.audit_role(id, options){ |es| show_audit_events es, options }
       end
 
-
       audit.desc "Show audit events related to a resource"
       audit.arg_name 'resource'
       audit_feed_command audit, :resource do |args, options|
         id = full_resource_id(require_arg args, "resource")
         api.audit_resource(id, options){|es| show_audit_events es, options}
       end 
-
-      audit.desc "Send custom event(s) to audit system"
-      audit.long_desc "Send custom event(s) to audit system. Events should be provided in JSON format, describing either single hash or array of hashes."
-      audit.arg_name "( json_string | STDIN )"
-      audit.command :send do |c| 
-        c.action do |global_options, options, args|
-          json = ( args.shift || STDIN.read )
-          api.audit_send json 
-          puts "Events sent successfully"
-        end
-      end
     end
   end
 end

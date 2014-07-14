@@ -81,55 +81,11 @@ describe Conjur::Command::Audit, logged_in: true do
     it_calls_the_api "audit:all", :audit, {}
   end
 
-  describe_command "audit:send '[{\"action\":\"login\",\"user\":\"alice\"},{\"action\":\"sudo\",\"user\":\"alice\"}]' " do
-    it 'calls api.audit_send with provided parameter' do
-      api.should_receive(:audit_send).with("'[{\"action\":\"login\",\"user\":\"alice\"},{\"action\":\"sudo\",\"user\":\"alice\"}]'")
-      expect { invoke }.to write "Events sent successfully"
-    end 
-
-    it 'does not hide exceptions coming from API' do
-      api.should_receive(:audit_send).and_return { raise ArgumentError }
-      expect { invoke }.to raise_error(ArgumentError)
-    end
-  end
-
   describe "output formatting:" do
+    include_context "default audit behavior"
+    
     before {
       api.stub(:audit_event_feed).and_yield([audit_event])
-    }
-
-    let(:default_audit_event) { 
-      {
-        "request" => {
-                    "ip" => "1.2.3.4",
-                    "url"=>"https://conjur/api",
-                    "method"=>"POST",
-                    "uuid" => "abcdef",
-                    "params"=> {
-                      "controller"=>"role",
-                      "action"=>"create",
-                      "account"=>"the-account"
-                      }
-                    },
-        "user" => "account:user:alice",
-        "acting_as" => "account:group:admins",
-        "conjur" =>   { # new behaviour
-                    "user" => "account:user:alice",
-                    "role" => "account:group:admins",
-                    "domain" => "authz",
-                    "env"    => "test",
-                    "account" => "the-account"
-                    },
-        "completely_custom_field" => "with some value",
-        "kind" => "some_asset",
-        "action" => "some_action",
-        "user" => "account:user:alice",
-        "id"   => 12345,
-        "timestamp" => Time.now().to_s,
-        "event_id" => "xaxaxaxaxa",
-        "resources" => ["the-account:layer:resources/production", "layer:resources/frontend"],
-        "roles" => ["the-account:group:roles/qa", "group:roles/ssh_users"]
-      }
     }
 
     describe_command "audit all" do
@@ -354,73 +310,6 @@ describe Conjur::Command::Audit, logged_in: true do
         it_behaves_like "it recognizes error messages:"
         it "prints 'created role .. " do
           expect { invoke }.to write(" created role super:user")
-        end
-      end
-
-      describe "(audit:send)" do
-        # reported [facility:action] (by role) (on resource) (allowed: <allowed>)(; message: <audit_message>)”
-
-        describe "standard behaviour" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login") }
-          it_behaves_like "it supports standard prefix:" 
-          it_behaves_like "it recognizes error messages:"
-        end
-
-        describe "if facility is not specified" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login") }
-          it "prints 'reported <action>'" do
-            expect { invoke }.to write "reported login"
-          end
-        end
-        describe "if facility is specified" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login", "facility"=>"ssh") }
-          it "prints 'reported <action>'" do
-            expect { invoke }.to write "reported ssh:login"
-          end
-        end
-
-        describe "if role is specified" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login", "role"=>"user:alice") }
-          it "prints 'by <role>'" do
-            expect { invoke }.to write "reported login by user:alice"
-          end
-        end
-        
-        describe "if resource_id is specified" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login", "resource_id"=>"host:frontend") }
-          it "prints 'on <resource>'" do
-            expect { invoke }.to write "reported login on host:frontend"
-          end
-        end
-        
-        describe "if allowed is specified" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login", "allowed"=>false) }
-          it "prints '(allowed: <allowed>)'" do
-            expect { invoke }.to write "reported login (allowed: false)"
-          end
-        end
-
-        describe "if audit_message is specified" do
-          let(:test_event) { default_audit_event.merge("kind"=>"audit", "action"=>"login", "audit_message"=>"something important to know") }
-          it "prints '; message: <audit_message>'" do
-            expect { invoke }.to write "reported login; message: something important to know"
-          end
-        end
-
-        describe "if facility, role, resource_id, allowed, audit_message are specified" do
-          let(:test_event) { default_audit_event.merge("user"=>"host:monitoring", "acting_as" => "host:monitoring",
-                                                       "kind"=>"audit", 
-                                                       "action"=>"sudo",
-                                                       "facility"=>"ssh",
-                                                       "role"=>"user:alice",
-                                                       "resource_id"=>"host:frontend",
-                                                       "allowed"=>"false",
-                                                       "audit_message" => "sudo command is 'su'"
-                                                       )
-                            }
-          it 'prints all optional components together' do
-            expect { invoke }.to write "[#{default_audit_event["timestamp"]}] host:monitoring reported ssh:sudo by user:alice on host:frontend (allowed: false); message: sudo command is 'su'" 
-          end
         end
       end
     end
