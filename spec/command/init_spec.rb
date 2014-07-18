@@ -112,7 +112,8 @@ describe Conjur::Command::Init do
           expect(YAML.load(File.read(File.join(tmpdir, ".conjurrc")))).to eq({
             account: 'the-account',
             appliance_url: "https://localhost/api",
-            cert_file: "#{tmpdir}/conjur-the-account.pem"
+            cert_file: "#{tmpdir}/conjur-the-account.pem",
+            plugins: %w(host-factory audit-send),
           }.stringify_keys)
 
           File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"
