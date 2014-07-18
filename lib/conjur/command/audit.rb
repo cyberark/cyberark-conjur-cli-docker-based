@@ -11,7 +11,7 @@ class Conjur::Command
         'resource:deny' => lambda{|e| "denied #{e[:privilege]} from #{e[:grantee]} on #{e[:resource]}" },
         'resource:permitted_roles' => lambda{|e| "listed roles permitted to #{e[:privilege]} on #{e[:resource]}" },
         'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
-        'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin" },
+        'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? 'with' : 'without'} admin" },
         'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
         'role:create' => lambda{|e| "created role #{e[:role]}" },
         'audit' => lambda{ |e| 
@@ -30,11 +30,11 @@ class Conjur::Command
         s = "[#{Time.parse(e[:timestamp])}]"
         s << " #{e[:user]}"
         s << " (as #{e[:acting_as]})" if e[:acting_as] != e[:user]
-        formatter = SHORT_FORMATS["#{e[:kind]}:#{e[:action]}"]
+        formatter = SHORT_FORMATS["#{e[:kind]}:#{e[:action]}"] || SHORT_FORMATS[e[:kind]]
         if formatter
           s << " " << formatter.call(e)
         else
-          s << " unknown event: #{e[:asset]}:#{e[:action]}!"
+          s << " unknown event: #{e[:kind]}:#{e[:action]}!"
         end
         s << " (failed with #{e[:error]})" if e[:error]
         s
@@ -61,6 +61,10 @@ class Conjur::Command
       
       def show_audit_events events, options
         events = [events] unless events.kind_of?(Array)
+        # offset and limit options seem to be broken. this is a temporary workaround (should be applied on server-side eventually)
+        events = events.drop(options[:offset]) if options[:offset]
+        events = events.take(options[:limit]) if options[:limit]
+
         if options[:short]
           events.each{|e| puts short_event_format(e)}
         else
@@ -90,13 +94,12 @@ class Conjur::Command
       end
     end
 
-    desc "Show audit events"
-    command  :audit do |audit|
+    desc "Fetch audit events"
+    command :audit do |audit|
       audit.desc "Show all audit events visible to the current user"
       audit_feed_command audit, :all do |args, options|
         api.audit(options){ |es| show_audit_events es, options }
       end
-
 
       audit.desc "Show audit events related to a role"
       audit.arg_name 'role'
@@ -105,13 +108,12 @@ class Conjur::Command
         api.audit_role(id, options){ |es| show_audit_events es, options }
       end
 
-
       audit.desc "Show audit events related to a resource"
       audit.arg_name 'resource'
       audit_feed_command audit, :resource do |args, options|
         id = full_resource_id(require_arg args, "resource")
         api.audit_resource(id, options){|es| show_audit_events es, options}
-      end
+      end 
     end
   end
 end
