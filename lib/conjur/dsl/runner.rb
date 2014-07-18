@@ -195,7 +195,7 @@ module Conjur
             api.send(create_method, options)
           end
         end
-        if annotations.kind_of? Hash
+        if annotations.kind_of?(Hash) && !annotations.blank?
           # TODO: fix API to make 'annotations' available directly on objects
           #   https://basecamp.com/1949725/projects/4268938-api-version-4-x/todos/84970444-high-support
           obj_as_resource = obj.resource
