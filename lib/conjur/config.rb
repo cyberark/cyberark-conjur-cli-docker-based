@@ -55,14 +55,14 @@ module Conjur
         require 'conjur/configuration'
         keys = Config.keys.dup
         keys.delete(:plugins)
-
+        
         cfg = Conjur.configuration
         keys.each do |k|
-          begin
-            next if cfg.send(k)
-          rescue
-            # we use try..rescue because Conjur.configuration
-            # provides no API to see if key is set
+          if Conjur.configuration.respond_to?("#{k}_env_var") && (env_var = Conjur.configuration.send("#{k}_env_var")) && (v = ENV[env_var])
+            if Conjur.log
+              Conjur.log << "Not overriding environment setting #{k}=#{v}\n"
+            end
+            next
           end
           value = Config[k]
           cfg.set k, value if value
