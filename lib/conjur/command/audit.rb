@@ -13,9 +13,17 @@ class Conjur::Command
         'role:check' => lambda{|e| "checked that #{e[:role] == e[:user] ? 'they' : e[:role]} can #{e[:privilege]} #{e[:resource]} (#{e[:allowed]})" },
         'role:grant' => lambda{|e| "granted role #{e[:role]} to #{e[:member]} #{e[:admin_option] ? ' with ' : ' without '}admin" },
         'role:revoke' => lambda{|e| "revoked role #{e[:role]} from #{e[:member]}" },
-        'role:create' => lambda{|e| "created role #{e[:role]}" }
+        'role:create' => lambda{|e| "created role #{e[:role]}" },
+        'audit' => lambda{ |e| 
+          action_part = [ e[:facility], e[:action] ].compact.join(":")
+          actor_part = e[:role] ? "by #{e[:role]}" : nil
+          resource_part = e[:resource_id] ? "on #{e[:resource_id]}" : nil
+          allowed_part = e.has_key?(:allowed) ? "(allowed: #{e[:allowed]})" : nil
+          message_part = e[:audit_message] ? "; message: #{e[:audit_message]}" : ""
+          statement = [ action_part, actor_part, resource_part, allowed_part ].compact.join(" ")
+          "reported #{statement}"+ message_part
+        }
       }
-      
       
       def short_event_format e
         e.symbolize_keys!
