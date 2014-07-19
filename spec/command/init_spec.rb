@@ -113,7 +113,7 @@ describe Conjur::Command::Init do
             account: 'the-account',
             appliance_url: "https://localhost/api",
             cert_file: "#{tmpdir}/conjur-the-account.pem",
-            plugins: %w(host-factory audit-send),
+            plugins: [],
           }.stringify_keys)
 
           File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"

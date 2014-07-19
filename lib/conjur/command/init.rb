@@ -94,9 +94,10 @@ class Conjur::Command::Init < Conjur::Command
       
       exit_now! "account is required" if account.blank?
       
-      config = { account: account,
-                 plugins: %w(host-factory audit-send)
-                }
+      config = { 
+        account: account,
+        plugins: []
+      }
       
       config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?
       
