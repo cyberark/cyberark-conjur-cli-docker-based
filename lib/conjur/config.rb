@@ -31,7 +31,11 @@ module Conjur
       end
       
       def default_config_files
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || File.expand_path("~/.conjurrc") ), '.conjurrc' ]
+        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || [ File.expand_path("~/.conjurrc"), '.conjurrc'] ) ].flatten.tap do |f| 
+          if f.include?'.conjurrc' and File.file?('.conjurrc') 
+            $stderr.puts "WARNING: .conjurrc file from current directory is used. This behaviour is deprecated. Use ENV['CONJURRC'] to explicitly define custom configuration file if needed"
+          end
+        end
       end
       
       def load(config_files = default_config_files)
