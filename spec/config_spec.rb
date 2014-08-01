@@ -56,6 +56,22 @@ describe Conjur::Config do
         expect { subject }.to_not write(deprecation_warning).to(:stderr)
       end
     end
+
+    context "when CONJURRC is set to .conjurrc" do
+      around do |example|
+        oldrc = ENV['CONJURRC']
+        ENV['CONJURRC']='.conjurrc'
+        example.run
+        ENV['CONJURRC'] = oldrc
+      end
+      before { File.stub(:file?).with('.conjurrc').and_return true }
+      it { should include('/etc/conjur.conf') }
+      it { should include('.conjurrc') }
+      it { should_not include('/home/isfake/.conjurrc') }
+      it "Does not issue a deprecation warning" do
+        expect { subject }.to_not write(deprecation_warning).to(:stderr)
+      end
+    end
   end
 
   let(:load!) { Conjur::Config.load([ File.expand_path('conjurrc', File.dirname(__FILE__)) ]) }
