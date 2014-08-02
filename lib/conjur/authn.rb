@@ -54,7 +54,15 @@ module Conjur::Authn
     end
     
     def get_credentials(options = {})
-      @credentials ||= (read_credentials || fetch_credentials(options))
+      @credentials ||= (env_credentials || read_credentials || fetch_credentials(options))
+    end
+    
+    def env_credentials
+      if (login = ENV['CONJUR_AUTHN_LOGIN']) && (api_key = ENV['CONJUR_AUTHN_API_KEY'])
+        [ login, api_key ]
+      else
+        nil
+      end
     end
     
     def read_credentials

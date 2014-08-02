@@ -2,6 +2,23 @@ require 'conjur/authn'
 require 'conjur/config'
 
 describe Conjur::Authn do
+  describe "credentials from environment" do
+    before {
+      Conjur::Authn.instance_variable_set("@credentials", nil)
+      ENV.should_receive(:[]).with("CONJUR_AUTHN_LOGIN").and_return "the-login"
+      ENV.should_receive(:[]).with("CONJUR_AUTHN_API_KEY").and_return "the-api-key"
+    }
+    after {
+      Conjur::Authn.instance_variable_set("@credentials", nil)
+    }
+    it "are used to authn" do
+      Conjur::Authn.get_credentials.should == [ "the-login", "the-api-key" ]
+    end
+    it "are not written to netrc" do
+      Conjur::Authn.stub(:write_credentials).and_raise "should not write credentials"
+      Conjur::Authn.get_credentials
+    end
+  end
   describe "netrc" do
     before {
       Conjur::Authn.instance_variable_set("@netrc", nil)
