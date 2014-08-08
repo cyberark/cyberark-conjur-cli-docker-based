@@ -29,11 +29,29 @@ module Conjur
       def clear
         @@attributes = {}
       end
-      
+
+      def user_config_files
+        if ENV['CONJURRC']
+          return ENV['CONJURRC']
+        else
+          homefile = File.expand_path "~/.conjurrc"
+          pwdfile = File.expand_path ".conjurrc"
+          if homefile != pwdfile && File.file?(pwdfile)
+            $stderr.puts "WARNING: .conjurrc file from current directory is " +
+                "used. This behaviour is deprecated. Use ENV['CONJURRC'] to " +
+                "explicitly define custom configuration file if needed"
+          end
+          [ homefile, pwdfile ]
+        end
+      end
+
       def default_config_files
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || [ File.expand_path("~/.conjurrc"), '.conjurrc'] ) ].flatten.tap do |f| 
-          if f.include?'.conjurrc' and File.file?('.conjurrc') and not ENV['CONJURRC']=='.conjurrc'
-            $stderr.puts "WARNING: .conjurrc file from current directory is used. This behaviour is deprecated. Use ENV['CONJURRC'] to explicitly define custom configuration file if needed"
+        ['/etc/conjur.conf', user_config_files].flatten
+        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || [ File.expand_path("~/.conjurrc"), '.conjurrc'] ) ].flatten.tap do |f|
+          if f.include?'.conjurrc' and
+              File.file?('.conjurrc') and
+              File.expand_path('..', '.conjurrc') != ENV['HOME'] and
+              not ENV['CONJURRC']=='.conjurrc'
           end
         end
       end

@@ -9,14 +9,22 @@ describe Conjur::Config do
 
   describe ".default_config_files" do
     subject { Conjur::Config.default_config_files }
+    let(:homedir) { '/home/isfake' }
     around do |example|
       realhome = ENV.delete 'HOME'
-      ENV['HOME'] = '/home/isfake'
+      ENV['HOME'] = homedir
       example.run
       ENV['HOME'] = realhome
     end
 
     let(:deprecation_warning) { "WARNING: .conjurrc file from current directory is used. This behaviour is deprecated. Use ENV['CONJURRC'] to explicitly define custom configuration file if needed" }
+
+    shared_examples "no deprecation warning" do
+      it "does not issue a deprecation warning" do
+        expect { subject }.to_not write(deprecation_warning).to(:stderr)
+      end
+    end
+
     context "when CONJURRC is not set" do
       around do |example|
         oldrc = ENV.delete 'CONJURRC'
@@ -25,19 +33,34 @@ describe Conjur::Config do
       end
 
       it { should include('/etc/conjur.conf') }
-      it { should include('/home/isfake/.conjurrc') }
+      it { should include("#{homedir}/.conjurrc") }
       it { should include('.conjurrc') }
+
+      before do
+        File.stub(:expand_path).and_call_original
+        File.stub(:expand_path).with('.conjurrc').and_return '.conjurrc'
+      end
+
       context "When .conjurrc is present" do
         before { File.stub(:file?).with('.conjurrc').and_return true }
         it "Issues a deprecation warning" do 
           expect { subject }.to write(deprecation_warning).to(:stderr)
         end
-      end 
+
+        context "but the current directory is home" do
+          before do
+            File.unstub(:expand_path)
+            File.stub(:expand_path).and_call_original
+            File.stub(:expand_path).with('.conjurrc').and_return("#{homedir}/.conjurrc")
+          end
+
+          include_examples "no deprecation warning"
+        end
+      end
+
       context "When .conjurrc is missing" do
         before { File.stub(:file?).with('.conjurrc').and_return false }
-        it "Does not issue a deprecation warning" do 
-          expect { subject }.to_not write(deprecation_warning).to(:stderr)
-        end
+        include_examples "no deprecation warning"
       end
     end
 
@@ -50,11 +73,10 @@ describe Conjur::Config do
       end
       it { should include('/etc/conjur.conf') }
       it { should include('stub_conjurrc') }
-      it { should_not include('/home/isfake/.conjurrc') }
+      it { should_not include("#{homedir}/.conjurrc") }
       it { should_not include('.conjurrc') }
-      it "Does not issue a deprecation warning" do
-        expect { subject }.to_not write(deprecation_warning).to(:stderr)
-      end
+
+      include_examples "no deprecation warning"
     end
 
     context "when CONJURRC is set to .conjurrc" do
@@ -67,10 +89,9 @@ describe Conjur::Config do
       before { File.stub(:file?).with('.conjurrc').and_return true }
       it { should include('/etc/conjur.conf') }
       it { should include('.conjurrc') }
-      it { should_not include('/home/isfake/.conjurrc') }
-      it "Does not issue a deprecation warning" do
-        expect { subject }.to_not write(deprecation_warning).to(:stderr)
-      end
+      it { should_not include("#{homedir}/.conjurrc") }
+
+      include_examples "no deprecation warning"
     end
   end
 
