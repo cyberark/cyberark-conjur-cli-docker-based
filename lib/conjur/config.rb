@@ -47,13 +47,6 @@ module Conjur
 
       def default_config_files
         ['/etc/conjur.conf', user_config_files].flatten
-        [ File.join("/etc", "conjur.conf"), ( ENV['CONJURRC'] || [ File.expand_path("~/.conjurrc"), '.conjurrc'] ) ].flatten.tap do |f|
-          if f.include?'.conjurrc' and
-              File.file?('.conjurrc') and
-              File.expand_path('..', '.conjurrc') != ENV['HOME'] and
-              not ENV['CONJURRC']=='.conjurrc'
-          end
-        end
       end
       
       def load(config_files = default_config_files)
