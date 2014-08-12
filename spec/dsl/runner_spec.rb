@@ -31,4 +31,35 @@ describe Conjur::DSL::Runner, logged_in: true do
       "the-account:user:alice" => "the-api-key"
     }
   end
+
+  it "doesn't store default env and stack in context" do
+    expect(runner.context).to_not have_key 'env'
+    expect(runner.context).to_not have_key 'stack'
+  end
+
+  context "with non-default stack and env" do
+    let(:runner) do
+      Conjur::Config.merge env: 'baz', stack: 'bar'
+      Conjur::Config.apply
+      Conjur::DSL::Runner.new '', nil
+    end
+
+    it "stores ther in context" do
+      expect(runner.context['env']).to eq 'baz'
+      expect(runner.context['stack']).to eq 'bar'
+    end
+  end
+
+  context "with appliance url" do
+    let(:appliance_url) { "https://conjur.example.com/api" }
+    let(:runner) do
+      Conjur::Config.merge appliance_url: appliance_url
+      Conjur::Config.apply
+      Conjur::DSL::Runner.new '', nil
+    end
+
+    it "stores appliance url in the context" do
+      expect(runner.context['appliance_url']).to eq appliance_url
+    end
+  end
 end
