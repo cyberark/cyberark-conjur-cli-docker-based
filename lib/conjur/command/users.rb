@@ -43,13 +43,20 @@ class Conjur::Command::Users < Conjur::Command
       c.desc "Prompt for a password for the user (default: --no-password)"
       c.switch [:p,:password]
 
+      c.desc "UID number to be associated with user (optional)"
+      c.flag [:uidnumber]
+
       acting_as_option(c)
 
       c.action do |global_options,options,args|
         login = require_arg(args, 'login')
 
-        opts = options.slice(:ownerid)
-        
+        opts = options.slice(:ownerid,:uidnumber)
+        if opts[:uidnumber] 
+          raise "Uidnumber should be integer" unless /\d+/ =~ opts[:uidnumber]
+          opts[:uidnumber]=opts[:uidnumber].to_i
+        end
+
         if options[:p]
           opts[:password] = prompt_for_password
         end
@@ -88,6 +95,33 @@ class Conjur::Command::Users < Conjur::Command
         Conjur::API.update_password username, password, new_password
       end
     end
+
+    user.desc "Set the UID number of an existing user"
+    user.arg_name "login" 
+    user.command :update do |c|
+      c.desc "UID number to be associtated with user"
+      c.flag [:uidnumber]
+      acting_as_option(c)
+      c.action do |global_options, options, args|
+        login=require_arg(args,'login')
+        raise "Uidnumber should be integer" unless /\d+/ =~ options[:uidnumber]
+        options[:uidnumber]=options[:uidnumber].to_i
+        api.user(login).update(options)
+        puts "UID set" 
+      end
+    end
+
+    user.desc "Find the user by UID" 
+    user.arg_name "uid" 
+    user.command :uidsearch do |c| 
+      c.action do |global_options, options, args| 
+        uidnumber = require_arg(args,'uid')
+        raise "Uidnumber should be integer" unless /\d+/ =~ uidnumber
+        uidnumber=uidnumber.to_i
+        display api.find_users(uidnumber: uidnumber)
+      end
+    end
+
   end
 
 end

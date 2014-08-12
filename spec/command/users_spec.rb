@@ -25,6 +25,33 @@ describe Conjur::Command::Users, logged_in: true do
           invoke
         end
       end
+      describe_command "#{cmd} --uidnumber 12345 the-user" do
+        it "Creates a user with specified uidnumber" do
+          Conjur::API.any_instance.should_receive(:create_user).with("the-user", { uidnumber: 12345 }).and_return new_user
+          invoke
+        end
+      end
+    end
+  end
+
+  context "updating UID number" do  
+    describe_command "user update --uidnumber 12345 the-user" do
+      it "updates the uidnumber" do
+        stub_user = double()
+        Conjur::API.any_instance.should_receive(:user).with("the-user").and_return stub_user
+        stub_user.should_receive(:update).with(uidnumber: 12345).and_return ""
+        expect { invoke }.to write "UID set"
+      end
+    end
+  end
+
+  context "lookup per UID" do
+    let(:search_result) { {id: "the-user"} }
+    describe_command "user uidsearch 12345" do
+      it "finds user" do
+        Conjur::API.any_instance.should_receive(:find_users).with(uidnumber: 12345).and_return search_result
+        expect { invoke }.to write(JSON.pretty_generate(search_result))
+      end
     end
   end
   
