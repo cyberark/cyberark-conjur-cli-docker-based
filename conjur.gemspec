@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
 
 
   gem.add_dependency 'activesupport'
-  gem.add_dependency 'conjur-api', '>=4.9.2'
+  gem.add_dependency 'conjur-api', '>=4.10.0'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc'
