@@ -96,12 +96,11 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
-    user.desc "Set the UID number of an existing user"
+    user.desc "Update user's attributes (only uidnumber supported now)"
     user.arg_name "login" 
     user.command :update do |c|
-      c.desc "UID number to be associtated with user"
+      c.desc "UID number to be associated with user"
       c.flag [:uidnumber]
-      acting_as_option(c)
       c.action do |global_options, options, args|
         login=require_arg(args,'login')
         raise "Uidnumber should be integer" unless /\d+/ =~ options[:uidnumber]
