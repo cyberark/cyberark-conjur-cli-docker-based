@@ -45,17 +45,17 @@ class Conjur::Command::Init < Conjur::Command
 
     c.desc "Conjur organization account name (not required for appliance)"
     c.flag ["a", "account"]
-    
+
     c.desc "Conjur SSL certificate (will be obtained from host unless provided by this option)"
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
     c.default_value File.expand_path('~/.conjurrc')
     c.flag ["f","file"]
-    
+
     c.desc "Force overwrite of existing files"
     c.flag "force"
-    
+
     c.action do |global_options,options,args|
       hl = HighLine.new $stdin, $stderr
 
@@ -65,7 +65,7 @@ class Conjur::Command::Init < Conjur::Command
       if hostname
         Conjur.configuration.core_url = "https://#{hostname}/api"
       end
-      
+
       account = options[:account]
       account ||= if hostname
         account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
@@ -73,7 +73,7 @@ class Conjur::Command::Init < Conjur::Command
         # using .to_s to overcome https://github.com/JEG2/highline/issues/69
         hl.ask("Enter your organization account name: ").to_s
       end
-      
+
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
           connect_hostname = if hostname.include?(':')
@@ -91,16 +91,16 @@ class Conjur::Command::Init < Conjur::Command
           exit_now! "You decided not to trust the certificate" unless hl.ask("Trust this certificate (yes/no): ").strip == "yes"
         end
       end
-      
+
       exit_now! "account is required" if account.blank?
-      
-      config = { 
+
+      config = {
         account: account,
         plugins: []
       }
-      
+
       config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?
-      
+
       unless certificate.blank?
         cert_file = File.join(File.dirname(options[:file]), "conjur-#{account}.pem")
         config[:cert_file] = cert_file
@@ -109,7 +109,7 @@ class Conjur::Command::Init < Conjur::Command
         end
         puts "Wrote certificate to #{cert_file}"
       end
-      
+
       write_file(options[:file], options[:force]) do |f|
         f.puts YAML.dump(config.stringify_keys)
       end
