@@ -57,12 +57,14 @@ describe Conjur::Command::Init do
     before {
       File.stub(:exists?).and_return false
     }
+
     context "auto-fetching fingerprint" do
       before {
         HighLine.any_instance.stub(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
         Conjur::Command::Init.stub get_certificate: ["the-fingerprint", nil]
         HighLine.any_instance.stub(:ask).with(/^Trust this certificate/).and_return "yes"
       }
+
       describe_command 'init' do
         it "fetches account and writes config file" do
           # Stub hostname
@@ -71,6 +73,7 @@ describe Conjur::Command::Init do
           invoke
         end
       end
+
       describe_command 'init -a the-account' do
         it "writes config file" do
           File.should_receive(:open)
@@ -78,11 +81,13 @@ describe Conjur::Command::Init do
         end
       end
     end
+
     describe_command 'init -a the-account -h foobar' do
       it "can't get the cert" do
         expect { invoke }.to raise_error(GLI::CustomExit, /unable to retrieve certificate/i)
       end
     end
+
     # KEG: These tests have a nasty habit of hanging
 #    describe_command 'init -a the-account -h google.com' do
 #      it "writes the config and cert" do
@@ -98,17 +103,19 @@ describe Conjur::Command::Init do
 #        invoke
 #      end
 #    end
+
     describe_command 'init -a the-account -h localhost -c the-cert' do
       it "writes config and cert files" do
         File.should_receive(:open).twice
         invoke
       end
     end
+
     context "in a temp dir" do
       describe_command "init -f #{tmpdir}/.conjurrc -a the-account -h localhost -c the-cert" do
         it "writes config and cert files" do
           invoke
-          
+
           expect(YAML.load(File.read(File.join(tmpdir, ".conjurrc")))).to eq({
             account: 'the-account',
             appliance_url: "https://localhost/api",
@@ -117,6 +124,21 @@ describe Conjur::Command::Init do
           }.stringify_keys)
 
           File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"
+        end
+      end
+
+      describe_command "init -a the-account -h localhost -c the-cert" do
+        it "writes config specified in CONJURRC env variable" do
+          ENV['CONJURRC'] = "#{tmpdir}/.conjurrc_env"
+
+          invoke
+
+          expect(YAML.load(File.read(ENV['CONJURRC']))).to eq({
+            account: 'the-account',
+            appliance_url: "https://localhost/api",
+            cert_file: "#{tmpdir}/conjur-the-account.pem",
+            plugins: [],
+          }.stringify_keys)
         end
       end
     end
