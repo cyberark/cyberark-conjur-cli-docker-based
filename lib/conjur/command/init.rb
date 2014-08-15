@@ -102,7 +102,7 @@ class Conjur::Command::Init < Conjur::Command
 
       config_file = File.expand_path('~/.conjurrc')
 
-      if not options[:file].nil?
+      if !options[:file].nil?
         config_file = File.expand_path(options[:file])
       elsif ENV['CONJURRC']
         config_file = File.expand_path(ENV['CONJURRC'])
