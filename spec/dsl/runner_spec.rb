@@ -2,6 +2,8 @@ require 'spec_helper'
 require 'conjur/dsl/runner'
 
 describe Conjur::DSL::Runner, logged_in: true do
+  include_context "fresh config"
+
   let(:filename) { nil }
   let(:runner) { Conjur::DSL::Runner.new script, filename }
   let(:script) { "user 'alice'" }
@@ -44,7 +46,7 @@ describe Conjur::DSL::Runner, logged_in: true do
       Conjur::DSL::Runner.new '', nil
     end
 
-    it "stores ther in context" do
+    it "stores them in context" do
       expect(runner.context['env']).to eq 'baz'
       expect(runner.context['stack']).to eq 'bar'
     end
@@ -55,6 +57,7 @@ describe Conjur::DSL::Runner, logged_in: true do
     let(:runner) do
       Conjur::Config.merge appliance_url: appliance_url
       Conjur::Config.apply
+      
       Conjur::DSL::Runner.new '', nil
     end
 

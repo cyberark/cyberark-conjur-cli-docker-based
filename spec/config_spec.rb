@@ -3,9 +3,7 @@ require 'conjur/config'
 require 'conjur/command/rspec/output_matchers'
 
 describe Conjur::Config do
-  after {
-    Conjur::Config.clear
-  }
+  include_context "fresh config"
 
   describe ".default_config_files" do
     subject { Conjur::Config.default_config_files }

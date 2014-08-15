@@ -29,3 +29,18 @@ require 'conjur/command/rspec/helpers'
 ENV['CONJURRC'] = '/dev/null'
 
 require 'conjur/cli'
+
+shared_context "fresh config" do
+  before {
+    ENV.delete_if do |k,v|
+      k =~ /^CONJUR_/
+    end
+    
+    @configuration = Conjur.configuration
+    Conjur.configuration = Conjur::Configuration.new
+  }
+  after {
+    Conjur::Config.clear
+    Conjur.configuration = @configuration
+  }
+end

@@ -84,8 +84,12 @@ module Conjur
         end
   
         if Conjur.log
-          require 'conjur/api'
-          Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
+          begin
+            require 'conjur/api'
+            Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
+          rescue RuntimeError
+            raise $! unless $!.message == "Missing required option account"
+          end
         end
         if Config[:cert_file]
           OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file Config[:cert_file]

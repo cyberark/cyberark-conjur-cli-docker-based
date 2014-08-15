@@ -15,7 +15,7 @@ module Conjur
           "account" => Conjur.account,
           "api_keys" => {}
         }
-
+        
         @context['env'] = Conjur.env unless Conjur.env == 'production'
         @context['stack'] = Conjur.stack unless Conjur.stack == 'v4'
         @context['appliance_url'] = Conjur.configuration.appliance_url unless Conjur.configuration.appliance_url.nil?
