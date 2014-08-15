@@ -50,7 +50,6 @@ class Conjur::Command::Init < Conjur::Command
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
-    c.default_value File.expand_path('~/.conjurrc')
     c.flag ["f", "file"]
 
     c.desc "Force overwrite of existing files"
@@ -101,12 +100,16 @@ class Conjur::Command::Init < Conjur::Command
 
       config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?
 
-      if ENV['CONJURRC'] and options[:file] == File.expand_path('~/.conjurrc')
-        options[:file] = File.expand_path(ENV['CONJURRC'])
+      config_file = File.expand_path('~/.conjurrc')
+
+      if not options[:file].nil?
+        config_file = File.expand_path(options[:file])
+      elsif ENV['CONJURRC']
+        config_file = File.expand_path(ENV['CONJURRC'])
       end
 
       unless certificate.blank?
-        cert_file = File.join(File.dirname(options[:file]), "conjur-#{account}.pem")
+        cert_file = File.join(File.dirname(config_file), "conjur-#{account}.pem")
         config[:cert_file] = cert_file
         write_file(cert_file, options[:force]) do |f|
           f.puts certificate
@@ -114,7 +117,7 @@ class Conjur::Command::Init < Conjur::Command
         puts "Wrote certificate to #{cert_file}"
       end
 
-      write_file(options[:file], options[:force]) do |f|
+      write_file(config_file, options[:force]) do |f|
         f.puts YAML.dump(config.stringify_keys)
       end
 
