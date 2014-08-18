@@ -24,7 +24,7 @@ require 'active_support/core_ext/hash/indifferent_access'
 module Conjur
   class Config
     @@attributes = {}
-    
+
     class << self
       def clear
         @@attributes = {}
@@ -48,7 +48,7 @@ module Conjur
       def default_config_files
         ['/etc/conjur.conf', user_config_files].flatten
       end
-      
+
       def load(config_files = default_config_files)
         require 'yaml'
         require 'conjur/log'
@@ -65,12 +65,12 @@ module Conjur
           end
         end
       end
-      
+
       def apply
         require 'conjur/configuration'
         keys = Config.keys.dup
         keys.delete(:plugins)
-        
+
         cfg = Conjur.configuration
         keys.each do |k|
           if Conjur.configuration.respond_to?("#{k}_env_var") && (env_var = Conjur.configuration.send("#{k}_env_var")) && (v = ENV[env_var])
@@ -82,7 +82,7 @@ module Conjur
           value = Config[k]
           cfg.set k, value if value
         end
-  
+
         if Conjur.log
           begin
             require 'conjur/api'
@@ -95,11 +95,11 @@ module Conjur
           OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file Config[:cert_file]
         end
       end
-      
+
       def inspect
         @@attributes.inspect
       end
-      
+
       def plugins
         plugins = @@attributes['plugins']
         if plugins
@@ -108,16 +108,16 @@ module Conjur
           []
         end
       end
-      
+
       def merge(a)
         a = {} unless a
         @@attributes.deep_merge!(a.stringify_keys)
       end
-      
+
       def keys
         @@attributes.keys.map(&:to_sym)
       end
-      
+
       def [](key)
         @@attributes[key.to_s]
       end
