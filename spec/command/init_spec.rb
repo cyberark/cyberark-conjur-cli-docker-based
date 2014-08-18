@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-tmpdir = Dir.mktmpdir
-
 GITHUB_FP = "SHA1 Fingerprint=A0:C4:A7:46:00:ED:A7:2D:C0:BE:CB:9A:8C:B6:07:CA:58:EE:74:5E"
 GITHUB_CERT = <<EOF
 -----BEGIN CERTIFICATE-----
@@ -41,10 +39,6 @@ XX4C2NesiZcLYbc2n7B9O+63M2k=
 EOF
 
 describe Conjur::Command::Init do
-  it "properly defaults to a file path" do
-    expect(Conjur::CLI.commands[:init].flags[:f].default_value).to eq("#{ENV['HOME']}/.conjurrc")
-  end
-
   describe ".get_certificate" do
     it "returns the right certificate from github" do
       fingerprint, certificate = Conjur::Command::Init.get_certificate('github.com:443')
@@ -57,12 +51,14 @@ describe Conjur::Command::Init do
     before {
       File.stub(:exists?).and_return false
     }
+
     context "auto-fetching fingerprint" do
       before {
         HighLine.any_instance.stub(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
         Conjur::Command::Init.stub get_certificate: ["the-fingerprint", nil]
         HighLine.any_instance.stub(:ask).with(/^Trust this certificate/).and_return "yes"
       }
+
       describe_command 'init' do
         it "fetches account and writes config file" do
           # Stub hostname
@@ -71,6 +67,7 @@ describe Conjur::Command::Init do
           invoke
         end
       end
+
       describe_command 'init -a the-account' do
         it "writes config file" do
           File.should_receive(:open)
@@ -78,11 +75,13 @@ describe Conjur::Command::Init do
         end
       end
     end
+
     describe_command 'init -a the-account -h foobar' do
       it "can't get the cert" do
         expect { invoke }.to raise_error(GLI::CustomExit, /unable to retrieve certificate/i)
       end
     end
+
     # KEG: These tests have a nasty habit of hanging
 #    describe_command 'init -a the-account -h google.com' do
 #      it "writes the config and cert" do
@@ -98,26 +97,64 @@ describe Conjur::Command::Init do
 #        invoke
 #      end
 #    end
+
     describe_command 'init -a the-account -h localhost -c the-cert' do
       it "writes config and cert files" do
         File.should_receive(:open).twice
         invoke
       end
     end
+
     context "in a temp dir" do
-      describe_command "init -f #{tmpdir}/.conjurrc -a the-account -h localhost -c the-cert" do
+      tmpdir = Dir.mktmpdir
+
+      shared_examples "check config and cert files" do |file, env|
+        around do |example|
+          Dir.foreach(tmpdir) {|f|
+            fn = File.join(tmpdir, f)
+            File.delete(fn) if f != '.' && f != '..'
+          }
+          f = ENV.delete 'CONJURRC'
+          if not env.nil?
+            ENV['CONJURRC'] = env
+          end
+          example.run
+          ENV['CONJURRC'] = f
+        end
+
         it "writes config and cert files" do
           invoke
-          
-          expect(YAML.load(File.read(File.join(tmpdir, ".conjurrc")))).to eq({
+
+          expect(YAML.load(File.read(file))).to eq({
             account: 'the-account',
             appliance_url: "https://localhost/api",
-            cert_file: "#{tmpdir}/conjur-the-account.pem",
+            cert_file: File.join(File.dirname(file), "conjur-the-account.pem"),
             plugins: [],
           }.stringify_keys)
-
-          File.read(File.join(tmpdir, "conjur-the-account.pem")).should == "the-cert\n"
         end
+      end
+
+      describe_command "init -a the-account -h localhost -c the-cert" do
+        before(:each) {
+          File.stub(:expand_path).and_call_original
+          File.stub(:expand_path).with('~/.conjurrc').and_return("#{tmpdir}/.conjurrc")
+        }
+
+        include_examples "check config and cert files", File.expand_path("~/.conjurrc"), nil
+      end
+
+      describe_command "init -f #{tmpdir}/.conjurrc -a the-account -h localhost -c the-cert" do
+        include_examples "check config and cert files", File.join(tmpdir, ".conjurrc"), nil
+      end
+
+      describe_command "init -a the-account -h localhost -c the-cert" do
+        file = File.join(tmpdir, ".conjurrc_env")
+        include_examples "check config and cert files", file, file
+      end
+
+      describe_command "init -f #{tmpdir}/.conjurrc_2 -a the-account -h localhost -c the-cert" do
+        ENV['CONJURRC'] = "#{tmpdir}/.conjurrc_env_2"
+        include_examples "check config and cert files", File.join(tmpdir, ".conjurrc_2")
       end
     end
   end
