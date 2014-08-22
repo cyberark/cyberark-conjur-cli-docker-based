@@ -79,7 +79,8 @@ RUNLONGDESC
         env = get_env_object(options)
         runtime_environment = Hash[ env.obtain(api).map {|k,v| [k.upcase, v] } ]
         if Conjur.log 
-          Conjur.log << "Running command in the prepared environment: #{args}"
+          Conjur.log << "[conjur env] Loaded environment #{runtime_environment.keys}\n"
+          Conjur.log << "[conjur env] Running command #{args}\n"
         end
         Kernel.system(runtime_environment, *args) or exit($?.to_i) # keep original exit code in case of failure
       end
