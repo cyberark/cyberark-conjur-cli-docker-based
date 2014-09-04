@@ -9,7 +9,6 @@ module Conjur
       include Conjur::IdentifierManipulation
       
       attr_reader :script, :filename, :context
-      # TODO: describe new attributes in release notes
       attr_reader :policy_role, :policy_resource
       
       def initialize(script, filename = nil)
