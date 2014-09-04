@@ -81,8 +81,7 @@ module Conjur::Authn
     end
     
     def ask_for_credentials(options = {})
-      raise "No credentials provided or found" if options[:noask]
-
+      raise "No Conjur credentials provided or found" if options[:noask]
 
       # also use stderr here, because we might be prompting for a password as part
       # of a command like user:create that we'd want to send to a file.

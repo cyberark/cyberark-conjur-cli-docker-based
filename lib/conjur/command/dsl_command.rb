@@ -28,7 +28,18 @@ class Conjur::DSLCommand < Conjur::Command
       filename = nil
       script = if script = args.pop
         filename = script
-        script = File.read(script)
+        script = if File.exists?(script)
+          File.read(script)
+        else
+          require 'open-uri'
+          uri = URI.parse(script)
+          raise "Unable to read this kind of URL : #{script}" unless uri.respond_to?(:read)
+          begin
+            uri.read
+          rescue OpenURI::HTTPError
+            raise "Unable to read URI #{script} : #{$!.message}"
+          end
+        end
       else
         STDIN.read
       end
