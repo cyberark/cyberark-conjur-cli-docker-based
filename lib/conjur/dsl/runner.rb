@@ -9,6 +9,7 @@ module Conjur
       include Conjur::IdentifierManipulation
       
       attr_reader :script, :filename, :context
+      attr_reader :policy_role, :policy_resource
       
       def initialize(script, filename = nil)
         @context = {
@@ -16,9 +17,10 @@ module Conjur
           "api_keys" => {}
         }
         
-        @context['env'] = Conjur.env unless Conjur.env == 'production'
+        @context['env']   = Conjur.env unless Conjur.env == 'production'
         @context['stack'] = Conjur.stack unless Conjur.stack == 'v4'
-        @context['appliance_url'] = Conjur.configuration.appliance_url unless Conjur.configuration.appliance_url.nil?
+        @context['appliance_url']   = Conjur.configuration.appliance_url unless Conjur.configuration.appliance_url.nil?
+        @context['ssl_certificate'] = File.read(Conjur::Config[:cert_file]) unless Conjur::Config[:cert_file].nil?
 
         @script = script
         @filename = filename
@@ -89,9 +91,11 @@ module Conjur
       
       def policy id, &block
         self.role "policy", id do |role|
+          @policy_role = role
           context["policy"] = role.identifier
           self.owns do
-            self.resource "policy", id do
+            self.resource "policy", id do |resource|
+              @policy_resource = resource
               scope id do
                 block.call if block_given?
               end

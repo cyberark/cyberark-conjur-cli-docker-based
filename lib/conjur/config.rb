@@ -46,7 +46,7 @@ module Conjur
       end
 
       def default_config_files
-        ['/etc/conjur.conf', user_config_files].flatten
+        ['/etc/conjur.conf', user_config_files].flatten.uniq
       end
 
       def load(config_files = default_config_files)
