@@ -22,7 +22,8 @@ describe Conjur::Command::Policy do
       double("resource", exists?: true).as_null_object
     end
     before {
-      File.stub(:read).with("policy-body").and_return "{}"
+      File.stub(:exists?).with("policy.rb").and_return true
+      File.stub(:read).with("policy.rb").and_return "{}"
       Conjur::DSL::Runner.any_instance.stub(:api).and_return api
     }
     before {
@@ -32,7 +33,17 @@ describe Conjur::Command::Policy do
       api.stub(:resource).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return resource
     }
     
-    describe_command 'policy:load --collection the-collection policy-body' do
+    describe_command 'policy:load --collection the-collection http://example.com/policy.rb' do
+      let(:collection) { "the-collection" }
+      before {
+        File.stub(:exists?).with("http://example.com/policy.rb").and_return false
+        URI.stub(:parse).with("http://example.com/policy.rb").and_return double(:uri, read: "{}")
+      }
+      it "creates the policy" do
+        invoke.should == 0
+      end
+    end
+    describe_command 'policy:load --collection the-collection policy.rb' do
       let(:collection) { "the-collection" }
       it "creates the policy" do
         invoke.should == 0
@@ -43,7 +54,7 @@ describe Conjur::Command::Policy do
       before {
         stub_const("ENV", "USER" => "alice", "HOSTNAME" => "localhost")
       }
-      describe_command 'policy:load --as-group the-group policy-body' do
+      describe_command 'policy:load --as-group the-group policy.rb' do
         let(:group) { double(:group, exists?: true) }
         it "creates the policy" do
           Conjur::Command.api.stub(:role).with("the-account:group:the-group").and_return group
@@ -52,7 +63,7 @@ describe Conjur::Command::Policy do
           invoke.should == 0
         end
       end
-      describe_command 'policy:load policy-body' do
+      describe_command 'policy:load policy.rb' do
         it "creates the policy with default collection" do
           invoke.should == 0
         end
