@@ -10,6 +10,8 @@ require 'io/grab'
 #
 # @note http://greyblake.com/blog/2012/12/14/custom-expectations-with-rspec/
 RSpec::Matchers.define :write do |message|
+  supports_block_expectations
+
   chain(:to) do |io|
     @io = io
   end
