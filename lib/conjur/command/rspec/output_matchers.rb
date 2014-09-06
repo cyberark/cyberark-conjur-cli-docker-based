@@ -26,7 +26,7 @@ RSpec::Matchers.define :write do |message|
       io
     end
 
-    output = stream.grab &block
+    @actual = output = stream.grab &block
 
     case message
     when Hash then output.include?(JSON.pretty_generate message)
@@ -41,16 +41,10 @@ RSpec::Matchers.define :write do |message|
     %Q[write #{message.inspect} to #{@io}]
   end
 
-  def _failure_message(to = 'to')
-    %Q[expected #{to} #{description} but got #{@buffer.inspect}]
-  end
+  diffable
 
-  failure_message_for_should do
-    _failure_message 'to'
-  end
-
-  failure_message_for_should_not do
-    _failure_message 'not to'
+  failure_message do
+    %Q[expected to #{description} but got #{@actual.inspect}]
   end
 
   # default IO is standard output
