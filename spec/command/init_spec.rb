@@ -49,28 +49,28 @@ describe Conjur::Command::Init do
 
   context logged_in: false do
     before {
-      File.stub(:exists?).and_return false
+      allow(File).to receive(:exists?).and_return false
     }
 
     context "auto-fetching fingerprint" do
       before {
-        HighLine.any_instance.stub(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
+        allow_any_instance_of(HighLine).to receive(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
         Conjur::Command::Init.stub get_certificate: ["the-fingerprint", nil]
-        HighLine.any_instance.stub(:ask).with(/^Trust this certificate/).and_return "yes"
+        allow_any_instance_of(HighLine).to receive(:ask).with(/^Trust this certificate/).and_return "yes"
       }
 
       describe_command 'init' do
         it "fetches account and writes config file" do
           # Stub hostname
-          Conjur::Core::API.should_receive(:info).and_return "account" => "the-account"
-          File.should_receive(:open)
+          expect(Conjur::Core::API).to receive(:info).and_return "account" => "the-account"
+          expect(File).to receive(:open)
           invoke
         end
       end
 
       describe_command 'init -a the-account' do
         it "writes config file" do
-          File.should_receive(:open)
+          expect(File).to receive(:open)
           invoke
         end
       end
@@ -100,7 +100,7 @@ describe Conjur::Command::Init do
 
     describe_command 'init -a the-account -h localhost -c the-cert' do
       it "writes config and cert files" do
-        File.should_receive(:open).twice
+        expect(File).to receive(:open).twice
         invoke
       end
     end
@@ -137,8 +137,8 @@ describe Conjur::Command::Init do
       context "default behavior" do
         describe_command "init -a the-account -h localhost -c the-cert" do
           before(:each) {
-            File.stub(:expand_path).and_call_original
-            File.stub(:expand_path).with('~/.conjurrc').and_return("#{tmpdir}/.conjurrc")
+            allow(File).to receive(:expand_path).and_call_original
+            allow(File).to receive(:expand_path).with('~/.conjurrc').and_return("#{tmpdir}/.conjurrc")
           }
   
           include_examples "check config and cert files", "#{tmpdir}/.conjurrc"

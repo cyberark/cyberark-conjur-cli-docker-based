@@ -7,7 +7,7 @@ describe Conjur::Command::Resources, logged_in: true do
   let (:resource_attributes) { { "some" => "attribute"} }
 
   before :each do
-    api.stub(:resource).with(full_resource_id).and_return(resource_instance)
+    allow(api).to receive(:resource).with(full_resource_id).and_return(resource_instance)
   end 
 
   def invoke_silently
@@ -16,27 +16,27 @@ describe Conjur::Command::Resources, logged_in: true do
 
   shared_examples 'it displays resource attributes' do
     it "as JSON to stdout" do
-      JSON::parse( expect { invoke }.to write ).should == resource_attributes
+      expect(JSON::parse( expect { invoke }.to write )).to eq(resource_attributes)
     end
   end
 
   shared_examples "it obtains resource by id" do
     it 'id is built from kind and id' do
-      api.should_receive(:resource).with(%r{^[^:]*:#{KIND}:#{ID}$})
+      expect(api).to receive(:resource).with(%r{^[^:]*:#{KIND}:#{ID}$})
       invoke_silently
     end
     it 'uses default account as a prefix' do
-      api.should_receive(:resource).with(%r{^#{account}:})
+      expect(api).to receive(:resource).with(%r{^#{account}:})
       invoke_silently
     end
   end
 
   describe_command "resource:create #{KIND}:#{ID}"  do
     before :each do
-      resource_instance.stub(:create)
+      allow(resource_instance).to receive(:create)
     end
     it "calls resource.create()" do
-      resource_instance.should_receive(:create)
+      expect(resource_instance).to receive(:create)
       invoke_silently
     end
     it_behaves_like "it obtains resource by id"
@@ -50,31 +50,31 @@ describe Conjur::Command::Resources, logged_in: true do
 
   describe_command "resource:exists #{KIND}:#{ID}" do
     before (:each) { 
-      resource_instance.stub(:exists?).and_return("true")
+      allow(resource_instance).to receive(:exists?).and_return("true")
     }
     it_behaves_like "it obtains resource by id" 
     it 'calls resource.exists?' do
-      resource_instance.should_receive(:exists?)
+      expect(resource_instance).to receive(:exists?)
       invoke_silently
     end
     context 'displays response of resource.exists? (true/false)' do
       # NOTE: a bit redundant, but will be helpful in 'documentation' context
       it 'true' do
-        resource_instance.stub(:exists?).and_return("true")
+        allow(resource_instance).to receive(:exists?).and_return("true")
         expect { invoke }.to write "true"
       end
       it 'false' do
-        resource_instance.stub(:exists?).and_return("false")
+        allow(resource_instance).to receive(:exists?).and_return("false")
         expect { invoke }.to write "false"
       end
     end
   end
 
   describe_command "resource:permit #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
-    before(:each) { resource_instance.stub(:permit).and_return(true) }
+    before(:each) { allow(resource_instance).to receive(:permit).and_return(true) }
     it_behaves_like "it obtains resource by id"
     it "calls resource.permit(#{PRIVILEGE}, #{ROLE})" do
-      resource_instance.should_receive(:permit).with(PRIVILEGE, ROLE)
+      expect(resource_instance).to receive(:permit).with(PRIVILEGE, ROLE)
       invoke_silently
     end
     it {  expect { invoke }.to write "Permission granted" }
@@ -82,16 +82,16 @@ describe Conjur::Command::Resources, logged_in: true do
 
   describe_command "resource:permit -g #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
     it 'calls resource.permit() with grant option' do
-      resource_instance.should_receive(:permit).with(PRIVILEGE, ROLE, grant_option: true)
+      expect(resource_instance).to receive(:permit).with(PRIVILEGE, ROLE, grant_option: true)
       invoke_silently
     end
   end
 
   describe_command "resource:deny #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
-    before(:each) { resource_instance.stub(:deny).and_return(true) }
+    before(:each) { allow(resource_instance).to receive(:deny).and_return(true) }
     it_behaves_like "it obtains resource by id"
     it "calls resource.deny(#{PRIVILEGE},#{ROLE})" do
-      resource_instance.should_receive(:deny).with(PRIVILEGE, ROLE)
+      expect(resource_instance).to receive(:deny).with(PRIVILEGE, ROLE)
       invoke_silently
     end
     it { expect { invoke }.to write "Permission revoked" }
@@ -99,8 +99,8 @@ describe Conjur::Command::Resources, logged_in: true do
 
   describe_command "resource:check #{KIND}:#{ID} #{PRIVILEGE}" do
     it "performs a permission check for the logged-in user" do
-      api.should_receive(:resource).with("the-account:#{KIND}:#{ID}").and_return bacon = double("the-account:#{KIND}:#{ID}")
-      bacon.should_receive(:permitted?).with(PRIVILEGE)
+      expect(api).to receive(:resource).with("the-account:#{KIND}:#{ID}").and_return bacon = double("the-account:#{KIND}:#{ID}")
+      expect(bacon).to receive(:permitted?).with(PRIVILEGE)
       
       invoke
     end
@@ -111,25 +111,25 @@ describe Conjur::Command::Resources, logged_in: true do
     let (:role_response) { "role response: true|false" }
     let (:account) { ACCOUNT }
     before(:each) { 
-      api.stub(:role).and_return(role_instance)
-      role_instance.stub(:permitted?).and_return(role_response)
+      allow(api).to receive(:role).and_return(role_instance)
+      allow(role_instance).to receive(:permitted?).and_return(role_response)
     }
     it 'obtains role object by id' do
-      api.should_receive(:role).with(ROLE)
+      expect(api).to receive(:role).with(ROLE)
       invoke_silently
     end
     it "calls role.permitted?('#{ACCOUNT}:#{KIND}:#{ID}', #{PRIVILEGE})" do
-      role_instance.should_receive(:permitted?).with([ACCOUNT,KIND,ID].join(":"),PRIVILEGE)
+      expect(role_instance).to receive(:permitted?).with([ACCOUNT,KIND,ID].join(":"),PRIVILEGE)
       invoke_silently
     end
     it { expect { invoke }.to write role_response }
   end
 
   describe_command "resource:give #{KIND}:#{ID} #{OWNER}" do
-    before(:each) { resource_instance.stub(:give_to).and_return(true) }
+    before(:each) { allow(resource_instance).to receive(:give_to).and_return(true) }
     it_behaves_like "it obtains resource by id"
     it "calls resource.give_to(#{OWNER})" do
-      resource_instance.should_receive(:give_to).with(OWNER)
+      expect(resource_instance).to receive(:give_to).with(OWNER)
       invoke_silently
     end
     it { expect { invoke }.to write "Ownership granted" }
@@ -138,15 +138,15 @@ describe Conjur::Command::Resources, logged_in: true do
   describe_command "resource:permitted_roles #{KIND}:#{ID} #{PRIVILEGE}" do
     let(:roles_list) { %W[klaatu barada nikto] }
     before(:each) { 
-      resource_instance.stub(:permitted_roles).and_return(roles_list) 
+      allow(resource_instance).to receive(:permitted_roles).and_return(roles_list) 
     }
     it_behaves_like "it obtains resource by id"
     it "calls resource.permitted_roles(#{PRIVILEGE}" do
-      resource_instance.should_receive(:permitted_roles)
+      expect(resource_instance).to receive(:permitted_roles)
       invoke_silently
     end
     it "displays JSONised list of roles" do
-      JSON.parse( expect { invoke }.to write ).should == roles_list
+      expect(JSON.parse( expect { invoke }.to write )).to eq(roles_list)
     end
   end
 end

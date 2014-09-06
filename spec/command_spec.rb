@@ -6,13 +6,13 @@ describe Conjur::Command do
       describe  "injects account into brief ids" do
         context "long id (3+ tokens)" do
           it "returns id as is" do
-            described_class.full_resource_id("a:b:c").should == "a:b:c"
+            expect(described_class.full_resource_id("a:b:c")).to eq("a:b:c")
           end
         end 
         context "brief id(2 tokens)" do
-          before(:each) { described_class.stub(:conjur_account).and_return("current/acc") }
+          before(:each) { allow(described_class).to receive(:conjur_account).and_return("current/acc") }
           it "injects current account as a prefix" do
-            described_class.full_resource_id("a:b").should == "current/acc:a:b"
+            expect(described_class.full_resource_id("a:b")).to eq("current/acc:a:b")
           end
         end
         context "malformed id (no separators)" do
@@ -30,18 +30,18 @@ describe Conjur::Command do
         end
         context "for brief ids(2 tokens)" do
           it "token#1=> kind (dashes replaced with undescrores), token#2=>id" do
-            subject("the-kind:the-id").should == ['the_kind','the-id']
+            expect(subject("the-kind:the-id")).to eq(['the_kind','the-id'])
           end
         end
         context "for long ids(3+ tokens)" do    
           it "token #1=> ignored" do
-            subject("a:b:c:d").should_not include('a')
+            expect(subject("a:b:c:d")).not_to include('a')
           end
           it "token #2=> kind (dashes replaced with underscores)" do
-            subject("a:the-kind:c:d")[0].should == "the_kind"
+            expect(subject("a:the-kind:c:d")[0]).to eq("the_kind")
           end
           it "extracts remaining part (starting from 3rd token) as an id" do
-            subject("a:b:c-token:d-token")[1].should == "c-token:d-token"
+            expect(subject("a:b:c-token:d-token")[1]).to eq("c-token:d-token")
           end
         end 
         context "for too short input" do

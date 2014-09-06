@@ -13,25 +13,25 @@ describe Conjur::DSL::Runner, logged_in: true do
     end
   }
   before {
-    Conjur.stub(:account).and_return "the-account"
-    runner.stub(:api).and_return api
+    allow(Conjur).to receive(:account).and_return "the-account"
+    allow(runner).to receive(:api).and_return api
   }
   it "should populate the root ownerid" do
-    api.should_receive(:user).with("alice").and_return double("alice-exists", exists?: false)
-    api.should_receive(:create_user).with(id: "alice", ownerid: "user:bob").and_return alice
+    expect(api).to receive(:user).with("alice").and_return double("alice-exists", exists?: false)
+    expect(api).to receive(:create_user).with(id: "alice", ownerid: "user:bob").and_return alice
     
     runner.owner = "user:bob"
     runner.execute
   end
   it "should store the api_key in the context keyed by roleid" do
-    api.should_receive(:user).with("alice").and_return double("alice-exists", exists?: false)
-    api.should_receive(:create_user).with(id: "alice").and_return alice
+    expect(api).to receive(:user).with("alice").and_return double("alice-exists", exists?: false)
+    expect(api).to receive(:create_user).with(id: "alice").and_return alice
     
     runner.execute
     
-    runner.context['api_keys'].should == {
+    expect(runner.context['api_keys']).to eq({
       "the-account:user:alice" => "the-api-key"
-    }
+    })
   end
 
   it "doesn't store default env and stack in context" do
