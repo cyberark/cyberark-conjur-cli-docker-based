@@ -49,7 +49,7 @@ describe Conjur::Command::Audit, logged_in: true do
       end
       context "without an account" do
         it_calls_the_api "audit:role bar:baz", :audit_role, 'the-conjur-account:bar:baz', {} do
-          Conjur::Command.stub(conjur_account: "the-conjur-account")
+          allow(Conjur::Command).to receive_messages(conjur_account: "the-conjur-account")
         end
       end
       context "without enough tokens" do
@@ -68,7 +68,7 @@ describe Conjur::Command::Audit, logged_in: true do
       end
       context "an id with two tokens" do
         it_calls_the_api "audit:resource foo:bar", :audit_resource, "the-conjur-account:foo:bar", {} do
-          Conjur::Command.stub(conjur_account: "the-conjur-account")
+          allow(Conjur::Command).to receive_messages(conjur_account: "the-conjur-account")
         end
       end
       context "an id with one token" do
