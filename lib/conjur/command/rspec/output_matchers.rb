@@ -1,6 +1,4 @@
-# from https://gist.github.com/elgalu/5073871
-require 'rspec'
-require 'stringio'
+require 'io/grab'
 
 # Custom matcher to test text written to standard output and standard error
 #
@@ -17,12 +15,16 @@ RSpec::Matchers.define :write do |message|
   end
 
   match do |block|
-    output =
-      case io
-      when :stdout then fake_stdout(&block)
-      when :stderr  then fake_stderr(&block)
-      else fail("Allowed values for `to` are :stdout and :stderr, got `#{io.inspect}`")
-      end
+    stream = case io
+    when :stdout
+      STDOUT
+    when :stderr
+      STDERR
+    else
+      io
+    end
+
+    output = stream.grab &block
 
     case message
     when Hash then output.include?(JSON.pretty_generate message)
@@ -47,26 +49,6 @@ RSpec::Matchers.define :write do |message|
 
   failure_message_for_should_not do
     failure_message 'not to'
-  end
-
-  # Fake STDERR and return a string written to it.
-  def fake_stderr
-    original_stderr = $stderr
-    $stderr = StringIO.new
-    yield
-    @buffer = $stderr.string
-  ensure
-    $stderr = original_stderr
-  end
-
-  # Fake STDOUT and return a string written to it.
-  def fake_stdout
-    original_stdout = $stdout
-    $stdout = StringIO.new
-    yield
-    @buffer = $stdout.string
-  ensure
-    $stdout = original_stdout
   end
 
   # default IO is standard output
