@@ -37,7 +37,7 @@ describe Conjur::Authn do
     context "without specified netrc_path" do
       let(:path) { nil }
       it "uses default netrc path" do
-        expect(Netrc).to receive(:read).with().and_return netrc = double("netrc")
+        expect(Netrc).to receive(:read).with(no_args).and_return netrc = double("netrc")
         expect(Conjur::Authn.netrc).to eq(netrc)
       end
     end

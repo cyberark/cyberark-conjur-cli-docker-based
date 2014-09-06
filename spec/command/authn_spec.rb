@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Conjur::Command::Authn do
-  context logged_in: false do
+  context "when not logged in", logged_in: false do
     context "logging in" do
       [ "authn:login", "authn login" ].each do |cmd|
         before do
@@ -45,7 +45,7 @@ describe Conjur::Command::Authn do
     end
   end
 
-  context logged_in: true do
+  context "when logged in", logged_in: true do
     describe_command 'authn:logout' do
       it "deletes credentials" do
         expect { invoke }.to write("Logged out")

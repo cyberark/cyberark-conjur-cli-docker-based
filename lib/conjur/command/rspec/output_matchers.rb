@@ -41,16 +41,16 @@ RSpec::Matchers.define :write do |message|
     %Q[write #{message.inspect} to #{@io}]
   end
 
-  def failure_message(to = 'to')
+  def _failure_message(to = 'to')
     %Q[expected #{to} #{description} but got #{@buffer.inspect}]
   end
 
   failure_message_for_should do
-    failure_message 'to'
+    _failure_message 'to'
   end
 
   failure_message_for_should_not do
-    failure_message 'not to'
+    _failure_message 'not to'
   end
 
   # default IO is standard output

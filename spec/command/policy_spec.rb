@@ -14,7 +14,7 @@ describe Conjur::Command::Policy do
     end
   end
 
-  context logged_in: true do
+  context "when logged in", logged_in: true do
     let(:role) do
       double("role", exists?: true, api_key: "the-api-key", roleid: "the-role")
     end

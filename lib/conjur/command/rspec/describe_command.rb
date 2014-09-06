@@ -1,4 +1,4 @@
-module RSpec::Core::DSL
+RSpec::Core::DSL.change_global_dsl do
   def describe_command *argv, &block
     describe *argv do
       let(:invoke) do

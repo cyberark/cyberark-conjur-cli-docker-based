@@ -26,7 +26,7 @@ Gem::Specification.new do |gem|
   
   gem.add_runtime_dependency 'cas_rest_client'
   
-  gem.add_development_dependency 'rspec', '>= 2.14', '< 3.0'
+  gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'aruba'
   gem.add_development_dependency 'ci_reporter', '~> 1.8'
