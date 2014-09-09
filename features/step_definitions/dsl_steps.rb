@@ -41,6 +41,6 @@ end
 
 Then(/^the context "(.*?)" should contain "(.*?)" item$/) do |key, key_count|
   step "the context should contain \"#{key}\""
-  @runner.context[key].should have(key_count.to_i).items
+  expect(@runner.context[key].length).to eq key_count.to_i
 end
 
