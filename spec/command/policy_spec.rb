@@ -14,7 +14,7 @@ describe Conjur::Command::Policy do
     end
   end
 
-  context logged_in: true do
+  context "when logged in", logged_in: true do
     let(:role) do
       double("role", exists?: true, api_key: "the-api-key", roleid: "the-role")
     end
@@ -22,31 +22,31 @@ describe Conjur::Command::Policy do
       double("resource", exists?: true).as_null_object
     end
     before {
-      File.stub(:exists?).with("policy.rb").and_return true
-      File.stub(:read).with("policy.rb").and_return "{}"
-      Conjur::DSL::Runner.any_instance.stub(:api).and_return api
+      allow(File).to receive(:exists?).with("policy.rb").and_return true
+      allow(File).to receive(:read).with("policy.rb").and_return "{}"
+      allow_any_instance_of(Conjur::DSL::Runner).to receive(:api).and_return api
     }
     before {
-      api.stub(:role).and_call_original
-      api.stub(:resource).and_call_original
-      api.stub(:role).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return role
-      api.stub(:resource).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return resource
+      allow(api).to receive(:role).and_call_original
+      allow(api).to receive(:resource).and_call_original
+      allow(api).to receive(:role).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return role
+      allow(api).to receive(:resource).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return resource
     }
     
     describe_command 'policy:load --collection the-collection http://example.com/policy.rb' do
       let(:collection) { "the-collection" }
       before {
-        File.stub(:exists?).with("http://example.com/policy.rb").and_return false
-        URI.stub(:parse).with("http://example.com/policy.rb").and_return double(:uri, read: "{}")
+        allow(File).to receive(:exists?).with("http://example.com/policy.rb").and_return false
+        allow(URI).to receive(:parse).with("http://example.com/policy.rb").and_return double(:uri, read: "{}")
       }
       it "creates the policy" do
-        invoke.should == 0
+        expect(invoke).to eq(0)
       end
     end
     describe_command 'policy:load --collection the-collection policy.rb' do
       let(:collection) { "the-collection" }
       it "creates the policy" do
-        invoke.should == 0
+        expect(invoke).to eq(0)
       end
     end
     context "default collection" do
@@ -57,15 +57,15 @@ describe Conjur::Command::Policy do
       describe_command 'policy:load --as-group the-group policy.rb' do
         let(:group) { double(:group, exists?: true) }
         it "creates the policy" do
-          Conjur::Command.api.stub(:role).with("the-account:group:the-group").and_return group
-          Conjur::DSL::Runner.any_instance.should_receive(:owner=).with("the-account:group:the-group")
+          allow(Conjur::Command.api).to receive(:role).with("the-account:group:the-group").and_return group
+          expect_any_instance_of(Conjur::DSL::Runner).to receive(:owner=).with("the-account:group:the-group")
           
-          invoke.should == 0
+          expect(invoke).to eq(0)
         end
       end
       describe_command 'policy:load policy.rb' do
         it "creates the policy with default collection" do
-          invoke.should == 0
+          expect(invoke).to eq(0)
         end
       end
     end

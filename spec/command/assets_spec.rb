@@ -4,55 +4,55 @@ describe Conjur::Command::Assets, logged_in: true do
 
   let(:asset) {  double(attributes: asset_attributes ) }
   let(:asset_attributes) { {"some"=>"attributes" } }
-  before(:each) { api.stub(KIND.to_sym).and_return(asset) }
+  before(:each) { allow(api).to receive(KIND.to_sym).and_return(asset) }
   def invoke_silently
     expect { invoke }.to write
   end
 
   context "asset:create" do
     before(:each) { 
-      api.stub(:method).with("create_#{KIND}").and_return(double(arity:1))
-      api.stub("create_#{KIND}".to_sym).and_return(asset)
+      allow(api).to receive(:method).with("create_#{KIND}").and_return(double(arity:1))
+      allow(api).to receive("create_#{KIND}".to_sym).and_return(asset)
     }
     describe_command "asset:create #{KIND}:#{ID}" do
       it "calls api.create_#{KIND}(id:#{ID})" do
-        api.should_receive("create_#{KIND}".to_sym).with(id: ID)
+        expect(api).to receive("create_#{KIND}".to_sym).with(id: ID)
         invoke_silently
       end
       it "writes JSONised attributes to stdout" do
-        JSON.parse( expect { invoke }.to write ).should == asset_attributes
+        expect(JSON.parse( expect { invoke }.to write )).to eq(asset_attributes)
       end
     end
     describe_command "asset:create #{KIND}" do
       it "calls api.create_#{KIND}({})" do
-        api.should_receive("create_#{KIND}".to_sym).with({})
+        expect(api).to receive("create_#{KIND}".to_sym).with({})
         invoke_silently
       end
       it "writes JSONised attributes to stdout" do
-        JSON.parse( expect { invoke }.to write ).should == asset_attributes
+        expect(JSON.parse( expect { invoke }.to write )).to eq(asset_attributes)
       end
     end
   end
 
   describe_command "asset:show #{KIND}:#{ID}" do
     it "obtains asset instance as api.#{KIND}(#{ID})" do
-      api.should_receive(KIND.to_sym).with(ID)
+      expect(api).to receive(KIND.to_sym).with(ID)
       invoke_silently
     end
     it "writes JSONised attributes to stdout" do
-      JSON.parse( expect { invoke }.to write ).should == asset_attributes
+      expect(JSON.parse( expect { invoke }.to write )).to eq(asset_attributes)
     end
   end
 
   describe_command "asset:exists #{KIND}:#{ID}" do
     let(:exists_response) { "exists? response" }
-    before(:each) { asset.stub(:exists?).and_return(exists_response) }
+    before(:each) { allow(asset).to receive(:exists?).and_return(exists_response) }
     it "obtains asset instance as api.#{KIND}(#{ID})" do
-      api.should_receive(KIND.to_sym).with(ID)
+      expect(api).to receive(KIND.to_sym).with(ID)
       invoke_silently
     end
     it "calls asset.exists?" do
-      asset.should_receive(:exists?)
+      expect(asset).to receive(:exists?)
       invoke_silently
     end
     it "writes response to stdout" do
@@ -67,10 +67,10 @@ describe Conjur::Command::Assets, logged_in: true do
         double(attributes: { "id" => x } )
       }
     }
-    before(:each) { api.stub("#{KIND}s".to_sym).and_return(assets_list) }
+    before(:each) { allow(api).to receive("#{KIND}s".to_sym).and_return(assets_list) }
 
     it "calls api.#{KIND}s" do
-      api.should_receive("#{KIND}s".to_sym)
+      expect(api).to receive("#{KIND}s".to_sym)
       invoke_silently
     end
     it "for each asset from response displays it's attributes" do
@@ -83,16 +83,16 @@ describe Conjur::Command::Assets, logged_in: true do
 
   shared_examples 'it obtains asset by kind and id' do
     it "obtains asset instance as api.#{KIND}(#{ID})" do
-      api.should_receive(KIND.to_sym).with(ID)
+      expect(api).to receive(KIND.to_sym).with(ID)
       invoke_silently
     end
   end
   
   shared_context "asset instance" do
     before(:each) { 
-      api.stub(KIND.to_sym).and_return(asset) 
-      asset.stub(:add_member)
-      asset.stub(:remove_member)
+      allow(api).to receive(KIND.to_sym).and_return(asset) 
+      allow(asset).to receive(:add_member)
+      allow(asset).to receive(:remove_member)
     }
   end
 
@@ -100,7 +100,7 @@ describe Conjur::Command::Assets, logged_in: true do
     include_context "asset instance"
     it_behaves_like "it obtains asset by kind and id"
     it 'calls role.grant_to(member,...)' do
-      asset.should_receive(:add_member).with(ROLE, MEMBER, anything)
+      expect(asset).to receive(:add_member).with(ROLE, MEMBER, anything)
       invoke_silently
     end
     it { expect { invoke }.to write "Membership granted" }
@@ -110,7 +110,7 @@ describe Conjur::Command::Assets, logged_in: true do
     include_context "asset instance"
     it_behaves_like "it obtains asset by kind and id"
     it 'calls role.revoke_from(member)' do
-      asset.should_receive(:remove_member).with(ROLE, MEMBER)
+      expect(asset).to receive(:remove_member).with(ROLE, MEMBER)
       invoke_silently
     end
     it { expect { invoke }.to write "Membership revoked" }

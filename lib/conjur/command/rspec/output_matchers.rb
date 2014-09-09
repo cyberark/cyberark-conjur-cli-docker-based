@@ -1,6 +1,4 @@
-# from https://gist.github.com/elgalu/5073871
-require 'rspec'
-require 'stringio'
+require 'io/grab'
 
 # Custom matcher to test text written to standard output and standard error
 #
@@ -12,17 +10,23 @@ require 'stringio'
 #
 # @note http://greyblake.com/blog/2012/12/14/custom-expectations-with-rspec/
 RSpec::Matchers.define :write do |message|
+  supports_block_expectations
+
   chain(:to) do |io|
     @io = io
   end
 
   match do |block|
-    output =
-      case io
-      when :stdout then fake_stdout(&block)
-      when :stderr  then fake_stderr(&block)
-      else fail("Allowed values for `to` are :stdout and :stderr, got `#{io.inspect}`")
-      end
+    stream = case io
+    when :stdout
+      STDOUT
+    when :stderr
+      STDERR
+    else
+      io
+    end
+
+    @actual = output = stream.grab &block
 
     case message
     when Hash then output.include?(JSON.pretty_generate message)
@@ -37,36 +41,10 @@ RSpec::Matchers.define :write do |message|
     %Q[write #{message.inspect} to #{@io}]
   end
 
-  def failure_message(to = 'to')
-    %Q[expected #{to} #{description} but got #{@buffer.inspect}]
-  end
+  diffable
 
-  failure_message_for_should do
-    failure_message 'to'
-  end
-
-  failure_message_for_should_not do
-    failure_message 'not to'
-  end
-
-  # Fake STDERR and return a string written to it.
-  def fake_stderr
-    original_stderr = $stderr
-    $stderr = StringIO.new
-    yield
-    @buffer = $stderr.string
-  ensure
-    $stderr = original_stderr
-  end
-
-  # Fake STDOUT and return a string written to it.
-  def fake_stdout
-    original_stdout = $stdout
-    $stdout = StringIO.new
-    yield
-    @buffer = $stdout.string
-  ensure
-    $stdout = original_stdout
+  failure_message do
+    %Q[expected to #{description} but got #{@actual.inspect}]
   end
 
   # default IO is standard output

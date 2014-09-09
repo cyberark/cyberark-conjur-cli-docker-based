@@ -4,7 +4,7 @@ describe Conjur::Command::Audit, logged_in: true do
   let(:events) { [{'foo' => 'bar', 'zelda' => 'link', 'abc' => 'xyz'}, {'some' => 'other event'}] }
 
   def expect_api_call method, *args
-    api.should_receive(method.to_sym).with(*args).and_return events
+    expect(api).to receive(method.to_sym).with(*args).and_return events
     #described_class.should_receive(:show_audit_events).with(events, an_instance_of(Hash))
   end
 
@@ -49,7 +49,7 @@ describe Conjur::Command::Audit, logged_in: true do
       end
       context "without an account" do
         it_calls_the_api "audit:role bar:baz", :audit_role, 'the-conjur-account:bar:baz', {} do
-          Conjur::Command.stub(conjur_account: "the-conjur-account")
+          allow(Conjur::Command).to receive_messages(conjur_account: "the-conjur-account")
         end
       end
       context "without enough tokens" do
@@ -68,7 +68,7 @@ describe Conjur::Command::Audit, logged_in: true do
       end
       context "an id with two tokens" do
         it_calls_the_api "audit:resource foo:bar", :audit_resource, "the-conjur-account:foo:bar", {} do
-          Conjur::Command.stub(conjur_account: "the-conjur-account")
+          allow(Conjur::Command).to receive_messages(conjur_account: "the-conjur-account")
         end
       end
       context "an id with one token" do
@@ -85,7 +85,7 @@ describe Conjur::Command::Audit, logged_in: true do
     include_context "default audit behavior"
     
     before {
-      api.stub(:audit_event_feed).and_yield([audit_event])
+      allow(api).to receive(:audit_event_feed).and_yield([audit_event])
     }
 
     describe_command "audit all" do
@@ -318,30 +318,30 @@ describe Conjur::Command::Audit, logged_in: true do
   describe "limit and offset" do
     let(:events) { (1 .. 5).map { |x| { event: x } } }
     before {
-      api.stub(:audit_event_feed).and_yield(events)
+      allow(api).to receive(:audit_event_feed).and_yield(events)
     }
 
     describe_command "audit all" do 
       it "prints all the elements" do
-        (expect { invoke }.to write).should ==  events.map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"  
+        expect(expect { invoke }.to write).to eq(events.map {|e| JSON.pretty_generate(e)}.join("\n")+"\n")  
       end
     end
 
     describe_command "audit all -l 2" do  
       it "prints only <limit> elements" do
-        (expect { invoke }.to write).should ==  events[0..1].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"  
+        expect(expect { invoke }.to write).to eq(events[0..1].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n")  
       end
     end
 
     describe_command "audit all -o 2" do  
       it "skips <offset> elements" do
-        (expect { invoke }.to write).should ==  events[2..4].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"   
+        expect(expect { invoke }.to write).to eq(events[2..4].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n")   
       end
     end
 
     describe_command "audit all -o 2 -l 2" do
       it "skips <offset> elements and prints only <limit> of remaining part" do
-        (expect { invoke }.to write).should ==  events[2..3].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n"
+        expect(expect { invoke }.to write).to eq(events[2..3].map {|e| JSON.pretty_generate(e)}.join("\n")+"\n")
       end
     end
 

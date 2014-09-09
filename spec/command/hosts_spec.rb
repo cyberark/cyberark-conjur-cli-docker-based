@@ -5,7 +5,7 @@ describe Conjur::Command::Hosts, logged_in: true do
   
   describe_command "host:create" do
     it "lets the server assign the id" do
-     RestClient::Request.should_receive(:execute).with(
+     expect(RestClient::Request).to receive(:execute).with(
         method: :post,
         url: collection_url,
         headers: {},
@@ -17,7 +17,7 @@ describe Conjur::Command::Hosts, logged_in: true do
   end
   describe_command "host:create the-id" do
     it "propagates the user-assigned id" do
-     RestClient::Request.should_receive(:execute).with(
+     expect(RestClient::Request).to receive(:execute).with(
         method: :post,
         url: collection_url,
         headers: {},

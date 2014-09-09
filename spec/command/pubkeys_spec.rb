@@ -24,7 +24,7 @@ require 'conjur/command/pubkeys'
 describe Conjur::Command::Pubkeys, logged_in: true do
   describe_command "pubkeys:show alice" do
     it "calls api.public_keys('alice') and prints the result" do
-      described_class.api.should_receive(:public_keys).with('alice').and_return "a public key"
+      expect(described_class.api).to receive(:public_keys).with('alice').and_return "a public key"
       expect{ invoke }.to write("a public key")
     end
   end
@@ -33,14 +33,14 @@ describe Conjur::Command::Pubkeys, logged_in: true do
     let(:keys){ ["x y foo", "x y bar"].join("\n") }
     let(:names){ "bar\nfoo" }
     it "calls api.public_keys('alice') and prints the names" do
-      described_class.api.should_receive(:public_keys).with('alice').and_return keys
+      expect(described_class.api).to receive(:public_keys).with('alice').and_return keys
       expect{ invoke }.to write(names) 
     end
   end
   
   describe_command "pubkeys:add alice data" do
     it "calls api.add_public_key('alice', 'data') and prints the key name" do
-      described_class.api.should_receive(:add_public_key).with('alice', 'data')
+      expect(described_class.api).to receive(:add_public_key).with('alice', 'data')
       expect{ invoke }.to write("Public key 'data' added")
     end
   end
@@ -48,11 +48,11 @@ describe Conjur::Command::Pubkeys, logged_in: true do
   describe_command "pubkeys:add alice @id_rsa.pub" do
     let(:file_contents){ "ssh-rsa blahblah keyname" }
     it "calls api.add_public_key('alice', data) and prints the key name" do
-      File.should_receive(:read) do |filename|
-        filename.should end_with("id_rsa.pub")
+      expect(File).to receive(:read) do |filename|
+        expect(filename).to end_with("id_rsa.pub")
         file_contents
       end
-      described_class.api.should_receive(:add_public_key).with('alice', file_contents)
+      expect(described_class.api).to receive(:add_public_key).with('alice', file_contents)
       expect{ invoke }.to write("Public key 'keyname' added")
     end
   end
@@ -60,15 +60,15 @@ describe Conjur::Command::Pubkeys, logged_in: true do
   describe_command "pubkeys:add alice" do
     let(:stdin_contents){ "ssh-rsa blahblah keyname" }
     it "calls api.add_public_key('alice', stdin) and prints the key name" do
-      STDIN.should_receive(:read).and_return(stdin_contents)
-      described_class.api.should_receive(:add_public_key).with('alice', stdin_contents)
+      expect(STDIN).to receive(:read).and_return(stdin_contents)
+      expect(described_class.api).to receive(:add_public_key).with('alice', stdin_contents)
       expect{ invoke }.to write("Public key 'keyname' added")
     end
   end
   
   describe_command "pubkeys:delete alice keyname" do
     it "calls api.delete_public_key('alice', 'keyname')" do
-      described_class.api.should_receive(:delete_public_key).with("alice", "keyname")
+      expect(described_class.api).to receive(:delete_public_key).with("alice", "keyname")
       expect{ invoke }.to write("Public key 'keyname' deleted")
     end
   end

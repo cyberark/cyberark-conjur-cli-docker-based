@@ -30,26 +30,26 @@ describe Conjur::Config do
         ENV['CONJURRC'] = oldrc
       end
 
-      it { should include('/etc/conjur.conf') }
-      it { should include("#{homedir}/.conjurrc") }
-      it { should include('.conjurrc') }
+      it { is_expected.to include('/etc/conjur.conf') }
+      it { is_expected.to include("#{homedir}/.conjurrc") }
+      it { is_expected.to include('.conjurrc') }
 
       before do
-        File.stub(:expand_path).and_call_original
-        File.stub(:expand_path).with('.conjurrc').and_return '.conjurrc'
+        allow(File).to receive(:expand_path).and_call_original
+        allow(File).to receive(:expand_path).with('.conjurrc').and_return '.conjurrc'
       end
 
       context "When .conjurrc is present" do
-        before { File.stub(:file?).with('.conjurrc').and_return true }
+        before { allow(File).to receive(:file?).with('.conjurrc').and_return true }
         it "Issues a deprecation warning" do 
           expect { subject }.to write(deprecation_warning).to(:stderr)
         end
 
         context "but the current directory is home" do
           before do
-            File.unstub(:expand_path)
-            File.stub(:expand_path).and_call_original
-            File.stub(:expand_path).with('.conjurrc').and_return("#{homedir}/.conjurrc")
+            allow(File).to receive(:expand_path).and_call_original
+            allow(File).to receive(:expand_path).and_call_original
+            allow(File).to receive(:expand_path).with('.conjurrc').and_return("#{homedir}/.conjurrc")
           end
 
           include_examples "no deprecation warning"
@@ -57,7 +57,7 @@ describe Conjur::Config do
       end
 
       context "When .conjurrc is missing" do
-        before { File.stub(:file?).with('.conjurrc').and_return false }
+        before { allow(File).to receive(:file?).with('.conjurrc').and_return false }
         include_examples "no deprecation warning"
       end
     end
@@ -69,10 +69,10 @@ describe Conjur::Config do
         example.run
         ENV['CONJURRC'] = oldrc
       end
-      it { should include('/etc/conjur.conf') }
-      it { should include('stub_conjurrc') }
-      it { should_not include("#{homedir}/.conjurrc") }
-      it { should_not include('.conjurrc') }
+      it { is_expected.to include('/etc/conjur.conf') }
+      it { is_expected.to include('stub_conjurrc') }
+      it { is_expected.not_to include("#{homedir}/.conjurrc") }
+      it { is_expected.not_to include('.conjurrc') }
 
       include_examples "no deprecation warning"
     end
@@ -84,10 +84,10 @@ describe Conjur::Config do
         example.run
         ENV['CONJURRC'] = oldrc
       end
-      before { File.stub(:file?).with('.conjurrc').and_return true }
-      it { should include('/etc/conjur.conf') }
-      it { should include('.conjurrc') }
-      it { should_not include("#{homedir}/.conjurrc") }
+      before { allow(File).to receive(:file?).with('.conjurrc').and_return true }
+      it { is_expected.to include('/etc/conjur.conf') }
+      it { is_expected.to include('.conjurrc') }
+      it { is_expected.not_to include("#{homedir}/.conjurrc") }
 
       include_examples "no deprecation warning"
     end
@@ -100,16 +100,16 @@ describe Conjur::Config do
     it "resolves the cert_file" do
       load!
       
-      Conjur::Config[:cert_file].should == cert_path
+      expect(Conjur::Config[:cert_file]).to eq(cert_path)
     end
   end
   describe "#apply" do
-    before { OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.stub(:add_file) }
+    before { allow(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file) }
 
     let(:cert_file) { "/path/to/cert.pem" }
     it "trusts the cert_file" do
       Conjur::Config.class_variable_set("@@attributes", { 'cert_file' => cert_file })
-      OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.should_receive(:add_file).with cert_file  
+      expect(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file).with cert_file  
       Conjur::Config.apply
     end
 
