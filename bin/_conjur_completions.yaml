@@ -87,6 +87,8 @@
   :show: true
   :list: true
   :update_password: true
+  :update: true
+  :uidsearch: true
 :variable:
   :create: true
   :show: true

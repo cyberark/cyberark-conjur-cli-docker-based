@@ -29,7 +29,8 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'aruba'
-  gem.add_development_dependency 'ci_reporter', '~> 1.8'
+  gem.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
+  gem.add_development_dependency 'ci_reporter_cucumber'
   gem.add_development_dependency 'rake', '~> 10.0'
   gem.add_development_dependency 'io-grab', '~> 0.0.1'
 end

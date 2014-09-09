@@ -19,9 +19,9 @@ RSpec::Matchers.define :write do |message|
   match do |block|
     stream = case io
     when :stdout
-      STDOUT
+      $stdout
     when :stderr
-      STDERR
+      $stderr
     else
       io
     end
