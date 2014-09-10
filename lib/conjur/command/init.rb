@@ -121,7 +121,7 @@ class Conjur::Command::Init < Conjur::Command
         f.puts YAML.dump(config.stringify_keys)
       end
 
-      puts "Wrote configuration to #{options[:file]}"
+      puts "Wrote configuration to #{config_file}"
     end
   end
 

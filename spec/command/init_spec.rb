@@ -142,12 +142,21 @@ describe Conjur::Command::Init do
           }
   
           include_examples "check config and cert files", "#{tmpdir}/.conjurrc"
+          it "prints the config file location" do
+            expect { invoke }.to write("Wrote configuration to #{tmpdir}/.conjurrc")
+          end
+          it "prints the cert location" do
+            expect { invoke }.to write("Wrote certificate to #{tmpdir}/conjur-the-account.pem")
+          end
         end
       end
 
       context "explicit output file" do
         describe_command "init -f #{tmpdir}/.conjurrc2 -a the-account -h localhost -c the-cert" do
           include_examples "check config and cert files", File.join(tmpdir, ".conjurrc2")
+          it "prints the config file location" do
+            expect { invoke }.to write("Wrote configuration to #{tmpdir}/.conjurrc2")
+          end
         end
       end
 
