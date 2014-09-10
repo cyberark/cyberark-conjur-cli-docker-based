@@ -20,6 +20,10 @@
 #
 
 class Conjur::Command::Hosts < Conjur::Command
+  def self.host_layer_roles host
+    host.role.all.select{|r| r.kind == "layer"}
+  end
+  
   desc "Manage hosts"
   command :host do |hosts|
     hosts.desc "Create a new host"
@@ -51,7 +55,33 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-
+    hosts.desc "Decommission a host"
+    hosts.arg_name "id"
+    hosts.command :retire do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'id')
+        
+        host = api.host(id)
+        
+        host_layer_roles(host).each do |layer|
+          puts "Removing from layer #{layer.id}"
+          api.layer(layer.id).remove_host host
+        end
+        
+        host.resource.attributes['permissions'].each do |p|
+          role = api.role(p['role'])
+          privilege = p['privilege']
+          next if role.roleid == host.roleid && privilege == 'read'
+          puts "Denying #{privilege} privilege to #{role.roleid}"
+          host.resource.deny(privilege, role)
+        end
+        
+        puts "Giving ownership to 'attic'"
+        host.resource.give_to api.user('attic')
+        
+        display(host.resource, options)
+      end
+    end
 
     hosts.desc "List hosts"
     hosts.command :list do |c|
@@ -78,7 +108,8 @@ class Conjur::Command::Hosts < Conjur::Command
     hosts.command :layers do |c|
       c.action do |global_options, options, args|
         id = require_arg(args, 'id')
-        display api.host(id).role.all.select{|r| r.kind == "layer"}.map(&:identifier), options
+        host = api.host(id)
+        display host_layer_roles(host).map(&:identifier), options
       end
     end
   end
