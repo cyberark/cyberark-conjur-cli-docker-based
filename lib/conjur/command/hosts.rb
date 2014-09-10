@@ -67,19 +67,14 @@ class Conjur::Command::Hosts < Conjur::Command
           puts "Removing from layer #{layer.id}"
           api.layer(layer.id).remove_host host
         end
-        
-        host.resource.attributes['permissions'].each do |p|
-          role = api.role(p['role'])
-          privilege = p['privilege']
-          next if role.roleid == host.roleid && privilege == 'read'
-          puts "Denying #{privilege} privilege to #{role.roleid}"
-          host.resource.deny(privilege, role)
-        end
+
+        retire_resource host
+        retire_role host
         
         puts "Giving ownership to 'attic'"
         host.resource.give_to api.user('attic')
         
-        display(host.resource, options)
+        puts "Host retired"
       end
     end
 

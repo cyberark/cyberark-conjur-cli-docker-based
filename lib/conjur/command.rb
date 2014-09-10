@@ -99,7 +99,24 @@ module Conjur
           puts JSON.pretty_generate resources
         end
       end
+      
+      def retire_resource obj
+        obj.resource.attributes['permissions'].each do |p|
+          role = api.role(p['role'])
+          privilege = p['privilege']
+          next if role.roleid == obj.roleid && privilege == 'read'
+          puts "Denying #{privilege} privilege to #{role.roleid}"
+          obj.resource.deny(privilege, role)
+        end
+      end
         
+      def retire_role obj
+        obj.role.members.each do |r|
+          member = api.role(r.member)
+          puts "Revoking from role #{member.roleid}"
+          obj.role.revoke_from member
+        end
+      end
       
       def display_members(members, options)
         result = if options[:V]

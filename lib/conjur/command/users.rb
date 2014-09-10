@@ -74,6 +74,24 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
+    user.desc "Decommission a user"
+    user.arg_name "id"
+    user.command :retire do |c|
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'id')
+        
+        user = api.user(id)
+        
+        retire_resource user
+        retire_role user
+        
+        puts "Giving ownership to 'attic'"
+        user.resource.give_to api.user('attic')
+        
+        puts "User retired"
+      end
+    end
+
     user.desc "List users"
     user.command :list do |c|
       command_options_for_list c
