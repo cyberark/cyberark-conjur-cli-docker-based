@@ -89,10 +89,10 @@ module Conjur::Authn
       require 'conjur/api'
 
       hl = HighLine.new $stdin, $stderr
-
+      
       user = options[:username] || hl.ask("Enter your username to log into Conjur: ")
-      pass = options[:password] || hl.ask("Please enter your password (it will not be echoed): "){ |q| q.echo = false }
-
+      pass = options[:password] || hl.ask("Please enter #{options[:username] ? [ options[:username] , "'s" ].join : "your"} password (it will not be echoed): "){ |q| q.echo = false }
+        
       api_key = if cas_server = options[:"cas-server"]
         Conjur::API.login_cas(user, pass, cas_server)
       else
