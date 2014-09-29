@@ -51,10 +51,10 @@ class Conjur::Command::Users < Conjur::Command
       c.action do |global_options,options,args|
         login = require_arg(args, 'login')
 
-        opts = options.slice(:ownerid,:uidnumber)
+        opts = options.slice(:ownerid, :uidnumber)
         if opts[:uidnumber] 
-          raise "Uidnumber should be integer" unless /\d+/ =~ opts[:uidnumber]
-          opts[:uidnumber]=opts[:uidnumber].to_i
+          raise "uidnumber should be integer" unless /\d+/ =~ opts[:uidnumber]
+          opts[:uidnumber] = opts[:uidnumber].to_i
         end
 
         if options[:p]
