@@ -147,6 +147,20 @@ module Conjur
         end
         puts str
       end
+
+      def prompt_for_password
+        require 'highline'
+        # use stderr to allow output redirection, e.g.
+        # conjur user:create -p username > user.json
+        hl = HighLine.new($stdin, $stderr)
+    
+        password = hl.ask("Enter the password (it will not be echoed): "){ |q| q.echo = false }
+        confirmation = hl.ask("Confirm the password: "){ |q| q.echo = false }
+        
+        raise "Password does not match confirmation" unless password == confirmation
+        
+        password
+      end
     end
   end
 end
