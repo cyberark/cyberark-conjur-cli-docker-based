@@ -69,7 +69,7 @@ module Conjur
 
       # Perform some basic validation in order to give the user a more informative
       # error if she forgot to run 'conjur init'.
-      def validate
+      def validate!
         # Hack: generally in a test environment, ENV['CONJURRC'] is set to '/dev/null'.
         # If a user is doing this, she obviously knows what's up, so we're not going to
         # bother issuing helpful error messages
