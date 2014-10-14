@@ -46,12 +46,13 @@ module Conjur
       end
 
       def default_config_files
-        ['/etc/conjur.conf', user_config_files].flatten.uniq
+        @@default_config_files ||= ['/etc/conjur.conf', user_config_files].flatten.uniq
       end
 
       def load(config_files = default_config_files)
         require 'yaml'
         require 'conjur/log'
+
         config_files.each do |f|
           if File.file?(f)
             if Conjur.log
@@ -66,8 +67,23 @@ module Conjur
         end
       end
 
+      # Perform some basic validation in order to give the user a more informative
+      # error if she forgot to run 'conjur init'.
+      def validate!
+        unless default_config_files.any?{|f| File.file?(f)}
+          raise "No .conjurrc files were found.  You may have to run 'conjur init' to create them."
+        end
+
+        unless Config.member? :account
+          raise "No account was specified in your .conjurrc files.  You may have to run 'conjur init' to create these files"
+        end
+      end
+
       def apply
         require 'conjur/configuration'
+
+        validate!
+
         keys = Config.keys.dup
         keys.delete(:plugins)
 
@@ -120,6 +136,18 @@ module Conjur
 
       def [](key)
         @@attributes[key.to_s]
+      end
+
+      def member? key
+        @@attributes.member?(key) || @@attributes.member?(alternate_key(key))
+      end
+
+      def alternate_key key
+        case key
+          when String then key.to_sym
+          when Symbol then key.to_s
+          else key
+        end
       end
     end
   end
