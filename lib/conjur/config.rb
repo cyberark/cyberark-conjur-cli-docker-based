@@ -67,18 +67,9 @@ module Conjur
         end
       end
 
-      # Perform some basic validation in order to give the user a more informative
-      # error if she forgot to run 'conjur init'.
-      def validate!
-       unless Config.member? :account
-          raise "No account was specified in your .conjurrc files.  You may have to run 'conjur init' to create these files"
-        end
-      end
 
       def apply
         require 'conjur/configuration'
-
-        validate!
 
         keys = Config.keys.dup
         keys.delete(:plugins)
@@ -100,7 +91,10 @@ module Conjur
             require 'conjur/api'
             Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
           rescue RuntimeError
-            raise $! unless $!.message == "Missing required option account"
+            if $!.message == "Missing required option account"
+              $stderr.puts "Your config is invalid, did you run 'conjur init'?"
+            end
+            raise $!
           end
         end
         if Config[:cert_file]
