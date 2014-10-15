@@ -70,21 +70,12 @@ module Conjur
       # Perform some basic validation in order to give the user a more informative
       # error if she forgot to run 'conjur init'.
       def validate!
-        # Hack: generally in a test environment, ENV['CONJURRC'] is set to '/dev/null'.
-        # If a user is doing this, she obviously knows what's up, so we're not going to
-        # bother issuing helpful error messages
-        return if ENV['CONJURRC'] == '/dev/null'
-
-        unless default_config_files.any?{|f| File.file?(f)}
-          raise "No .conjurrc files were found.  You may have to run 'conjur init' to create them."
-        end
-
-        unless Config.member? :account
+       unless Config.member? :account
           raise "No account was specified in your .conjurrc files.  You may have to run 'conjur init' to create these files"
         end
       end
 
-      def apply validate=false
+      def apply
         require 'conjur/configuration'
 
         validate!
