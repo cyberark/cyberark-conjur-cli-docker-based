@@ -26,8 +26,10 @@ describe Conjur::Config do
     context "when CONJURRC is not set" do
       around do |example|
         oldrc = ENV.delete 'CONJURRC'
-        puts "swaping #{oldrc} to nil"
+
+
         example.run
+
         ENV['CONJURRC'] = oldrc
       end
 
