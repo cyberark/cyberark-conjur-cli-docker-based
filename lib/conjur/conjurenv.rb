@@ -29,6 +29,9 @@ module Conjur
         raise "#{self.class.name.split('::').last} requires a parameter" if id.to_s.empty?
         @id=id
       end
+      def gsub! pattern, replace
+        @id.gsub! pattern, replace
+      end
       def init_with(coder)
         initialize(coder.scalar)
       end
@@ -61,21 +64,22 @@ module Conjur
       raise ":file and :yaml options can not be provided together" if ( options.has_key?(:file) and options.has_key?(:yaml) )
 
       yaml = if options.has_key?(:yaml) 
-                raise ":yaml option should be non-empty string" unless options[:yaml].kind_of?(String)
-                raise ":yaml option should be non-empty string" if options[:yaml].empty?
-                options[:yaml]
-              elsif options.has_key?(:file)
-                raise ":file option should be non-empty string" unless options[:file].kind_of?(String)
-                raise ":file option should be non-empty string" if options[:file].empty?
-                File.read(options[:file])
-              else
-                raise "either :file or :yaml option is mandatory"
-              end
-
-       @definition = parse(yaml)
+        raise ":yaml option should be non-empty string" unless options[:yaml].kind_of?(String)
+        raise ":yaml option should be non-empty string" if options[:yaml].empty?
+        options[:yaml]
+      elsif options.has_key?(:file)
+        raise ":file option should be non-empty string" unless options[:file].kind_of?(String)
+        raise ":file option should be non-empty string" if options[:file].empty?
+        File.read(options[:file])
+      else
+        raise "either :file or :yaml option is mandatory"
+      end
+      parse_arguments = [ yaml ]
+      parse_arguments << options[:substitutions] if options[:substitutions]
+      @definition = parse(*parse_arguments)
     end
 
-    def parse(yaml)
+    def parse(yaml, substitutions = {})
       YAML.add_tag("!var", ConjurVariable)
       YAML.add_tag("!tmp", ConjurTempfile)
       definition = YAML.load(yaml)
@@ -84,6 +88,14 @@ module Conjur
       definition.keys.select { |k| definition[k].kind_of? Fixnum }.each { |k| definition[k]="#{definition[k]}" }
       bad_types = definition.values.select { |v| not (v.kind_of?(String) or v.kind_of?(CustomTag)) }.map {|v| v.class}.uniq
       raise "Definition can not include values of types: #{bad_types}" unless bad_types.empty?
+      definition.inject({}) do |memo,e| 
+        key, value = e
+        substitutions.each do |k,v|
+          value.gsub! k, v
+        end
+        memo[key] = value
+        memo
+      end
       definition
     end
 

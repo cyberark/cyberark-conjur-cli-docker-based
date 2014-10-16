@@ -35,6 +35,9 @@ class Conjur::Command::Env < Conjur::Command
     
     c.desc "Environment configuration as inline yaml"
     c.flag ["yaml"]
+
+    c.desc "Policy id to substitute for $policy in the YAML values"
+    c.flag ["policy"]
   end
 
   def self.get_env_object options
@@ -42,12 +45,13 @@ class Conjur::Command::Env < Conjur::Command
       exit_now! "Options -c and --yaml can not be provided together"
     end
 
-    env = if options[:yaml] 
-            Conjur::Env.new(yaml: options[:yaml])
-          else
-            Conjur::Env.new(file: (options[:c]||'.conjurenv'))
-          end
-    return env
+    env_options = if options[:yaml] 
+      { yaml: options[:yaml]}
+    else
+      { file: (options[:c]||'.conjurenv') }
+    end
+    env_options[:substitutions] = { "$policy" => options[:policy] } if options[:policy]
+    Conjur::Env.new env_options
   end
 
   command :env do |env|
@@ -132,7 +136,6 @@ TEMPLATEDESC
         conjurenv = env.obtain(api)  # needed for binding
         rendered = ERB.new(template).result(binding)
 
-        # 
         tempfile = if File.directory?("/dev/shm") and File.writable?("/dev/shm")
                       Tempfile.new("conjur","/dev/shm")
                    else

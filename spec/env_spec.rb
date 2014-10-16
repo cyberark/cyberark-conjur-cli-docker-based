@@ -78,7 +78,29 @@ describe Conjur::Env do
       expect(result.keys.sort).to eq(["a","b","c"])
       expect(result["a"]).to eq('literal')
       expect(result["b"]).to be_a_kind_of(Conjur::Env::ConjurTempfile)
+      expect(result["b"].conjur_id).to eq('sometmp')
       expect(result["c"]).to be_a_kind_of(Conjur::Env::ConjurVariable)
+      expect(result["c"].conjur_id).to eq('somevar')
+    end
+    
+    it "Accepts empty string substitution" do
+      substitutions = {
+      }
+      result = Conjur::Env.new(yaml: "{a: $foo, b: !tmp '$foo$foo$bar', c: !var '$foo$bar'}", substitutions: substitutions).instance_variable_get("@definition")
+      expect(result["a"]).to eq('$foo')
+      expect(result["b"].conjur_id).to eq('$foo$foo$bar')
+      expect(result["c"].conjur_id).to eq('$foo$bar')
+    end
+
+    it "Performs requested string substitution" do
+      substitutions = {
+        "$foo" => "alice",
+        "$bar" => "bob"
+      }
+      result = Conjur::Env.new(yaml: "{a: $foo, b: !tmp '$foo$foo$bar', c: !var '$foo$bar'}", substitutions: substitutions).instance_variable_get("@definition")
+      expect(result["a"]).to eq('alice')
+      expect(result["b"].conjur_id).to eq('alicealicebob')
+      expect(result["c"].conjur_id).to eq('alicebob')
     end
 
     it "Converts numbers to string literals" do
