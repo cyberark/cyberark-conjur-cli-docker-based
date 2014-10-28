@@ -38,11 +38,25 @@ shared_examples_for "processes environment definition" do |cmd, options|
   end
 end
 
+shared_examples_for "accepts policy option" do |cmd, options|
+  before {  # suspend all interaction with the environment
+    allow(Kernel).to receive(:system).and_return(true) 
+  }
+  let(:stub_object) { double(obtain:{}, check:{}) }
+  describe_command "env:#{cmd} --policy foobar #{options}" do
+    it "uses .conjurenv file by default" do
+      expect(Conjur::Env).to receive(:new).with(file:".conjurenv", substitutions: { "$policy" => "foobar" }).and_return(stub_object)
+      invoke
+    end
+  end
+end
+
 describe Conjur::Command::Env, logged_in: true do
 
   let(:stub_env)    { double() }
   describe ":check" do
     it_behaves_like "processes environment definition", "check", ''
+    it_behaves_like "accepts policy option", "check", ''
 
     describe_command "env:check" do
       before { expect(Conjur::Env).to receive(:new).and_return(stub_env) }
@@ -81,6 +95,7 @@ describe Conjur::Command::Env, logged_in: true do
 
   describe ":run" do
     it_behaves_like "processes environment definition", "run","-- extcmd"
+    it_behaves_like "accepts policy option", "run", '-- extcmd'
     describe_command "env:run" do
       it 'fails because of missing argument' do 
         expect(Kernel).not_to receive(:system)
@@ -119,6 +134,7 @@ describe Conjur::Command::Env, logged_in: true do
         allow(FileUtils).to receive(:copy).and_return(true)
       }
       it_behaves_like "processes environment definition", "template","config.erb"
+      it_behaves_like "accepts policy option", "template", 'config.erb'
     end
     describe_command "env:template" do
       it 'fails because of missing argument' do 
