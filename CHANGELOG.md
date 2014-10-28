@@ -1,3 +1,9 @@
+# 4.17.0
+
+* Support --policy parameter in 'conjur env'
+* Bugfix: failures on 'variable retire'
+* Raise a better error in case of missing config
+
 # 4.16.0
 
 * Add 'bootstrap' CLI command
