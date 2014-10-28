@@ -104,7 +104,7 @@ module Conjur
         obj.resource.attributes['permissions'].each do |p|
           role = api.role(p['role'])
           privilege = p['privilege']
-          next if role.roleid == obj.roleid && privilege == 'read'
+          next if obj.respond_to?(:roleid) && role.roleid == obj.roleid && privilege == 'read'
           puts "Denying #{privilege} privilege to #{role.roleid}"
           obj.resource.deny(privilege, role)
         end
