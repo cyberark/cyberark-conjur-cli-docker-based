@@ -2,8 +2,8 @@
 require File.expand_path('../lib/conjur/version', __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Rafa\305\202 Rzepecki", "Kevin Gilpin"]
-  gem.email         = ["divided.mind@gmail.com", "kgilpin@conjur.net",]
+  gem.authors       = ["Rafal Rzepecki", "Kevin Gilpin"]
+  gem.email         = ["rafal@conjur.net", "kgilpin@conjur.net",]
   gem.summary       = %q{Conjur command line interface}
   gem.homepage      = "https://github.com/conjurinc/cli-ruby"
   gem.license       = 'MIT'
