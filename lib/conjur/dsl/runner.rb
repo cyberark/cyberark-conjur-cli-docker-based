@@ -20,7 +20,7 @@ module Conjur
         @context['env']   = Conjur.env unless Conjur.env == 'production'
         @context['stack'] = Conjur.stack unless Conjur.stack == 'v4'
         @context['appliance_url']   = Conjur.configuration.appliance_url unless Conjur.configuration.appliance_url.nil?
-        @context['ssl_certificate'] = File.read(Conjur::Config[:cert_file]) unless Conjur::Config[:cert_file].nil?
+        @context['ssl_certificate'] = File.read(Conjur.configuration.cert_file) unless Conjur.configuration.cert_file.nil?
 
         @script = script
         @filename = filename
