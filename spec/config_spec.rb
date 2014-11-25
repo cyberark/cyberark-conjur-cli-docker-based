@@ -1,3 +1,4 @@
+require 'spec_helper'
 require 'conjur/authn'
 require 'conjur/config'
 require 'conjur/command/rspec/output_matchers'
@@ -107,13 +108,23 @@ describe Conjur::Config do
     end
   end
   describe "#apply" do
-    before { allow(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file) }
-
-    let(:cert_file) { "/path/to/cert.pem" }
-    it "trusts the cert_file" do
-      Conjur::Config.class_variable_set("@@attributes", { 'cert_file' => cert_file })
-      expect(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file).with cert_file  
-      Conjur::Config.apply
+    before { 
+      allow(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file) 
+    }
+    context "cert_file" do
+      let(:cert_file) { "/path/to/cert.pem" }
+      before { 
+        Conjur::Config.class_variable_set("@@attributes", { 'cert_file' => cert_file })
+      }
+  
+      it "trusts the cert_file" do
+        expect(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file).with cert_file  
+        Conjur::Config.apply
+      end
+      it "propagates the cert_file to Configuration.cert_file" do
+        Conjur::Config.apply
+        expect(Conjur.configuration.cert_file).to eq(cert_file)
+      end
     end
 
     it "shadows rc with envars" do
@@ -121,7 +132,7 @@ describe Conjur::Config do
       ENV['CONJUR_APPLIANCE_URL'] = url
       load!
       Conjur::Config.apply
-      expect(Conjur.configuration.appliance_url).to eq url
+      expect(Conjur.configuration.appliance_url).to eq(url)
     end
   end
 end
