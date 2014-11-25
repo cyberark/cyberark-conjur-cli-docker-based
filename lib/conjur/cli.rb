@@ -85,6 +85,8 @@ module Conjur
 
     init!
 
+    version Conjur::VERSION
+
     pre do |global,command,options,args|
       require 'conjur/api'
 
