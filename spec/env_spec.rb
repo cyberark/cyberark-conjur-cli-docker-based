@@ -2,6 +2,12 @@ require 'spec_helper'
 require 'conjur/conjurenv'
 
 describe Conjur::Env do
+  describe Conjur::Env::ConjurVariable do
+    it "reports a missing value" do
+      var = Conjur::Env::ConjurVariable.new('the-id')
+      expect { var.evaluate nil }.to raise_error "variable the-id exists but doesn't have a value"
+    end
+  end
 
   describe "#initialize" do
 

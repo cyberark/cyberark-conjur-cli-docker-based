@@ -42,7 +42,7 @@ module Conjur
 
     class ConjurVariable < CustomTag
       def evaluate value
-        raise "variable #{id} exists but doesn't have a value" if value.nil?
+        raise "variable #{conjur_id} exists but doesn't have a value" if value.nil?
         value.chomp
       end
     end
