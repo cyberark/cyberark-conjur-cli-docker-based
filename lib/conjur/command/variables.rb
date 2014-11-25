@@ -23,7 +23,7 @@ class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
     var.desc "Create and store a variable"
-    var.arg_name "id"
+    var.arg_name "id [value]"
     var.command :create do |c|
       c.arg_name "mime_type"
       c.flag [:m, :"mime-type"], default_value: "text/plain"
@@ -32,18 +32,23 @@ class Conjur::Command::Variables < Conjur::Command
       c.flag [:k, :"kind"], default_value: "secret"
 
       c.arg_name "value"
-      c.desc "Initial value"
+      c.desc "Initial value, which may also be specified as the second command argument after the variable id"
       c.flag [:v, :"value"]
 
       acting_as_option(c)
 
       c.action do |global_options,options,args|
         id = args.shift
-        options[:id] = id if id
-
         unless id
           ActiveSupport::Deprecation.warn "id argument will be required in future releases"
         end
+        value = args.shift unless args.empty?
+        
+        raise "Received extra arguments '#{args.join(' ')}'" unless args.empty?
+        raise "Received conflicting value arguments" if value && options[:value]
+        
+        options[:id] = id if id
+        options[:value] ||= value if value
 
         mime_type = options.delete(:m)
         kind = options.delete(:k)
