@@ -86,9 +86,10 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-    hosts.desc "Enroll a new host into conjur"
+    hosts.desc "[Deprecated] Enroll a new host into conjur"
     hosts.arg_name "host"
     hosts.command :enroll do |c|
+      hide_docs(c)
       c.action do |global_options, options, args|
         id = require_arg(args, 'host')
         enrollment_url = api.host(id).enrollment_url
