@@ -32,6 +32,7 @@ module Conjur
   autoload :Command,                'conjur/command'
   autoload :DSL,                    'conjur/dsl/runner'
   autoload :DSLCommand,             'conjur/command/dsl_command'
+  autoload :VERSION,                'conjur/version'
 
   module Audit
     autoload :Follower,             'conjur/audit/follower'
