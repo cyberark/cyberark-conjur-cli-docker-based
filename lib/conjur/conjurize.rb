@@ -41,7 +41,7 @@ module Conjur
       end
       
       sudo = lambda{|str| 
-        [ options[:sudo] ? "sudo" : nil, str ].compact.join(" ")
+        [ options[:sudo] ? "sudo -n" : nil, str ].compact.join(" ")
       }
       
       header = <<-HEADER
