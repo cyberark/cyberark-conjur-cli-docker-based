@@ -44,3 +44,28 @@ shared_context "fresh config" do
     Conjur.configuration = @configuration
   }
 end
+
+RSpec::Core::DSL.change_global_dsl do
+  def describe_conjurize *argv, &block
+    describe *argv do
+      let(:command) { Conjur::Conjurize }
+      let(:invoke) do
+        command.go!
+      end
+      before {
+        require 'methadone'
+        
+        option_parser = OptionParser.new
+        expect(option_parser).to receive(:parse!).with(no_args) do |*args|
+          option_parser.parse! argv
+        end
+        allow(option_parser).to receive(:parse!).and_call_original
+        option_parser_proxy = nil
+        expect(Conjur::Conjurize).to receive(:opts) do |*args|
+          option_parser_proxy ||= Methadone::OptionParserProxy.new(option_parser, command.options)
+        end
+      }
+      instance_eval &block
+    end
+  end
+end
