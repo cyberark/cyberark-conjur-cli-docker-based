@@ -6,10 +6,15 @@ module Conjur
     include Methadone::Main
     include Methadone::CLILogging
   
-    description "Generate a script to install Conjur onto a host"
+    description <<-DESC
+Generate a script to install Conjur onto a machine. "conjurize" is designed to be used
+in a piped execution, along with "conjur host create" and "ssh". For example:
+
+conjur host create myhost.example.com | tee host.json | conjurize --ssh | ssh myhost.example.com
+DESC
 
     version Conjur::VERSION
-  
+    
     main do
       input = if input_file = options[:f]
         File.read(input_file)
@@ -47,7 +52,10 @@ module Conjur
       header = <<-HEADER
 #!/bin/sh
 set -e
+
+# Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
       HEADER
+      
       configure_conjur = <<-CONFIGURE
 #{sudo.call 'tee'} /etc/conjur.conf > /dev/null << CONJUR_CONF
 account: #{Conjur.configuration.account}
@@ -86,12 +94,12 @@ CONJUR_IDENTITY
       puts [ header, configure_conjur, install_chef, run_chef ].compact.join("\n")
     end
     
-    on("-c CONJUR_CONFIG_FILE")
-    on("-f HOST_JSON_FILE")
-    on("--chef-executable PATH")
-    on("--ssh")
-    on("--sudo")
-    on("--conjur-cookbook-url NAME")
-    on("--conjur-run-list RUNLIST")
+    on("-c CONJUR_CONFIG_FILE", "Overrides defaults (CONJURRC env var, ~/.conjurrc, /etc/conjur.conf).")
+    on("-f HOST_JSON_FILE", "Host login and API key can be read from the output emitted from 'conjur host create'. This data can be obtained from stdin, or from a file.")
+    on("--chef-executable PATH", "If specified, the designated chef-solo executable is used, otherwise Chef is installed on the target machine.")
+    on("--ssh", "Indicates that Conjur SSH should be installed.")
+    on("--sudo", "Indicates that all commands should be run via 'sudo'.")
+    on("--conjur-cookbook-url NAME", "Overrides the default Chef cookbook URL for Conjur SSH.")
+    on("--conjur-run-list RUNLIST", "Overrides the default Chef run list for Conjur SSH.")
   end
 end

@@ -16,6 +16,8 @@ Feature: conjurize program generates install scripts
 #!/bin/sh
 set -e
 
+# Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
+
 tee /etc/conjur.conf > /dev/null << CONJUR_CONF
 account: test
 appliance_url: https://conjur/api
@@ -63,6 +65,8 @@ chmod 0600 /etc/conjur.identity
 """
 #!/bin/sh
 set -e
+
+# Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
 
 tee /etc/conjur.conf > /dev/null << CONJUR_CONF
 account: test
@@ -119,9 +123,9 @@ chef-solo -r https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1
 
   Scenario: conjurize with sudo-ized commands
     When I conjurize "--sudo --ssh"
-    Then the stdout should contain "sudo tee /etc/conjur.conf > /dev/null << CONJUR_CONF"
-    And the stdout should contain "sudo tee /etc/conjur-test.pem > /dev/null << CONJUR_CERT"
-    And the stdout should contain "tee /etc/conjur.identity > /dev/null << CONJUR_IDENTITY"
-    And the stdout should contain "sudo chmod 0600 /etc/conjur.identity"
-    And the stdout should contain "curl -L https://www.opscode.com/chef/install.sh | sudo bash"
+    Then the stdout should contain "sudo -n tee /etc/conjur.conf > /dev/null << CONJUR_CONF"
+    And the stdout should contain "sudo -n tee /etc/conjur-test.pem > /dev/null << CONJUR_CERT"
+    And the stdout should contain "sudo -n tee /etc/conjur.identity > /dev/null << CONJUR_IDENTITY"
+    And the stdout should contain "sudo -n chmod 0600 /etc/conjur.identity"
+    And the stdout should contain "curl -L https://www.opscode.com/chef/install.sh | sudo -n bash"
     
