@@ -23,6 +23,10 @@ require 'active_support/dependencies/autoload'
 require 'conjur/api'
 require 'netrc'
 
+Netrc.configure do |config|
+  config[:allow_permissive_netrc_file] = true
+end
+
 module Conjur::Authn
   autoload :API,      'conjur/authn-api'
   class << self

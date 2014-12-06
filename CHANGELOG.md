@@ -1,6 +1,13 @@
+# 4.18.0
+
+* New `conjurize` command 
+* Deprecate the `host enroll` command
+* `variable create` command now takes an optional value for the variable after the variable id
+* Configure "permissive" netrc to allow the `conjur` Unix group to read the `.netrc` or `conjur.identity` file.
+
 # 4.17.0
 
-* Support --policy parameter in 'conjur env'
+* Support --policy parameter in `conjur env`
 * Bugfix: failures on 'variable retire'
 * Raise a better error in case of missing config
 
