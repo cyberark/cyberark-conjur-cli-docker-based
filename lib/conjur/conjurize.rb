@@ -1,5 +1,6 @@
-require 'json'
 require 'methadone'
+require 'json'
+require 'conjur/version.rb'
 
 module Conjur
   class Conjurize
