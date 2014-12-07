@@ -26,7 +26,8 @@ require 'socket'
 class Conjur::Command::Policy < Conjur::DSLCommand
   class << self
     def default_collection_user
-      Etc.getlogin
+      # More accurate than Etc.getlogin
+      Etc.getpwuid(Process.uid).name
     end
     
     def default_collection_hostname

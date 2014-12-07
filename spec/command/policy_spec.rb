@@ -22,6 +22,8 @@ describe Conjur::Command::Policy do
       double("resource", exists?: true).as_null_object
     end
     before {
+      allow(File).to receive(:read).and_call_original
+      allow(File).to receive(:exists?).and_call_original
       allow(File).to receive(:exists?).with("policy.rb").and_return true
       allow(File).to receive(:read).with("policy.rb").and_return "{}"
       allow_any_instance_of(Conjur::DSL::Runner).to receive(:api).and_return api
