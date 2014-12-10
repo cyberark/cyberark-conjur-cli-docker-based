@@ -1,3 +1,8 @@
+# 4.18.1
+
+* `authn whoami` will notice if the user is logged in via env vars
+* `conjurize` default conjur-ssh cookbook updated to 1.2.2
+
 # 4.18.0
 
 * New `conjurize` command 

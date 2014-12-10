@@ -10,7 +10,7 @@ namespace do
   user "bob"
 end
     """
-    Then the model should contain "user" /^bob@/
+    Then the model should contain "user" /bob@.+/
 
   Scenario: Namespace can be used as a no-arg method
     When I run script:

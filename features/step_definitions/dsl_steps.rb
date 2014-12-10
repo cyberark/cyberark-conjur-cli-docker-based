@@ -12,7 +12,9 @@ end
 Then(/^the model should contain "(.*?)" "(.*?)"$/) do |kind, id|
   @mock_api.thing(kind, id).should_not be_nil
 end
-
+Then(/^the model should contain "(.*?)" \/(.*?)\/$/) do |kind, id|
+  @mock_api.thing_like(kind, Regexp.new(id)).should_not be_nil
+end
 Then(/^the "(.*?)" "(.*?)" should be owned by "(.*?)"$/) do |kind, id, owner|
   step "the model should contain \"#{kind}\" \"#{id}\""
   @mock_api.thing(kind, id).ownerid.should == owner

@@ -11,6 +11,10 @@ class MockAPI
     (@things[kind.to_sym] || []).find{|r| r.id == id}  
   end
   
+  def thing_like(kind, id_pattern)
+    (@things[kind.to_sym] || []).find{|r| id_pattern.match(r.id)}  
+  end
+
   def create_host(options = {})
     id = options.delete(:id)
     if id
