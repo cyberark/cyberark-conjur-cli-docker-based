@@ -28,6 +28,12 @@ Netrc.configure do |config|
 end
 
 module Conjur::Authn
+  class NoCredentialsError < RuntimeError
+    def initialize
+      super "No Conjur credentials provided or found"
+    end
+  end
+  
   autoload :API,      'conjur/authn-api'
   class << self
     def login(options = {})
@@ -85,7 +91,7 @@ module Conjur::Authn
     end
     
     def ask_for_credentials(options = {})
-      raise "No Conjur credentials provided or found" if options[:noask]
+      raise NoCredentialsError if options[:noask]
 
       # also use stderr here, because we might be prompting for a password as part
       # of a command like user:create that we'd want to send to a file.

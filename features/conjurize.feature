@@ -108,7 +108,7 @@ CONJUR_IDENTITY
 chmod 0600 /etc/conjur.identity
 
 curl -L https://www.opscode.com/chef/install.sh | bash
-chef-solo -r https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1.2.0/conjur-ssh-v1.2.0.tar.gz -o conjur-ssh
+chef-solo -r https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1.2.2/conjur-ssh-v1.2.2.tar.gz -o conjur-ssh
 
 """
 

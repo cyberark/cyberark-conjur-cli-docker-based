@@ -44,6 +44,16 @@ describe Conjur::Command::Authn do
       end
     end
   end
+  
+  context "when login credentials are available in the environment" do
+    before do
+      expect(ENV).to receive(:[]).with("CONJUR_AUTHN_LOGIN").and_return username
+      expect(ENV).to receive(:[]).with("CONJUR_AUTHN_API_KEY").and_return 'the-password'
+      it "prints the current account and username to stdout" do
+        expect { invoke }.to write({ account: account, username: username }.to_json)
+      end
+    end
+  end
 
   context "when logged in", logged_in: true do
     describe_command 'authn:logout' do

@@ -86,9 +86,10 @@ It should be running the CAS RESTful services at the /v1 path
     authn.desc "Prints out the current logged in username"
     authn.command :whoami do |c|
       c.action do
-        if creds = Conjur::Authn.read_credentials
+        begin
+          creds = Conjur::Authn.get_credentials(noask: true)
           puts({account: Conjur::Core::API.conjur_account, username: creds[0]}.to_json)
-        else
+        rescue Conjur::Authn::NoCredentialsError
           exit_now! 'Not logged in.', -1
         end
       end
