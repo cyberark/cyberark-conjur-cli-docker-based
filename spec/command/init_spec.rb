@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'highline'
 
 GITHUB_FP = "SHA1 Fingerprint=A0:C4:A7:46:00:ED:A7:2D:C0:BE:CB:9A:8C:B6:07:CA:58:EE:74:5E"
 GITHUB_CERT = <<EOF

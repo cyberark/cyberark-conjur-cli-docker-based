@@ -18,7 +18,6 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'highline'
 require 'conjur/command'
 require 'openssl'
 require 'socket'
@@ -29,8 +28,7 @@ class Conjur::Command::Init < Conjur::Command
   def self.write_file(filename, force, &block)
     if File.exists?(filename)
       unless force
-        hl = HighLine.new $stdin, $stderr
-        force = true if hl.ask("File #{filename} exists. Overwrite (yes/no): ").strip == "yes"
+        force = true if highline.ask("File #{filename} exists. Overwrite (yes/no): ").strip == "yes"
       end
       exit_now! "Not overwriting #{filename}" unless force
     end
@@ -56,9 +54,7 @@ class Conjur::Command::Init < Conjur::Command
     c.flag "force"
 
     c.action do |global_options,options,args|
-      hl = HighLine.new $stdin, $stderr
-
-      hostname = options[:hostname] || hl.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
+      hostname = options[:hostname] || highline.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
       protocol, hostname = (hostname.scan %r(^(?:(.*)://)?(.*))).first
       exit_now! "only https protocol supported" unless protocol.nil? || protocol == 'https'
       if hostname
@@ -70,7 +66,7 @@ class Conjur::Command::Init < Conjur::Command
         account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
       else
         # using .to_s to overcome https://github.com/JEG2/highline/issues/69
-        hl.ask("Enter your organization account name: ").to_s
+        highline.ask("Enter your organization account name: ").to_s
       end
 
       if (certificate = options[:certificate]).blank?
@@ -87,7 +83,7 @@ class Conjur::Command::Init < Conjur::Command
 
           puts "\nPlease verify this certificate on the appliance using command:
                 openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
-          exit_now! "You decided not to trust the certificate" unless hl.ask("Trust this certificate (yes/no): ").strip == "yes"
+          exit_now! "You decided not to trust the certificate" unless highline.ask("Trust this certificate (yes/no): ").strip == "yes"
         end
       end
 
@@ -145,5 +141,13 @@ class Conjur::Command::Init < Conjur::Command
   ensure
     ssock.close if ssock
     sock.close if sock
+  end
+
+  private
+
+  def self.highline
+    # isolated here so that highline is only loaded on demand
+    require 'highline'
+    @hl ||= HighLine.new $stdin, $stderr
   end
 end
