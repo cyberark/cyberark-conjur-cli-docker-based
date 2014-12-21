@@ -17,10 +17,7 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-#
-#require 'conjur/authn'
-#require 'conjur/command'
-require 'conjur/conjurenv'
+
 require 'tempfile'
 
 class Conjur::Command::Env < Conjur::Command
@@ -41,6 +38,8 @@ class Conjur::Command::Env < Conjur::Command
   end
 
   def self.get_env_object options
+    require 'conjur/conjurenv'
+
     if options[:yaml] and options[:c]!='.conjurenv'
       exit_now! "Options -c and --yaml can not be provided together"
     end
