@@ -1,3 +1,5 @@
+* Make the command start up faster by lazy loading some gems
+
 # 4.18.1
 
 * `authn whoami` will notice if the user is logged in via env vars
