@@ -68,7 +68,10 @@ module Conjur::Authn
       args = []
       if path = Conjur::Config[:netrc_path]
         args.unshift(path)
+      else
+        path = Netrc.default_path
       end
+      fail "netrc (#{path}) shouldn't be world-readable" if File.world_readable?(path)
       Netrc.read(*args)
     end
     

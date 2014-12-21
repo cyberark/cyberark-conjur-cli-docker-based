@@ -61,7 +61,7 @@ describe Conjur::Authn do
     end
 
     context "with specified netrc_path" do
-      let(:path) { double("path") }
+      let(:path) { "/a/dummy/netrc/path" }
       it "consults Conjur::Config for netrc_path" do
         expect(Netrc).to receive(:read).with(path).and_return netrc = double("netrc")
         expect(Conjur::Authn.netrc).to eq(netrc)

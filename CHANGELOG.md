@@ -1,3 +1,4 @@
+* Complain if netrc is world readable
 * Find (and store) credentials by only a hostname as the machine in netrc
 * Make the command start up faster by lazy loading some gems
 
