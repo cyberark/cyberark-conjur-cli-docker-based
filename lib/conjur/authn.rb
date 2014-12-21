@@ -47,20 +47,29 @@ module Conjur::Authn
     end
     
     def delete_credentials
+      netrc.delete uri # old version keyed it by uri
       netrc.delete host
       netrc.save
     end
     
+    def uri
+      Conjur::Authn::API.host # this method has a misleading name
+    end
+
     def host
-      Conjur::Authn::API.host
+      URI.parse(uri).hostname
     end
     
     def netrc
+      @netrc ||= read_netrc
+    end
+
+    def read_netrc
       args = []
       if path = Conjur::Config[:netrc_path]
         args.unshift(path)
       end
-      @netrc ||= Netrc.read(*args)
+      Netrc.read(*args)
     end
     
     def get_credentials(options = {})
@@ -76,7 +85,7 @@ module Conjur::Authn
     end
     
     def read_credentials
-      netrc[host]
+      netrc[host] || netrc[uri] # old version keyed it by uri
     end
     
     def fetch_credentials(options = {})
@@ -86,6 +95,7 @@ module Conjur::Authn
     
     def write_credentials
       netrc[host] = @credentials
+      netrc.delete uri  # old version keyed it by uri
       netrc.save
       @credentials
     end

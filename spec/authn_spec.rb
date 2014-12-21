@@ -3,8 +3,10 @@ require 'conjur/config'
 
 describe Conjur::Authn do
   let(:netrc) { Netrc.read '' }
+  let(:authn_uri) { 'https://conjur.example.com/api/authn' }
   before do
     Conjur::Authn.instance_variable_set("@netrc", netrc)
+    allow(Conjur::Authn::API).to receive(:host).and_return authn_uri
   end
 
   describe "credentials from environment" do
@@ -25,6 +27,30 @@ describe Conjur::Authn do
     it "are not written to netrc" do
       expect(Conjur::Authn).not_to receive(:write_credentials)
       Conjur::Authn.get_credentials
+    end
+  end
+
+  describe ".read_credentials" do
+    shared_examples :read_credentials do
+      it "finds the credentials" do
+        creds = Conjur::Authn.read_credentials
+        expect(creds.login).to eq 'user'
+        expect(creds.password).to eq 'pass'
+      end
+    end
+
+    context "when only the hostname not the url is the machine in the netrc file" do
+      before do
+        netrc['conjur.example.com'] = %w(user pass)
+      end
+      include_examples :read_credentials
+    end
+
+    context "when the url is the machine in the netrc file" do
+      before do
+        netrc[authn_uri] = %w(user pass)
+      end
+      include_examples :read_credentials
     end
   end
 
