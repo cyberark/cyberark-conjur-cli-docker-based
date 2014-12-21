@@ -23,6 +23,10 @@ require 'gli'
 require 'active_support'
 require 'active_support/deprecation'
 
+# this makes mime/types gem load much faster by lazy loading
+# mime types and caching them in binary form
+ENV['RUBY_MIME_TYPES_LAZY_LOAD'] ||= 'true'
+ENV['RUBY_MIME_TYPES_CACHE'] ||= '/tmp/conjur.mimetype.cache'
 
 module Conjur
   autoload :Config,                 'conjur/config'
