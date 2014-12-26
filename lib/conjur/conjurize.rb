@@ -43,7 +43,7 @@ DESC
       
       if options[:ssh]
         conjur_run_list ||= "conjur-ssh"
-        conjur_cookbook_url ||= "https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1.2.2/conjur-ssh-v1.2.2.tar.gz"
+        conjur_cookbook_url ||= "https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1.2.3/conjur-ssh-v1.2.3.tar.gz"
       end
       
       sudo = lambda{|str| 
