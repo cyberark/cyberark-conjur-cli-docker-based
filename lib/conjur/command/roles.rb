@@ -159,7 +159,7 @@ class Conjur::Command::Roles < Conjur::Command
         params[:as_role] = options[:acting_as] if options.member?(:acting_as)
         params[:roles] = args
 
-        graph = api.role_graph(roles, params)
+        graph = api.role_graph(args, params)
 
         output = case format
           when :json then graph.to_json(options[:short]) + "\n"
