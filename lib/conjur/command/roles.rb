@@ -119,6 +119,10 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
+
+    role.desc "Revoke a role from another role. You must have admin permission on the revoking role."
+    role.arg_name "role member"
+    role.command :revoke_from do |c|
       c.action do |global_options,options,args|
         id = require_arg(args, 'role')
         member = require_arg(args, 'member')
@@ -169,5 +173,4 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
   end
-
 end
