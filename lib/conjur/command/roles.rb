@@ -20,6 +20,8 @@
 #
 
 class Conjur::Command::Roles < Conjur::Command
+  GRAPH_FORMATS = %w(json dot png)
+
 
   desc "Manage roles"
   command :role do |role|
@@ -117,15 +119,53 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
-    role.desc "Revoke a role from another role. You must have admin permission on the revoking role."
-    role.arg_name "role member"
-    role.command :revoke_from do |c|
       c.action do |global_options,options,args|
         id = require_arg(args, 'role')
         member = require_arg(args, 'member')
         role = api.role(id)
         role.revoke_from member
         puts "Role revoked"
+      end
+    end
+
+    role.desc "Describe role memberships as a digraph"
+    role.arg_name "role", :multiple
+    role.command :graph do |c|
+      c.desc "Output formats [#{GRAPH_FORMATS}]"
+      c.flag [:f,:format], default_value: 'json', must_match: GRAPH_FORMATS
+
+      c.desc "Use a more compact JSON format"
+      c.switch [:s, :short]
+
+      c.desc "Whether to show ancestors"
+      c.switch [:a, :ancestors], default_value: true
+
+      c.desc "Whether to show descendants"
+      c.switch [:d, :descendants], default_value: true
+
+      acting_as_option(c)
+
+      c.action do |global, options, args|
+        format = options[:format].downcase.to_sym
+        if options[:short] and format != :json
+          $stderr.puts "WARNING: the --short option is meaningless when --format is not json"
+        end
+
+        params = options.slice(:ancestors, :descendants)
+        params[:as_role] = options[:acting_as] if options.member?(:acting_as)
+        params[:roles] = args
+
+        graph = api.role_graph(roles, params)
+
+        output = case format
+          when :json then graph.to_json(options[:short]) + "\n"
+          when :png then graph.to_png
+          when :dot then graph.to_dot + "\n"
+          else raise "Unsupported format: #{format}" # not strictly necessary, because GLI must_match checks it,
+                                                     # but might as well?
+        end
+
+        $stdout.write output
       end
     end
   end
