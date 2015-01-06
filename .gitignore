@@ -1,3 +1,5 @@
+.gems
+.rbenv*
 *.policy
 .conjurrc
 *.cert
