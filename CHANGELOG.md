@@ -1,5 +1,5 @@
 
-# 4.18.1
+# 4.18.2
 
 * Require a recent version of netrc
 * Complain if netrc is world readable
