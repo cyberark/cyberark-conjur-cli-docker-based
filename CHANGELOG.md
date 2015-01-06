@@ -1,9 +1,10 @@
-* Complain if netrc is world readable
-* Find (and store) credentials by only a hostname as the machine in netrc
-* Make the command start up faster by lazy loading some gems
 
 # 4.18.1
 
+* Require a recent version of netrc
+* Complain if netrc is world readable
+* Find (and store) credentials by only a hostname as the machine in netrc
+* Make the command start up faster by lazy loading some gems
 * `authn whoami` will notice if the user is logged in via env vars
 * `conjurize` default conjur-ssh cookbook updated to 1.2.2
 
