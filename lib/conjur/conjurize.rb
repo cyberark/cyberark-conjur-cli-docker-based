@@ -1,12 +1,13 @@
 require 'methadone'
 require 'json'
+require 'net/http'
 require 'conjur/version.rb'
 
 module Conjur
   class Conjurize
     include Methadone::Main
     include Methadone::CLILogging
-  
+
     description <<-DESC
 Generate a script to install Conjur onto a machine. "conjurize" is designed to be used
 in a piped execution, along with "conjur host create" and "ssh". For example:
@@ -15,7 +16,7 @@ conjur host create myhost.example.com | tee host.json | conjurize --ssh | ssh my
 DESC
 
     version Conjur::VERSION
-    
+
     main do
       input = if input_file = options[:f]
         File.read(input_file)
@@ -23,10 +24,10 @@ DESC
         STDIN.read
       end
       host = JSON.parse input
-      
+
       login = host['id'] or raise "No 'id' field in host JSON"
       api_key = host['api_key'] or raise "No 'api_key' field in host JSON"
-        
+
       require 'conjur/cli'
       if conjur_config = options[:c]
         Conjur::Config.load [ conjur_config ]
@@ -34,29 +35,29 @@ DESC
         Conjur::Config.load
       end
       Conjur::Config.apply
-        
+
       conjur_cookbook_url = conjur_run_list = nil
-        
+
       conjur_run_list = options[:"conjur-run-list"]
       conjur_cookbook_url = options[:"conjur-cookbook-url"]
       chef_executable = options[:"chef-executable"]
-      
+
       if options[:ssh]
         conjur_run_list ||= "conjur-ssh"
-        conjur_cookbook_url ||= "https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1.2.3/conjur-ssh-v1.2.3.tar.gz"
+        conjur_cookbook_url ||= latest_conjur_ssh_release()
       end
-      
-      sudo = lambda{|str| 
+
+      sudo = lambda{|str|
         [ options[:sudo] ? "sudo -n" : nil, str ].compact.join(" ")
       }
-      
+
       header = <<-HEADER
 #!/bin/sh
 set -e
 
 # Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
       HEADER
-      
+
       # NOTE: change the identity file generation to use hostname
       # instead of URL after the new Conjur version (> 4.18.1) handling
       # that hits the cookbook
@@ -80,13 +81,13 @@ machine #{Conjur.configuration.appliance_url}/authn
 CONJUR_IDENTITY
 #{sudo.call 'chmod'} 0600 /etc/conjur.identity
       CONFIGURE
-      
+
       install_chef = if conjur_cookbook_url && !chef_executable
         %Q(curl -L https://www.opscode.com/chef/install.sh | #{sudo.call 'bash'})
       else
         nil
       end
-      
+
       chef_executable ||= "chef-solo"
 
       run_chef = if conjur_cookbook_url
@@ -94,10 +95,18 @@ CONJUR_IDENTITY
       else
         nil
       end
-      
+
       puts [ header, configure_conjur, install_chef, run_chef ].compact.join("\n")
     end
-    
+
+    def latest_conjur_ssh_release
+      releases_url = 'https://api.github.com/repos/conjur-cookbooks/conjur-ssh/releases'
+      resp = Net::HTTP.get_response(URI.parse(url))
+      json = JSON.parse(resp.body)
+      latest = json[0]['assets'].select {|asset| asset['name'] == 'conjur-ssh.tar.gz'}[0]
+      latest['browser_download_url']
+    end
+
     on("-c CONJUR_CONFIG_FILE", "Overrides defaults (CONJURRC env var, ~/.conjurrc, /etc/conjur.conf).")
     on("-f HOST_JSON_FILE", "Host login and API key can be read from the output emitted from 'conjur host create'. This data can be obtained from stdin, or from a file.")
     on("--chef-executable PATH", "If specified, the designated chef-solo executable is used, otherwise Chef is installed on the target machine.")
