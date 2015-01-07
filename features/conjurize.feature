@@ -58,10 +58,10 @@ CONJUR_IDENTITY
 chmod 0600 /etc/conjur.identity
 
 """
-    
+
   Scenario: conjurize with SSH installation
     When I conjurize "--ssh"
-    Then the stdout should contain exactly:
+    Then the stdout should contain:
 """
 #!/bin/sh
 set -e
@@ -108,14 +108,13 @@ CONJUR_IDENTITY
 chmod 0600 /etc/conjur.identity
 
 curl -L https://www.opscode.com/chef/install.sh | bash
-chef-solo -r https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1.2.3/conjur-ssh-v1.2.3.tar.gz -o conjur-ssh
-
 """
+    And the stdout should match /chef-solo -r https:\/\/github.com\/conjur-cookbooks\/conjur-ssh\/releases\/download\/v1.2.3\/conjur-ssh.tar.gz -o conjur-ssh/
 
   Scenario: conjurize with arbitrary cookbook
     When I conjurize "--conjur-cookbook-url https://example.com --conjur-run-list fry"
     Then the stdout should contain "chef-solo -r https://example.com -o fry"
-    
+
   Scenario: conjurize with path to chef-solo
     When I conjurize "--chef-executable /path/to/chef-solo --conjur-cookbook-url https://example.com --conjur-run-list fry"
     Then the stdout should contain "/path/to/chef-solo -r https://example.com -o fry"
@@ -128,4 +127,4 @@ chef-solo -r https://github.com/conjur-cookbooks/conjur-ssh/releases/download/v1
     And the stdout should contain "sudo -n tee /etc/conjur.identity > /dev/null << CONJUR_IDENTITY"
     And the stdout should contain "sudo -n chmod 0600 /etc/conjur.identity"
     And the stdout should contain "curl -L https://www.opscode.com/chef/install.sh | sudo -n bash"
-    
+

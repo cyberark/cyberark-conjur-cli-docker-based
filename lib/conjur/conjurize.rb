@@ -3,6 +3,14 @@ require 'json'
 require 'net/http'
 require 'conjur/version.rb'
 
+def latest_conjur_ssh_release
+  url = 'https://api.github.com/repos/conjur-cookbooks/conjur-ssh/releases'
+  resp = Net::HTTP.get_response(URI.parse(url))
+  json = JSON.parse(resp.body)
+  latest = json[0]['assets'].select {|asset| asset['name'] == 'conjur-ssh.tar.gz'}[0]
+  latest['browser_download_url']
+end
+
 module Conjur
   class Conjurize
     include Methadone::Main
@@ -97,14 +105,6 @@ CONJUR_IDENTITY
       end
 
       puts [ header, configure_conjur, install_chef, run_chef ].compact.join("\n")
-    end
-
-    def latest_conjur_ssh_release
-      releases_url = 'https://api.github.com/repos/conjur-cookbooks/conjur-ssh/releases'
-      resp = Net::HTTP.get_response(URI.parse(url))
-      json = JSON.parse(resp.body)
-      latest = json[0]['assets'].select {|asset| asset['name'] == 'conjur-ssh.tar.gz'}[0]
-      latest['browser_download_url']
     end
 
     on("-c CONJUR_CONFIG_FILE", "Overrides defaults (CONJURRC env var, ~/.conjurrc, /etc/conjur.conf).")

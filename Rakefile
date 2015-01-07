@@ -11,7 +11,7 @@ Cucumber::Rake::Task.new :features
 
 task :jenkins => ['ci:setup:rspec', :spec, 'ci:setup:cucumber_report_cleanup'] do
   Cucumber::Rake::Task.new do |t|
-    t.cucumber_opts = "--format CI::Reporter::Cucumber"
+    t.cucumber_opts = "--format progress --format CI::Reporter::Cucumber --out features/reports"
   end.runner.run
   File.write('build_number', ENV['BUILD_NUMBER']) if ENV['BUILD_NUMBER']
 end
