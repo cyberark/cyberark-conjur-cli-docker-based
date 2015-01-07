@@ -109,7 +109,10 @@ chmod 0600 /etc/conjur.identity
 
 curl -L https://www.opscode.com/chef/install.sh | bash
 """
-    And the stdout should match /chef-solo -r https:\/\/github.com\/conjur-cookbooks\/conjur-ssh\/releases\/download\/v1.2.3\/conjur-ssh.tar.gz -o conjur-ssh/
+    And the output should match:
+    """
+    chef-solo -r https:\/\/github.com\/conjur-cookbooks\/conjur-ssh\/releases\/download/v\d\.\d\.\d/conjur-ssh.tar.gz -o conjur-ssh
+    """
 
   Scenario: conjurize with arbitrary cookbook
     When I conjurize "--conjur-cookbook-url https://example.com --conjur-run-list fry"
