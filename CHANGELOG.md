@@ -1,3 +1,6 @@
+# 4.18.3
+
+* Use the latest conjur-ssh cookbook version for conjurize
 
 # 4.18.2
 
@@ -10,7 +13,7 @@
 
 # 4.18.0
 
-* New `conjurize` command 
+* New `conjurize` command
 * Deprecate the `host enroll` command
 * `variable create` command now takes an optional value for the variable after the variable id
 * Configure "permissive" netrc to allow the `conjur` Unix group to read the `.netrc` or `conjur.identity` file.
@@ -24,7 +27,7 @@
 # 4.16.0
 
 * Add 'bootstrap' CLI command
-* Raise a better error if conjur env encounters a variable with no value 
+* Raise a better error if conjur env encounters a variable with no value
 
 # 4.15.0
 
