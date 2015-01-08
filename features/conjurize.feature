@@ -108,6 +108,7 @@ CONJUR_IDENTITY
 chmod 0600 /etc/conjur.identity
 
 curl -L https://www.opscode.com/chef/install.sh | bash
+
 """
     And the output should match:
     """
