@@ -112,7 +112,7 @@ curl -L https://www.opscode.com/chef/install.sh | bash
 """
     And the output should match:
     """
-    chef-solo -r https:\/\/github.com\/conjur-cookbooks\/conjur-ssh\/releases\/download/v\d\.\d\.\d/conjur-ssh.tar.gz -o conjur-ssh
+    chef-solo -r https:\/\/github.com\/conjur-cookbooks\/conjur-ssh\/releases\/download/v\d\.\d\.\d/conjur-ssh-v\d\.\d\.\d.tar.gz -o conjur-ssh
     """
 
   Scenario: conjurize with arbitrary cookbook

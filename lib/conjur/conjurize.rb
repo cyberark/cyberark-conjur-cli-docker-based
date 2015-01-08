@@ -7,7 +7,7 @@ def latest_conjur_ssh_release
   url = 'https://api.github.com/repos/conjur-cookbooks/conjur-ssh/releases'
   resp = open(url)
   json = JSON.parse(resp.read)
-  latest = json[0]['assets'].select {|asset| asset['name'] == 'conjur-ssh.tar.gz'}[0]
+  latest = json[0]['assets'].select {|asset| asset['name'] =~ /conjur-ssh-v\d.\d.\d.tar.gz/}[0]
   latest['browser_download_url']
 end
 
