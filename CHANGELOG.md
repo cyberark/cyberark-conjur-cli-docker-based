@@ -1,3 +1,7 @@
+# 4.18.4
+
+* Revert "Find (and store) credentials by only a hostname as the machine in netrc"
+
 # 4.18.3
 
 * Use the latest conjur-ssh cookbook version for conjurize

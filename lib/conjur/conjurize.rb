@@ -66,9 +66,6 @@ set -e
 # Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
       HEADER
 
-      # NOTE: change the identity file generation to use hostname
-      # instead of URL after the new Conjur version (> 4.18.1) handling
-      # that hits the cookbook
       configure_conjur = <<-CONFIGURE
 #{sudo.call 'tee'} /etc/conjur.conf > /dev/null << CONJUR_CONF
 account: #{Conjur.configuration.account}
