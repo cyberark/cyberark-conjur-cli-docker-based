@@ -1,3 +1,7 @@
+# 4.18.5
+
+* Bump conjur-api version to mime-types problem
+
 # 4.18.4
 
 * Revert "Find (and store) credentials by only a hostname as the machine in netrc"
