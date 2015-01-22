@@ -149,7 +149,7 @@ class Conjur::Command::Roles < Conjur::Command
 
       acting_as_option(c)
 
-      c.action do |global, options, args|
+      c.action do |_, options, args|
         format = options[:format].downcase.to_sym
         if options[:short] and format != :json
           $stderr.puts "WARNING: the --short option is meaningless when --format is not json"
@@ -157,7 +157,6 @@ class Conjur::Command::Roles < Conjur::Command
 
         params = options.slice(:ancestors, :descendants)
         params[:as_role] = options[:acting_as] if options.member?(:acting_as)
-        params[:roles] = args
 
         graph = api.role_graph(args, params)
 
