@@ -120,3 +120,11 @@ Before("@dsl") do
   @mock_api ||= MockAPI.new
   Conjur::DSL::Runner.any_instance.stub(:api).and_return @mock_api
 end
+
+Before('@real-api') do
+  cfg = File.absolute_path("#{File.dirname __FILE__}/../../.conjurrc")
+  puts "cfg_path = #{cfg}"
+  puts "contents = #{File.read(cfg)}"
+  Conjur::Config.load cfg
+  Conjur::Config.apply
+end

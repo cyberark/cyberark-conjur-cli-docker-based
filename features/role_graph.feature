@@ -1,3 +1,4 @@
+@real-api
 Feature: Retrieving role graphs
   As a Conjur user
   In order to understand the role hierarchy
@@ -5,7 +6,6 @@ Feature: Retrieving role graphs
 
 Background:
   Given a graph with edges
-    | parent    | child         |
     | Tywin     | Jamie         |
     | Tywin     | Cersei        |
     | Cersei    | Joffrey       |
@@ -36,6 +36,23 @@ Background:
           [ "Tywin", "Cersei"  ],
           [ "Jamie", "Joffrey" ],
           [ "Cersei", "Joffrey"]
+        ]
+      """
+
+  Scenario: I can restrict the output to show only ancestors or descendants
+    When I successfully run "conjur role graph --short --no-ancestors Cersei Cersei"
+    Then the JSON should be:
+      """
+        [
+          [ "Cersei", "Joffrey" ]
+        ]
+      """
+    When I successfully run "conjur role graph --short --no-descendants Cersei Cersei Jamie"
+    Then the JSON should be:
+      """
+        [
+          [ "Tywin", "Cersei" ],
+          [ "Tywin", "Jamie"  ]
         ]
       """
 
