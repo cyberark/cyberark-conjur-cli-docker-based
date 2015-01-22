@@ -132,6 +132,45 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
+    role.long_desc <<-EOD
+Retrieves a digraph representing the role members and memberships of one or more roles.
+
+The --[no-]ancestors and --[no-descendants] determine whether the graph should include ancestors, descendants, or both.  Both
+are included in the graph by default.
+
+The --acting-as flag specifies, as usual, a role as which to perform the action.  The default is the role of the currently
+authenticated user.  Only roles visible to this role will be included in the resulting graph.
+
+The output is always written to the standard output, and can be one of the following forms (specified with the --format flag):
+
+   * png: use the 'dot' command to generate a png image representing the graph.
+   * dot: produce a file in a suitable format for use with the 'dot' program.
+   * json [default]: output a JSON representation of the graph.
+
+In order to generate png images, the 'dot' program must be present and on your path.  This program is usually installed
+as part of the 'graphviz' package, and is available via apt-get on debian like systems and homebrew on OSX.
+
+The JSON format is determined by the presence of the --short flag.  If the --short flag is present, the JSON will be an array of
+edges, with each edge represented as an array:
+
+  [
+    [ 'parent1', 'child1' ],
+    [ 'parent2', 'child2'],
+    ...
+  ]
+
+If the --short flag is not present, the JSON output will be more verbose:
+
+  {
+    "graph": [
+      {
+        "parent": "parent1",
+        "child":  "child1"
+      },
+      ...
+    ]
+  }
+EOD
     role.desc "Describe role memberships as a digraph"
     role.arg_name "role", :multiple
     role.command :graph do |c|
