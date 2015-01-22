@@ -132,6 +132,7 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
+
     role.long_desc <<-EOD
 Retrieves a digraph representing the role members and memberships of one or more roles.
 
@@ -144,7 +145,9 @@ authenticated user.  Only roles visible to this role will be included in the res
 The output is always written to the standard output, and can be one of the following forms (specified with the --format flag):
 
    * png: use the 'dot' command to generate a png image representing the graph.
+
    * dot: produce a file in a suitable format for use with the 'dot' program.
+
    * json [default]: output a JSON representation of the graph.
 
 In order to generate png images, the 'dot' program must be present and on your path.  This program is usually installed
@@ -171,6 +174,7 @@ If the --short flag is not present, the JSON output will be more verbose:
     ]
   }
 EOD
+    
     role.desc "Describe role memberships as a digraph"
     role.arg_name "role", :multiple
     role.command :graph do |c|
