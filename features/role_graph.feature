@@ -14,22 +14,22 @@ Background:
     | Joanna    | Tyrion        |
 
   Scenario: Showing the graph as JSON
-    When I successfully run "conjur role graph --as-role Joffrey Joffrey"
-    Then the JSON should be:
+    When I successfully run with role expansion "conjur role graph --as-role Joffrey Joffrey"
+    Then the graph JSON should be:
       """
         {
-          "graph": {
+          "graph": [
             { "parent": "Tywin",  "child": "Jamie" },
             { "parent": "Tywin",  "child": "Cersei"},
             { "parent": "Cersei", "child": "Joffrey"},
             { "parent": "Jamie",  "child": "Joffrey" }
-          }
+          ]
         }
       """
 
   Scenario: Short JSON output
-    When I successfully run "conjur role graph --short --as-role Joffrey Joffrey"
-    Then the JSON should be:
+    When I successfully run with role expansion "conjur role graph --short --as-role Joffrey Joffrey"
+    Then the graph JSON should be:
       """
         [
           [ "Tywin", "Jamie"   ],
@@ -40,15 +40,15 @@ Background:
       """
 
   Scenario: I can restrict the output to show only ancestors or descendants
-    When I successfully run "conjur role graph --short --no-ancestors Cersei Cersei"
-    Then the JSON should be:
+    When I successfully run with role expansion "conjur role graph --short --no-ancestors --as-role Cersei Cersei"
+    Then the graph JSON should be:
       """
         [
           [ "Cersei", "Joffrey" ]
         ]
       """
-    When I successfully run "conjur role graph --short --no-descendants Cersei Cersei Jamie"
-    Then the JSON should be:
+    When I successfully run with role expansion "conjur role graph --short --no-descendants --as-role Cersei Cersei Jamie"
+    Then the graph JSON should be:
       """
         [
           [ "Tywin", "Cersei" ],
