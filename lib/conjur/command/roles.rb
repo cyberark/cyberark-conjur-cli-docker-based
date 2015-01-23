@@ -20,7 +20,7 @@
 #
 
 class Conjur::Command::Roles < Conjur::Command
-  GRAPH_FORMATS = %w(json dot png)
+  GRAPH_FORMATS = %w(json dot)
 
 
   desc "Manage roles"
@@ -205,7 +205,6 @@ EOD
 
         output = case format
           when :json then graph.to_json(options[:short]) + "\n"
-          when :png then graph.to_png
           when :dot then graph.to_dot + "\n"
           else raise "Unsupported format: #{format}" # not strictly necessary, because GLI must_match checks it,
                                                      # but might as well?
