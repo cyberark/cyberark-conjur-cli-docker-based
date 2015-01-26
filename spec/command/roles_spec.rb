@@ -138,10 +138,6 @@ describe Conjur::Command::Roles, logged_in: true do
         end
       end
       
-      describe_command 'role graph --format png foo' do
-        it_formats_the_graph_as :to_png
-      end
-      
       describe_command 'role graph -fdot foo' do
         it_formats_the_graph_as :to_dot
       end
