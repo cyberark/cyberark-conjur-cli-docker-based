@@ -1,3 +1,7 @@
+# 4.19.0
+
+* Add command `conjur role graph` for batch retrieval of role relationships
+
 # 4.18.5
 
 * Bump conjur-api version to mime-types problem
