@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2013-2015 Conjur Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -121,19 +121,26 @@ module Conjur
     
     on_error do |exception|
       require 'rest-client'
-      if exception.is_a?(RestClient::Exception)
-        begin
-          body = JSON.parse(exception.response.body)
-          $stderr.puts body['error']
-        rescue
-          $stderr.puts exception.response.body if exception.response
+      require 'patches/conjur/error'
+
+      use_default_handler = true
+
+      if exception.is_a?(RestClient::Exception) && exception.response
+        err = Conjur::Error.create exception.response.body
+        if err
+          exception = err
+          $stderr.puts "error: " + err.message
+          use_default_handler = false
+        else
+          $stderr.puts exception.response.body
         end
       end
       require 'conjur/log'
       if Conjur.log
         Conjur.log << "error: #{exception}\n#{exception.backtrace.join("\n") rescue 'NO BACKTRACE?'}"
       end
-      true
+
+      use_default_handler
     end
   end
 end
