@@ -123,24 +123,17 @@ module Conjur
       require 'rest-client'
       require 'patches/conjur/error'
 
-      use_default_handler = true
-
       if exception.is_a?(RestClient::Exception) && exception.response
         err = Conjur::Error.create exception.response.body
         if err
-          exception = err
           $stderr.puts "error: " + err.message
-          use_default_handler = false
+          return false # suppress default error message
         else
           $stderr.puts exception.response.body
         end
       end
-      require 'conjur/log'
-      if Conjur.log
-        Conjur.log << "error: #{exception}\n#{exception.backtrace.join("\n") rescue 'NO BACKTRACE?'}"
-      end
 
-      use_default_handler
+      return true
     end
   end
 end
