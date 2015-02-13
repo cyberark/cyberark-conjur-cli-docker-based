@@ -1,3 +1,7 @@
+# 4.20.0
+
+* GID manipulation commands
+
 # 4.19.0
 
 * Add command `conjur role graph` for batch retrieval of role relationships

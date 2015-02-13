@@ -27,6 +27,8 @@
   :create: true
   :list: true
   :show: true
+  :update: true
+  :gidsearch: true
   :retire: true
   :members:
     :list: true
