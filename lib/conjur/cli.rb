@@ -123,17 +123,18 @@ module Conjur
       require 'rest-client'
       require 'patches/conjur/error'
 
+      run_default_handler = true
       if exception.is_a?(RestClient::Exception) && exception.response
         err = Conjur::Error.create exception.response.body
         if err
           $stderr.puts "error: " + err.message
-          return false # suppress default error message
+          run_default_handler = false # suppress default error message
         else
           $stderr.puts exception.response.body
         end
       end
 
-      return true
+      run_default_handler
     end
   end
 end

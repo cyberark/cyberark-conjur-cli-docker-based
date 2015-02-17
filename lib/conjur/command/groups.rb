@@ -32,10 +32,15 @@ class Conjur::Command::Groups < Conjur::Command
     group.desc "Create a new group"
     group.arg_name "id"
     group.command :create do |c|
+      c.desc "GID number to be associated with the group (optional)"
+      c.flag [:gidnumber]
+
       acting_as_option(c)
 
       c.action do |global_options,options,args|
         id = require_arg(args, 'id')
+
+        options[:gidnumber] = Integer(options[:gidnumber]) if options[:gidnumber]
 
         group = api.create_group(id, options)
         display(group, options)
@@ -60,6 +65,30 @@ class Conjur::Command::Groups < Conjur::Command
       end
     end
     
+    group.desc "Update group's attributes (eg. gidnumber)"
+    group.arg_name "id"
+    group.command :update do |c|
+      c.desc "GID number to be associated with the group"
+      c.flag [:gidnumber]
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'id')
+
+        options[:gidnumber] = Integer(options[:gidnumber])
+        api.group(id).update(options)
+
+        puts "GID set"
+      end
+    end
+
+    group.desc "Find groups by GID"
+    group.arg_name "gid"
+    group.command :gidsearch do |c|
+      c.action do |global_options, options, args|
+        gidnumber = Integer require_arg args, 'gid'
+        display api.find_groups(gidnumber: gidnumber)
+      end
+    end
+
     group.desc "Decommission a group"
     group.arg_name "id"
     group.command :retire do |c|
