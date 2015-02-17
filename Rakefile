@@ -16,6 +16,7 @@ task :jenkins => ['ci:setup:rspec', :spec, 'ci:setup:cucumber_report_cleanup'] d
   File.write('build_number', ENV['BUILD_NUMBER']) if ENV['BUILD_NUMBER']
 end
 
+desc "Generate the update completions file"
 task :completions do
   # having 'lib' in the load path, which happens to be the case when running rake,
   # messes up GLIs commands_from

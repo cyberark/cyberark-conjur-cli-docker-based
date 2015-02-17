@@ -1,3 +1,7 @@
+# 4.20.1
+
+* Improve the error reporting
+
 # 4.20.0
 
 * GID manipulation commands

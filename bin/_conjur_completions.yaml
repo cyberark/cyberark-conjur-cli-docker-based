@@ -82,6 +82,7 @@
   :members: true
   :grant_to: true
   :revoke_from: true
+  :graph: true
 :script:
   :execute: true
 :secret:
