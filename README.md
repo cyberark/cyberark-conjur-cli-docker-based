@@ -1,12 +1,14 @@
 # Conjur
 
-TODO: Write a gem description
+Command-line interface to Conjur. 
+
+A complete reference guide is available at [developer.conjur.net](http://developer.conjur.net/reference).
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'conjur'
+    gem 'conjur-cli', require: 'conjur/cli'
 
 And then execute:
 
@@ -14,11 +16,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install conjur
-
-## Usage
-
-TODO: Write usage instructions here
+    $ gem install conjur-cli
 
 ## Contributing
 
