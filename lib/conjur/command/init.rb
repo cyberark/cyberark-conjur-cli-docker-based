@@ -129,13 +129,14 @@ class Conjur::Command::Init < Conjur::Command
     sock = TCPSocket.new host, port.to_i
     ssock = SSLSocket.new sock
     ssock.connect
-    cert = ssock.peer_cert
+    chain = ssock.peer_cert_chain
+    cert = chain.first
     fp = Digest::SHA1.digest cert.to_der
 
     # convert to hex, then split into bytes with :
     hexfp = (fp.unpack 'H*').first.upcase.scan(/../).join(':')
 
-    ["SHA1 Fingerprint=#{hexfp}", cert.to_pem]
+    ["SHA1 Fingerprint=#{hexfp}", chain.map(&:to_pem).join]
   rescue
     exit_now! "Unable to retrieve certificate from #{connect_hostname}"
   ensure

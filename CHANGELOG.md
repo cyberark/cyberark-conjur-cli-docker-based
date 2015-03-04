@@ -1,3 +1,5 @@
+* Retrieve the whole certificate chain on conjur init
+
 # 4.20.1
 
 * Improve the error reporting
