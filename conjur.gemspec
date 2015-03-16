@@ -23,6 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'netrc', '~> 0.10.2'
   gem.add_dependency 'methadone'
   gem.add_dependency 'deep_merge'
+  gem.add_dependency 'xdg'
 
   gem.add_runtime_dependency 'cas_rest_client'
 

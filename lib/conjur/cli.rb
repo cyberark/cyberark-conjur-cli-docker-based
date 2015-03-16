@@ -22,12 +22,15 @@ require 'gli'
 # need this to prevent an active support bug in some versions
 require 'active_support'
 require 'active_support/deprecation'
-require 'tmpdir'
+require 'xdg'
+require 'fileutils'
 
 # this makes mime/types gem load much faster by lazy loading
 # mime types and caching them in binary form
 ENV['RUBY_MIME_TYPES_LAZY_LOAD'] ||= 'true'
-ENV['RUBY_MIME_TYPES_CACHE'] ||= File.join Dir.tmpdir, 'conjur.mimetype.cache'
+ENV['RUBY_MIME_TYPES_CACHE'] ||= (
+  XDG['CACHE'].to_path.tap(&FileUtils.method(:mkdir_p)) + 'ruby-mime-types.cache'
+).to_s
 
 module Conjur
   autoload :Config,                 'conjur/config'
