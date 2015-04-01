@@ -4,6 +4,7 @@ RSpec::Core::DSL.change_global_dsl do
       let(:cert_store) { double(:cert_store) }
         
       before do
+        allow(cert_store).to receive(:add_file)
         stub_const 'OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE', cert_store
       end
       
