@@ -1,3 +1,5 @@
+# 4.21.0
+
 * Use user cache dir for mimetype cache
 * Retrieve the whole certificate chain on conjur init
 
