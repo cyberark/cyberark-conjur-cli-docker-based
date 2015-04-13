@@ -29,6 +29,7 @@ require 'conjur/command/rspec/helpers'
 ENV['CONJURRC'] = '/dev/null'
 
 require 'conjur/cli'
+require 'conjur/api'
 
 shared_context "fresh config" do
   before {
