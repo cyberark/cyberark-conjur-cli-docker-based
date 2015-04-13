@@ -53,12 +53,12 @@ class Conjur::Command::Bootstrap < Conjur::Command
         puts "Adminship granted"
       end
       
-    if (attic = api.user("attic")).exists?
-      puts "User 'attic' exists"
-    else
-      puts "Creating user 'attic'"
-      attic = api.create_user("attic")
-    end
+      if (attic = api.user("attic")).exists?
+        puts "User 'attic' exists"
+      else
+        puts "Creating user 'attic'"
+        attic = api.create_user("attic")
+      end
     end
   end
 end
