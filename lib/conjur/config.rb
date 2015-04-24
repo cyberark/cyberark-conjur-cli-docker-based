@@ -97,8 +97,24 @@ module Conjur
             raise $!
           end
         end
-        if Config[:cert_file]
-          OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file Config[:cert_file]
+
+        install_certificate
+      end
+
+
+      def install_certificate
+        cert_store = OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE
+        if file = Config[:cert_file]
+          cert_store.add_file file
+        elsif contents = Config[:ssl_certificate]
+          cert =  OpenSSL::X509::Certificate.new contents
+          # This operation isn't idempotent like cert_store.add_file is, so rescue
+          # when it raises an exception because the certificate has already been added.
+          begin
+            cert_store.add_cert cert
+          rescue  OpenSSL::X509::StoreError => ex
+            raise $! unless 'cert already in hash table' == ex.message
+          end
         end
       end
 
