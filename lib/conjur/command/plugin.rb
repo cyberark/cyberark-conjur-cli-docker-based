@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'conjur/command'
+require 'yaml'
 
 class Conjur::Command::Plugin < Conjur::Command
   desc 'Manage plugins'
@@ -63,7 +64,7 @@ class Conjur::Command::Plugin < Conjur::Command
         puts "Installing #{gem.name}-#{version}"
         okay = system("#{gem_binary} install #{gem.name} -v #{version}")
         if okay
-          #TODO: update conjurrc plugin list here
+          modify_plugin_list(name, 'add')
         end
       end
     end
@@ -97,5 +98,23 @@ def gem_binary
     "#{ENV['MY_RUBY_HOME']}/bin/gem"
   else
     "#{Gem.bindir}/gem"
+  end
+end
+
+def modify_plugin_list(plugin, op)
+  Conjur::Config.default_config_files.each do |f|
+    if File.file?(f)
+      config = YAML.load(IO.read(f)).stringify_keys rescue {}
+      if op == 'add'
+        unless config['plugins'].include?(plugin)
+          config['plugins'] += [plugin]
+        end
+      elsif op == 'remove'
+        if config['plugins'].include?(plugin)
+          config['plugins'] -= [plugin]
+        end
+      end
+      File.write(f, YAML.dump(config))
+    end
   end
 end
