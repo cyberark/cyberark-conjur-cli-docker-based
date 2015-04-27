@@ -21,11 +21,16 @@
 require 'conjur/command'
 require 'yaml'
 
+GEMBIN = '/opt/conjur/embedded/bin/gem'
+
 class Conjur::Command::Plugin < Conjur::Command
   desc 'Manage plugins'
-  command :plugin do |var|
-    var.desc 'List installed plugins'
-    var.command :list do |c|
+  command :plugin do |cmd|
+    # Only enable this plugin for omnibus-installed CLI
+    hide_docs(cmd) unless File.file?(GEMBIN) or ENV['DEV']
+
+    cmd.desc 'List installed plugins'
+    cmd.command :list do |c|
       c.action do
         Conjur::Config.load
         Conjur::Config.plugins.each do |p|
@@ -39,44 +44,30 @@ class Conjur::Command::Plugin < Conjur::Command
       end
     end
 
-    var.desc 'Install a plugin'
-    var.arg_name 'name'
-    var.command :install do |c|
+    cmd.desc 'Install a plugin'
+    cmd.arg_name 'name'
+    cmd.command :install do |c|
       c.arg_name 'version'
       c.desc 'Version of the plugin to install'
       c.flag [:v, :version], :default_value => 'latest'
 
       c.action do |_, options, args|
-        name = require_arg(args, 'name')
-        gem_name = name.start_with?('conjur-asset-') ? name : "conjur-asset-#{name}"
-
-        gem = Gem.latest_spec_for(gem_name)
-        if gem.nil?
-          exit_now! "gem #{gem_name} not found"
-        end
-
-        if options[:version] == 'latest'
-          version = gem.version
-        else
-          version = options[:version]
-        end
-
-        puts "Installing #{gem.name}-#{version}"
-        okay = system("#{gem_binary} install #{gem.name} -v #{version}")
-        if okay
-          modify_plugin_list(name, 'add')
-        end
+        install_plugin(require_arg(args, 'name'), options[:version])
       end
     end
 
-    var.desc 'Uninstall a plugin'
-    var.command :uninstall do |c|
-
+    cmd.desc 'Uninstall a plugin'
+    cmd.arg_name 'name'
+    cmd.command :uninstall do |c|
+      c.action do |_, _, args|
+        name = require_arg(args, 'name')
+        uninstall_plugin(name)
+      end
     end
 
-    var.desc "Show a plugin's details"
-    var.arg_name 'name'
-    var.command :show do |c|
+    cmd.desc "Show a plugin's details"
+    cmd.arg_name 'name'
+    cmd.command :show do |c|
       c.action do |_, _, args|
         name = require_arg(args, 'name')
         begin
@@ -93,28 +84,52 @@ class Conjur::Command::Plugin < Conjur::Command
   end
 end
 
-def gem_binary
-  if ENV['MY_RUBY_HOME'] && ENV['MY_RUBY_HOME'].include?('rvm')
-    "#{ENV['MY_RUBY_HOME']}/bin/gem"
+def install_plugin(name, version)
+  gem_name = name.start_with?('conjur-asset-') ? name : "conjur-asset-#{name}"
+
+  gem = Gem.latest_spec_for(gem_name)
+  if gem.nil?
+    exit_now! "gem #{gem_name} does not exist"
+  end
+
+  # Uninstall all versions of plugin to avoid multiple versions
+  uninstall_plugin(name)
+
+  version = gem.version if version == 'latest'
+  okay = system("#{GEMBIN} install #{gem.name} -v #{version}")
+  modify_plugin_list(name, 'add') if okay
+end
+
+def uninstall_plugin(name)
+  if Conjur::Config.plugins.include?(name)
+    gem_name = name.start_with?('conjur-asset-') ? name : "conjur-asset-#{name}"
+    okay = system("#{GEMBIN} uninstall #{gem_name} --all")
+    modify_plugin_list(name, 'remove') if okay
   else
-    "#{Gem.bindir}/gem"
+    puts "Plugin #{name} is not installed"
   end
 end
 
-def modify_plugin_list(plugin, op)
+def modify_plugin_list(plugin_name, op)
+  config_exists = false
   Conjur::Config.default_config_files.each do |f|
     if File.file?(f)
+      config_exists = true
       config = YAML.load(IO.read(f)).stringify_keys rescue {}
       if op == 'add'
-        unless config['plugins'].include?(plugin)
-          config['plugins'] += [plugin]
+        unless config['plugins'].include?(plugin_name)
+          config['plugins'] += [plugin_name]
         end
       elsif op == 'remove'
-        if config['plugins'].include?(plugin)
-          config['plugins'] -= [plugin]
+        if config['plugins'].include?(plugin_name)
+          config['plugins'] -= [plugin_name]
         end
       end
       File.write(f, YAML.dump(config))
+    end
+
+    unless config_exists
+      puts 'ERROR: No Conjur config found'
     end
   end
 end
