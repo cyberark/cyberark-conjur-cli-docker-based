@@ -107,10 +107,18 @@ describe Conjur::Config do
       expect(Conjur::Config[:cert_file]).to eq(cert_path)
     end
   end
+
   describe "#apply" do
     before { 
       allow(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file) 
     }
+
+    context "ssl_certificate string" do
+      let(:ssl_certificate){ 'the certificate' }
+      before{
+      }
+    end
+
     context "cert_file" do
       let(:cert_file) { "/path/to/cert.pem" }
       before { 
@@ -121,6 +129,7 @@ describe Conjur::Config do
         expect(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file).with cert_file  
         Conjur::Config.apply
       end
+
       it "propagates the cert_file to Configuration.cert_file" do
         Conjur::Config.apply
         expect(Conjur.configuration.cert_file).to eq(cert_file)
