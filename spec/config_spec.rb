@@ -115,8 +115,16 @@ describe Conjur::Config do
 
     context "ssl_certificate string" do
       let(:ssl_certificate){ 'the certificate' }
+      let(:certificate){ double('Certificate') }
       before{
+          Conjur::Config.class_variable_set('@@attributes', {'ssl_certificate' => ssl_certificate})
       }
+
+      it 'trusts the certificate string' do
+        expect(OpenSSL::X509::Certificate).to receive(:new).with(ssl_certificate).once.and_return certificate
+        expect(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_cert).with(certificate).once
+        Conjur::Config.apply
+      end
     end
 
     context "cert_file" do
