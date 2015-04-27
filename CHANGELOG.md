@@ -1,3 +1,5 @@
+* Print the error message if there's a problem loading a plugin
+
 # 4.21.1
 
 * Configure trust to the new certificate in `conjur init`, before attempting to contact the Conjur server
