@@ -97,10 +97,10 @@ module Conjur
             raise $!
           end
         end
-        if Config[:cert_file]
-          OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file Config[:cert_file]
-        end
+
+        Conjur.config.apply_cert_config!
       end
+
 
       def inspect
         @@attributes.inspect

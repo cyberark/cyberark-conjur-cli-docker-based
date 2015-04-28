@@ -45,19 +45,19 @@ describe Conjur::Command::Variables, logged_in: true do
       expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
     end
   end
-  
+
   describe_command "variable:create -v the-value-1 the-id the-value-2" do
     it "complains about conflicting values" do
       expect { invoke }.to raise_error("Received conflicting value arguments")
     end
   end
-  
+
   describe_command "variable:create the-id -v the-value" do
     it "complains about extra arguments" do
       expect { invoke }.to raise_error("Received extra arguments 'the-value'")
     end
   end
-  
+
   describe_command "variable:create" do
     it "provides default values for optional parameters mime_type and kind" do
       expect(RestClient::Request).to receive(:execute).with({
