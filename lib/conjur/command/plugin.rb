@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014 Conjur Inc
+# Copyright (C) 2015 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -18,21 +18,25 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
-require 'conjur/command'
+
+require 'rubygems'
+require 'rubygems/commands/install_command'
+require 'rubygems/commands/uninstall_command'
 require 'yaml'
 
-GEMBIN = '/opt/conjur/embedded/bin/gem'
+require 'conjur/command'
 
 class Conjur::Command::Plugin < Conjur::Command
+  def self.assert_empty(args)
+    exit_now! 'Received extra command arguments' unless args.empty?
+  end
+
   desc 'Manage plugins'
   command :plugin do |cmd|
-    # Only enable this plugin for omnibus-installed CLI
-    hide_docs(cmd) unless File.file?(GEMBIN) or ENV['DEV']
-
     cmd.desc 'List installed plugins'
     cmd.command :list do |c|
-      c.action do
-        Conjur::Config.load
+      c.action do |_, _, args|
+        self.assert_empty(args)
         Conjur::Config.plugins.each do |p|
           begin
             gem = Gem::Specification.find_by_name "conjur-asset-#{p}"
@@ -49,7 +53,7 @@ class Conjur::Command::Plugin < Conjur::Command
     cmd.command :install do |c|
       c.arg_name 'version'
       c.desc 'Version of the plugin to install'
-      c.flag [:v, :version], :default_value => 'latest'
+      c.flag [:v, :version], :default_value => Gem::Requirement.default
 
       c.action do |_, options, args|
         install_plugin(require_arg(args, 'name'), options[:version])
@@ -85,51 +89,50 @@ class Conjur::Command::Plugin < Conjur::Command
 end
 
 def install_plugin(name, version)
+  uninstall_plugin(name) rescue Exception
+
   gem_name = name.start_with?('conjur-asset-') ? name : "conjur-asset-#{name}"
 
-  gem = Gem.latest_spec_for(gem_name)
-  if gem.nil?
-    exit_now! "gem #{gem_name} does not exist"
+  cmd = Gem::Commands::InstallCommand.new
+  cmd.handle_options ['--no-ri', '--no-rdoc', gem_name, '--version', "#{version}"]
+
+  begin
+    cmd.execute
+  rescue Gem::SystemExitException => e
+    if e.exit_code != 0
+      raise e
+    end
   end
 
-  # Uninstall all versions of plugin to avoid multiple versions
-  uninstall_plugin(name)
-
-  version = gem.version if version == 'latest'
-  okay = system("#{GEMBIN} install #{gem.name} -v #{version}")
-  modify_plugin_list(name, 'add') if okay
+  modify_plugin_list('add', name)
 end
 
 def uninstall_plugin(name)
   if Conjur::Config.plugins.include?(name)
     gem_name = name.start_with?('conjur-asset-') ? name : "conjur-asset-#{name}"
-    okay = system("#{GEMBIN} uninstall #{gem_name} --all")
-    modify_plugin_list(name, 'remove') if okay
-  else
-    puts "Plugin #{name} is not installed"
+
+    cmd = Gem::Commands::UninstallCommand.new
+    cmd.handle_options ['-x', '-I', '-a', gem_name]
+    cmd.execute
+
+    modify_plugin_list('remove', name)
   end
 end
 
-def modify_plugin_list(plugin_name, op)
+def modify_plugin_list(op, plugin_name)
   config_exists = false
   Conjur::Config.default_config_files.each do |f|
     if File.file?(f)
       config_exists = true
       config = YAML.load(IO.read(f)).stringify_keys rescue {}
-      if op == 'add'
-        unless config['plugins'].include?(plugin_name)
-          config['plugins'] += [plugin_name]
-        end
-      elsif op == 'remove'
-        if config['plugins'].include?(plugin_name)
-          config['plugins'] -= [plugin_name]
-        end
-      end
+
+      config['plugins'] ||= {}
+      config['plugins'] += [plugin_name] if op == 'add'
+      config['plugins'] -= [plugin_name] if op == 'remove'
+      config['plugins'].uniq!
+
       File.write(f, YAML.dump(config))
     end
-
-    unless config_exists
-      puts 'ERROR: No Conjur config found'
-    end
   end
+  exit_now! 'No Conjur config file found, run "conjur init"' unless config_exists
 end
