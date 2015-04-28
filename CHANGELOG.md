@@ -1,3 +1,6 @@
+# 4.22.0
+
+* Configure SSL certificate from Conjur.configuration
 * Print the error message if there's a problem loading a plugin
 
 # 4.21.1
