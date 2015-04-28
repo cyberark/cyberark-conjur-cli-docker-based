@@ -1,5 +1,6 @@
 # 4.22.0
 
+* New 'plugin' subcommand to manage CLI plugins
 * Configure SSL certificate from Conjur.configuration
 * Print the error message if there's a problem loading a plugin
 
