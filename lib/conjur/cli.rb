@@ -75,8 +75,10 @@ module Conjur
           begin
             filename = "conjur-asset-#{plugin}"
             require filename
-          rescue LoadError
-            warn "Could not load plugin '#{plugin}' specified in your config file.\nMake sure you have the #{filename} gem installed."
+          rescue LoadError => err
+            warn "WARNING: #{err.message}\n" \
+              "Could not load plugin '#{plugin}' specified in your config file.\n"\
+              "Make sure you have the #{filename} gem installed."
           end
         end
       end

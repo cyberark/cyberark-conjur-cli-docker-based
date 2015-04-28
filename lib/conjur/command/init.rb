@@ -61,14 +61,6 @@ class Conjur::Command::Init < Conjur::Command
         Conjur.configuration.core_url = "https://#{hostname}/api"
       end
 
-      account = options[:account]
-      account ||= if hostname
-        account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
-      else
-        # using .to_s to overcome https://github.com/JEG2/highline/issues/69
-        highline.ask("Enter your organization account name: ").to_s
-      end
-
       if (certificate = options[:certificate]).blank?
         unless hostname.blank?
           connect_hostname = if hostname.include?(':')
@@ -85,6 +77,16 @@ class Conjur::Command::Init < Conjur::Command
                 openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
           exit_now! "You decided not to trust the certificate" unless highline.ask("Trust this certificate (yes/no): ").strip == "yes"
         end
+      end
+      
+      configure_cert_store certificate
+      
+      account = options[:account]
+      account ||= if hostname
+        account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
+      else
+        # using .to_s to overcome https://github.com/JEG2/highline/issues/69
+        highline.ask("Enter your organization account name: ").to_s
       end
 
       exit_now! "account is required" if account.blank?
@@ -120,7 +122,15 @@ class Conjur::Command::Init < Conjur::Command
       puts "Wrote configuration to #{config_file}"
     end
   end
-
+  
+  def self.configure_cert_store certificate
+    unless certificate.blank?
+      cert_file = Tempfile.new("conjur_cert")
+      File.write cert_file.path, certificate
+      OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file cert_file.path
+    end
+  end
+  
   def self.get_certificate connect_hostname
     include OpenSSL::SSL
     host, port = connect_hostname.split ':'

@@ -1,3 +1,14 @@
+# 4.22.0
+
+* Configure SSL certificate from Conjur.configuration
+* Print the error message if there's a problem loading a plugin
+
+# 4.21.1
+
+* Configure trust to the new certificate in `conjur init`, before attempting to contact the Conjur server
+
+# 4.21.0
+
 * Use user cache dir for mimetype cache
 * Retrieve the whole certificate chain on conjur init
 

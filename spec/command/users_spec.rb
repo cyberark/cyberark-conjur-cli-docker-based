@@ -57,14 +57,14 @@ describe Conjur::Command::Users, logged_in: true do
   
   context "updating password" do
     before do
-     expect(RestClient::Request).to receive(:execute).with(hash_including(
+     expect(RestClient::Request).to receive(:execute).with({
         method: :put,
         url: update_password_url,
         user: username, 
         password: api_key,
         headers: { },
         payload: "new-password"
-      ))
+       }.merge(cert_store_options))
     end
     
     describe_command "user:update_password -p new-password" do
