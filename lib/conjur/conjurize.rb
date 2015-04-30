@@ -3,11 +3,11 @@ require 'json'
 require 'open-uri'
 require 'conjur/version.rb'
 
-def latest_conjur_ssh_release
-  url = 'https://api.github.com/repos/conjur-cookbooks/conjur-ssh/releases'
+def latest_conjur_release
+  url = 'https://api.github.com/repos/conjur-cookbooks/conjur/releases'
   resp = open(url)
   json = JSON.parse(resp.read)
-  latest = json[0]['assets'].select {|asset| asset['name'] =~ /conjur-ssh-v\d.\d.\d.tar.gz/}[0]
+  latest = json[0]['assets'].select {|asset| asset['name'] =~ /conjur-v\d.\d.\d.tar.gz/}[0]
   latest['browser_download_url']
 end
 
@@ -51,8 +51,8 @@ DESC
       chef_executable = options[:"chef-executable"]
 
       if options[:ssh]
-        conjur_run_list ||= "conjur-ssh"
-        conjur_cookbook_url ||= latest_conjur_ssh_release()
+        conjur_run_list ||= "conjur"
+        conjur_cookbook_url ||= latest_conjur_release()
       end
 
       sudo = lambda{|str|
