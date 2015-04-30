@@ -1,3 +1,5 @@
+* In policy DSL, allow creation of records without an explicit `id`. In this case, the current scope is used as the `id`.
+
 # 4.22.0
 
 * New 'plugin' subcommand to manage CLI plugins

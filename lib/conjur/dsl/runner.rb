@@ -112,12 +112,12 @@ module Conjur
         instance_eval(*args)
       end
       
-      def resource kind, id, options = {}, &block
+      def resource kind, id = nil, options = {}, &block
         id = full_resource_id([kind, qualify_id(id, kind) ].join(':'))
         find_or_create :resource, id, options, &block
       end
       
-      def role kind, id, options = {}, &block
+      def role kind, id = nil, options = {}, &block
         id = full_resource_id([ kind, qualify_id(id, kind) ].join(':'))
         find_or_create :role, id, options, &block
       end
@@ -146,11 +146,12 @@ module Conjur
       protected
       
       def qualify_id id, kind
-        if id[0] == "/"
+        if id && id[0] == "/"
           id[1..-1]
         else
           case kind.to_sym
           when :user
+            raise "User id is required" unless id
             [ id, current_user_scope ].compact.join('@')
           else
             [ current_scope, id ].compact.join('/')
@@ -175,6 +176,11 @@ module Conjur
           lambda { args.length == 1 },
           lambda { args.length == 2 && args[1].is_a?(Hash) }
         ]
+        if current_scope
+          # If there is a scope, it's valid to create a record without an id, because the
+          # scope name will be used as the id.
+          valid_prototypes << lambda { args.length == 0 }
+        end
         !valid_prototypes.find{|p| p.call}.nil?      
       end
       
@@ -213,7 +219,7 @@ module Conjur
       
       def do_object obj, &block
         begin
-          api_keys[obj.roleid] = obj.api_key if obj.api_key 
+          api_keys[obj.roleid] = obj.api_key if obj.respond_to?(:api_key) && obj.api_key 
         rescue
         end
         
