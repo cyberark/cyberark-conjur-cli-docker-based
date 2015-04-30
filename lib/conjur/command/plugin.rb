@@ -126,7 +126,7 @@ def modify_plugin_list(op, plugin_name)
       config_exists = true
       config = YAML.load(IO.read(f)).stringify_keys rescue {}
 
-      config['plugins'] ||= {}
+      config['plugins'] ||= []
       config['plugins'] += [plugin_name] if op == 'add'
       config['plugins'] -= [plugin_name] if op == 'remove'
       config['plugins'].uniq!

@@ -1,3 +1,5 @@
+
+* Fix faulty initialization of plugins list, if it's nil, in the .conjurrc
 * Log DSL commands to stderr, even if CONJURAPI_LOG is not explicitly configured
 * In policy DSL, allow creation of records without an explicit `id`. In this case, the current scope is used as the `id`.
 
