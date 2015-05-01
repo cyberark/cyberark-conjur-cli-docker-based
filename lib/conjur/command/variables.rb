@@ -26,10 +26,10 @@ class Conjur::Command::Variables < Conjur::Command
     var.arg_name "id [value]"
     var.command :create do |c|
       c.arg_name "mime_type"
-      c.flag [:m, :"mime-type"], default_value: "text/plain"
+      c.flag [:m, :"mime-type"]
 
       c.arg_name "kind"
-      c.flag [:k, :"kind"], default_value: "secret"
+      c.flag [:k, :"kind"]
 
       c.arg_name "value"
       c.desc "Initial value, which may also be specified as the second command argument after the variable id"
@@ -37,26 +37,65 @@ class Conjur::Command::Variables < Conjur::Command
 
       acting_as_option(c)
 
+      c.arg_name 'interactive'
+      c.desc 'Create variable interactively'
+      c.switch [:i, :'interactive']
+      
       c.action do |global_options,options,args|
-        id = args.shift
-        unless id
-          ActiveSupport::Deprecation.warn "id argument will be required in future releases"
-        end
+        id = args.shift unless args.empty?
+
         value = args.shift unless args.empty?
         
-        raise "Received extra arguments '#{args.join(' ')}'" unless args.empty?
         raise "Received conflicting value arguments" if value && options[:value]
-        
-        options[:id] = id if id
-        options[:value] ||= value if value
 
         mime_type = options.delete(:m)
         kind = options.delete(:k)
 
+        options.delete(:'interactive')
         options.delete(:"mime-type")
         options.delete(:"kind")
 
+        default_kind = 'secret'
+        default_mime_type = 'text/plain'
+        annotations = {}
+
+        
+        # If the user asked for interactive mode, or he didn't specify
+        # both an id and a value, prompt for any missing options.
+        if options.delete(:i) || !(id && value)
+          id ||= highline.ask('Enter the id: ')
+
+          unless options[:'ownerid']
+            groupid = highline.ask('Enter the group: ', ->(name) { @group && @group.roleid } ) do |q|
+              q.validate = ->(name) do
+                name.empty? || (@group = api.group(name)).exists?
+              end
+              q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
+            end
+            options[:'ownerid'] = groupid if groupid
+          end
+          
+          kind ||= highline.ask('Enter the kind: ') {|q| q.default = default_kind }
+          
+          mime_type ||= highline.ask('Enter the MIME type: ') {|q| q.default = default_mime_type }
+
+          highline.say('Add annotations (blank name to finish):')
+          until (name = highline.ask('annotation name: ')).empty?
+            annotations[name] = read_till_eof('annotation value (^D to finish):')
+          end
+
+          value ||= read_till_eof('Enter the value (^D to finish):')
+        end
+        
+        # If still unset, use defaults
+        mime_type ||= default_mime_type
+        kind ||= default_kind
+        
+        options[:id] = id if id
+        options[:value] ||= value if value
+
         var = api.create_variable(mime_type, kind, options)
+        api.resource(var).annotations.merge!(annotations) if annotations && !annotations.empty?
         display(var, options)
       end
     end
@@ -123,5 +162,23 @@ class Conjur::Command::Variables < Conjur::Command
       end
     end
 
+  end
+
+  def self.highline
+    require 'highline'
+    @highline ||= HighLine.new($stdin,$stderr)
+  end
+
+  def self.read_till_eof(prompt = nil)
+    highline.say(prompt) if prompt
+    [].tap do |lines|
+      loop do
+        begin
+          lines << highline.ask('')
+        rescue EOFError
+          break
+        end
+      end
+    end.join("\n")
   end
 end
