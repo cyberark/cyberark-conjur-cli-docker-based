@@ -87,14 +87,14 @@ module Conjur
         end
 
         if Conjur.log
-          begin
-            require 'conjur/api'
-            Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
+          require 'conjur/api'
+          host = begin
+            Conjur::Authn::API.host
           rescue RuntimeError
-            if $!.message == "Missing required option account"
-              $stderr.puts "Your config is invalid, did you run 'conjur init'?"
-            end
-            raise $!
+            nil
+          end
+          if host
+            Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
           end
         end
 

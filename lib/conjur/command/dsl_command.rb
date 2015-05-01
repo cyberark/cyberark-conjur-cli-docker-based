@@ -21,10 +21,9 @@
 
 class Conjur::DSLCommand < Conjur::Command
   class << self
-    def file_or_stdin_arg(args)
-    end
-
     def run_script(args, options, &block)
+      Conjur.log = "stderr"
+
       filename = nil
       script = if script = args.pop
         filename = script

@@ -114,7 +114,7 @@ describe Conjur::Config do
     }
 
     context "ssl_certificate string" do
-      let(:ssl_certificate){ 'the certificate' }
+      let(:ssl_certificate){ 'the-certificate' }
       let(:certificate){ double('Certificate') }
       before{
           Conjur::Config.class_variable_set('@@attributes', {'ssl_certificate' => ssl_certificate})
