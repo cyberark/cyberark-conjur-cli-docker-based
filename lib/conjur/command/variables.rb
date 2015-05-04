@@ -18,7 +18,6 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
@@ -41,59 +40,51 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Create variable interactively'
       c.switch [:i, :'interactive']
       
-      c.action do |global_options,options,args|
+      c.action do |global_options,options, args|
         id = args.shift unless args.empty?
 
         value = args.shift unless args.empty?
         
         raise "Received conflicting value arguments" if value && options[:value]
 
+        groupid = options[:'ownerid']
         mime_type = options.delete(:m)
         kind = options.delete(:k)
-
+        value ||= options.delete(:v)
+        
         options.delete(:'interactive')
         options.delete(:"mime-type")
         options.delete(:"kind")
+        options.delete(:'value')
 
-        default_kind = 'secret'
-        default_mime_type = 'text/plain'
+        @default_kind = 'secret'
+        @default_mime_type = 'text/plain'
         annotations = {}
 
-        
         # If the user asked for interactive mode, or he didn't specify
         # both an id and a value, prompt for any missing options.
         if options.delete(:i) || !(id && value)
-          id ||= highline.ask('Enter the id: ')
+          id ||= prompt_for_id
 
-          unless options[:'ownerid']
-            groupid = highline.ask('Enter the group: ', ->(name) { @group && @group.roleid } ) do |q|
-              q.validate = ->(name) do
-                name.empty? || (@group = api.group(name)).exists?
-              end
-              q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
-            end
-            options[:'ownerid'] = groupid if groupid
-          end
+          groupid ||= prompt_for_group
           
-          kind ||= highline.ask('Enter the kind: ') {|q| q.default = default_kind }
+          kind ||= prompt_for_kind
           
-          mime_type ||= highline.ask('Enter the MIME type: ') {|q| q.default = default_mime_type }
+          mime_type ||= prompt_for_mime_type
 
-          highline.say('Add annotations (blank name to finish):')
-          until (name = highline.ask('annotation name: ')).empty?
-            annotations[name] = read_till_eof('annotation value (^D to finish):')
-          end
+          annotations = prompt_for_annotations
 
-          value ||= read_till_eof('Enter the value (^D to finish):')
+          value ||= prompt_for_value
         end
         
         # If still unset, use defaults
-        mime_type ||= default_mime_type
-        kind ||= default_kind
+        mime_type ||= @default_mime_type
+        kind ||= @default_kind
         
-        options[:id] = id if id
-        options[:value] ||= value if value
-
+        options[:id] = id
+        options[:value] = value
+        options[:'ownerid'] = groupid if groupid
+        
         var = api.create_variable(mime_type, kind, options)
         api.resource(var).annotations.merge!(annotations) if annotations && !annotations.empty?
         display(var, options)
@@ -164,6 +155,40 @@ class Conjur::Command::Variables < Conjur::Command
 
   end
 
+  def self.prompt_for_id
+    highline.ask('Enter the id: ')
+  end
+
+  def self.prompt_for_group
+    highline.ask('Enter the group: ', ->(name) { @group && @group.roleid } ) do |q|
+      q.validate = ->(name) do
+        name.empty? || (@group = api.group(name)).exists?
+      end
+      q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
+    end
+  end
+
+  def self.prompt_for_kind
+    highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
+  end
+
+  def self.prompt_for_mime_type
+    highline.ask('Enter the MIME type: ') {|q| q.default = @default_mime_type }
+  end
+
+  def self.prompt_for_annotations
+    highline.say('Add annotations (blank name to finish):')
+    {}.tap do |annotations|
+      until (name = highline.ask('annotation name: ')).empty?
+        annotations[name] = read_till_eof('annotation value (^D to finish):')
+      end
+    end
+  end
+
+  def self.prompt_for_value
+    read_till_eof('Enter the value (^D to finish):')
+  end
+  
   def self.highline
     require 'highline'
     @highline ||= HighLine.new($stdin,$stderr)

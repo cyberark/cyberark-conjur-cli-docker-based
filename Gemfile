@@ -8,7 +8,6 @@ gemspec
 gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'master'
 
 group :test, :development do
-  gem 'pry-debugger'
-  gem 'pry-stack_explorer'
+  gem 'pry'
   gem 'ruby-prof'
 end
