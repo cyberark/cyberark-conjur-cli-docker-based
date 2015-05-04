@@ -1,4 +1,4 @@
-
+* Don't check if netrc is world-readable on Windows, since the answer is not reliable
 * Use new [conjur](https://supermarket.chef.io/cookbooks/conjur) cookbook for conjurize
 * Fix faulty initialization of plugins list, if it's nil, in the .conjurrc
 * Log DSL commands to stderr, even if CONJURAPI_LOG is not explicitly configured

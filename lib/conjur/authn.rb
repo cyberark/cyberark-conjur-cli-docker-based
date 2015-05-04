@@ -66,7 +66,7 @@ module Conjur::Authn
       else
         path = Netrc.default_path
       end
-      fail "netrc (#{path}) shouldn't be world-readable" if File.world_readable?(path)
+      fail_if_world_readable path
       Netrc.read(*args)
     end
     
@@ -125,6 +125,19 @@ module Conjur::Authn
         cls = Conjur::API
       end
       cls.new_from_key(*get_credentials(options))
+    end
+    
+    protected
+    
+    def fail_if_world_readable path
+      if !windows? && File.world_readable?(path)
+        fail "netrc (#{path}) shouldn't be world-readable" 
+      end
+    end
+    
+    # see http://stackoverflow.com/questions/4871309/what-is-the-correct-way-to-detect-if-ruby-is-running-on-windows
+    def windows?
+      RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
     end
   end
 end
