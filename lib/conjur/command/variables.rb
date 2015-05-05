@@ -25,10 +25,10 @@ class Conjur::Command::Variables < Conjur::Command
     var.arg_name "id [value]"
     var.command :create do |c|
       c.arg_name "mime_type"
-      c.flag [:m, :"mime-type"]
+      c.flag [:m, :"mime-type"], default_value: 'text/plain'
 
       c.arg_name "kind"
-      c.flag [:k, :"kind"]
+      c.flag [:k, :"kind"], default_value: 'secret'
 
       c.arg_name "value"
       c.desc "Initial value, which may also be specified as the second command argument after the variable id"
@@ -41,6 +41,9 @@ class Conjur::Command::Variables < Conjur::Command
       c.switch [:i, :'interactive']
       
       c.action do |global_options,options, args|
+        @default_mime_type = c.flags[:m].default_value
+        @default_kind = c.flags[:k].default_value
+        
         id = args.shift unless args.empty?
 
         value = args.shift unless args.empty?
@@ -57,8 +60,6 @@ class Conjur::Command::Variables < Conjur::Command
         options.delete(:"kind")
         options.delete(:'value')
 
-        @default_kind = 'secret'
-        @default_mime_type = 'text/plain'
         annotations = {}
 
         # If the user asked for interactive mode, or he didn't specify
@@ -67,19 +68,15 @@ class Conjur::Command::Variables < Conjur::Command
           id ||= prompt_for_id
 
           groupid ||= prompt_for_group
-          
-          kind ||= prompt_for_kind
-          
-          mime_type ||= prompt_for_mime_type
+
+          kind = prompt_for_kind if !kind || kind == @default_kind
+
+          mime_type = prompt_for_mime_type if !mime_type || mime_type == @default_mime_type
 
           annotations = prompt_for_annotations
 
           value ||= prompt_for_value
         end
-        
-        # If still unset, use defaults
-        mime_type ||= @default_mime_type
-        kind ||= @default_kind
         
         options[:id] = id
         options[:value] = value

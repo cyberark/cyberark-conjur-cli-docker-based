@@ -64,8 +64,8 @@ describe Conjur::Command::Variables, logged_in: true do
       end
     end
     
-    describe_command "variable:create -k secret" do
-      let (:kind) { 'secret' }
+    describe_command "variable:create -k password" do
+      let (:kind) { 'password' }
       it "propagates the user-assigned kind" do
         expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
       end
@@ -96,11 +96,13 @@ describe Conjur::Command::Variables, logged_in: true do
           it { is_expected.not_to receive(:prompt_for_value) }
         end
         
-        describe_command 'variable:create -m text/plain' do
+        describe_command 'variable:create -m application/json' do
+          let (:mime_type) { 'application/json' }
           it { is_expected.not_to receive(:prompt_for_mime_type) }
         end
         
-        describe_command 'variable:create -k secret' do
+        describe_command 'variable:create -k password' do
+          let (:kind) { 'password' }
           it { is_expected.not_to receive(:prompt_for_kind) }
         end
         
