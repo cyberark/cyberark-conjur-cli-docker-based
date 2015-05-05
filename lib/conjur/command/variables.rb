@@ -177,7 +177,7 @@ class Conjur::Command::Variables < Conjur::Command
   end
 
   def self.prompt_for_annotations
-    highline.say('Add annotations (blank name to finish):')
+    highline.say('Add annotations (press enter to finish):')
     {}.tap do |annotations|
       until (name = highline.ask('annotation name: ')).empty?
         annotations[name] = read_till_eof('annotation value (^D to finish):')
@@ -186,7 +186,7 @@ class Conjur::Command::Variables < Conjur::Command
   end
 
   def self.prompt_for_value
-    read_till_eof('Enter the value (^D to finish):')
+    read_till_eof('Enter the value (^D on its own line to finish):')
   end
   
   def self.highline
