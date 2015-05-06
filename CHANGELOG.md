@@ -1,5 +1,7 @@
 # Unreleased
 
+* Interactive mode for variable creation
+
 # 4.23.0
 
 * Don't check if netrc is world-readable on Windows, since the answer is not reliable
