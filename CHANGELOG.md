@@ -1,5 +1,7 @@
 # Unreleased
 
+# 4.24.0
+
 * Interactive mode for variable creation
 
 # 4.23.0
