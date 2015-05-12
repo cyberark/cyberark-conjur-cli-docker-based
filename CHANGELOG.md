@@ -1,5 +1,7 @@
 # Unreleased
 
+* Don't require 'admin' user to bootstrap, prompt to create a new security admin during bootstrap
+
 # 4.24.0
 
 * Interactive mode for variable creation
