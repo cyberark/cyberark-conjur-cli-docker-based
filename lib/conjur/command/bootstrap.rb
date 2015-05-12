@@ -21,18 +21,33 @@
 
 class Conjur::Command::Bootstrap < Conjur::Command
   desc "Create initial users, groups, and permissions"
+  
+  def self.security_admin_manager? api
+    username = api.username
+    user = if username.index('/')
+      nil
+    else
+      api.user(username)
+    end
+    security_admin = api.group("security_admin")
+    user && 
+      security_admin.exists? && 
+      security_admin.role.members.find{|m| m.member.roleid == user.roleid && m.admin_option} &&
+      user.role.memberships.map(&:roleid).member?(security_admin.resource.ownerid)
+  end
 
   Conjur::CLI.command :bootstrap do |c|
     c.action do |global_options,options,args|
       require 'highline/import'
 
-      exit_now! "You must be logged in as 'admin' to bootstrap Conjur" unless api.username == "admin"
+      exit_now! "You must be an administrator to bootstrap Conjur" unless security_admin_manager?(api)
         
       if (security_admin = api.group("security_admin")).exists?
         puts "Group 'security_admin' exists"
       else
         puts "Creating group 'security_admin'"
         security_admin = api.create_group("security_admin")
+        security_admin.resource.give_to security_admin
       end
       
       puts "Permitting group 'security_admin' to manage public keys"
@@ -40,11 +55,12 @@ class Conjur::Command::Bootstrap < Conjur::Command
       
       security_administrators = security_admin.role.members.select{|m| m.member.roleid.split(':')[1..-1] != [ 'user', 'admin'] }
       puts "Current 'security_admin' members are : #{security_administrators.map{|m| m.member.roleid.split(':')[-1]}.join(', ')}" unless security_administrators.blank?
+      created_user = nil
       if security_administrators.empty? || agree("Create a new security_admin? (answer 'y' or 'yes'):")
         username = ask("Enter #{security_administrators.empty? ? 'your' : 'the'} username:")
         password = prompt_for_password
         puts "Creating user '#{username}'"
-        user = api.create_user(username, password: password)
+        created_user = user = api.create_user(username, password: password)
         Conjur::API.new_from_key(user.login, password).user(user.login).resource.give_to security_admin
         puts "User created"
         puts "Making '#{username}' a member and admin of group 'security_admin'"
@@ -58,6 +74,11 @@ class Conjur::Command::Bootstrap < Conjur::Command
       else
         puts "Creating user 'attic'"
         attic = api.create_user("attic")
+      end
+      
+      if created_user && agree("Login as user '#{created_user.login}'? (answer 'y' or 'yes'):")
+        Conjur::Authn.fetch_credentials(username: created_user.login, password: created_user.api_key)
+        puts "Logged in as '#{created_user.login}'"
       end
     end
   end

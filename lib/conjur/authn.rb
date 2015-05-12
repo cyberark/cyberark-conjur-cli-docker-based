@@ -91,6 +91,8 @@ module Conjur::Authn
       write_credentials
     end
     
+    alias save_credentials fetch_credentials
+    
     def write_credentials
       netrc[host] = @credentials
       netrc.save
