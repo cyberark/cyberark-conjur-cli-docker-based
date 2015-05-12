@@ -112,7 +112,8 @@ class Conjur::Command::Bootstrap < Conjur::Command
         api.create_variable "text/plain", 
           "conjur-api-key", 
           id: "conjur/users/#{attic_user_name}/api-key", 
-          value: attic.api_key
+          value: attic.api_key,
+          ownerid: security_admin.role.roleid
       end
       
       if created_user && agree("Login as user '#{created_user.login}'? (answer 'y' or 'yes'):")
