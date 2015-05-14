@@ -42,6 +42,16 @@ module Conjur
       def api
         @@api ||= Conjur::Authn.connect
       end
+      
+      def current_user
+        username = api.username
+        kind, id = username.split('/')
+        unless kind && id
+          id = kind
+          kind = 'user'
+        end
+        api.send(kind, username)
+      end
 
       # Prevent a deprecated command from being displayed in the help output
       def hide_docs(command)
@@ -100,6 +110,30 @@ module Conjur
         end
       end
       
+      def validate_privileges message, &block
+        valid = begin
+          yield
+        rescue RestClient::Exception
+          false
+        end
+        exit_now! message unless valid
+      end
+      
+      def validate_retire_privileges record
+        if record.respond_to?(:role)
+          memberships = current_user.role.memberships.map(&:roleid)
+          validate_privileges "You can't administer this record" do
+            # The current user has a role which is admin of the record's role
+            record.role.members.find{|m| memberships.member?(m.member.roleid) && m.admin_option}
+          end
+        end
+        
+        validate_privileges "You don't own the record" do
+          # The current user has the role which owns the record's resource
+          current_user.role.member_of?(record.resource.ownerid)
+        end
+      end
+      
       def retire_resource obj
         obj.resource.attributes['permissions'].each do |p|
           role = api.role(p['role'])
@@ -111,7 +145,16 @@ module Conjur
       end
         
       def retire_role obj
-        obj.role.members.each do |r|
+        members = obj.role.members
+        # Move the invoking role to the end of the roles list, so that it doesn't
+        # lose its permissions in the middle of this operation.
+        # I'm sure there's a cleaner way to do this.
+        self_member = members.select{|m| m.member.roleid == current_user.role.roleid}
+        self_member.each do |m|
+          members.delete m
+        end
+        members.concat self_member if self_member
+        members.each do |r|
           member = api.role(r.member)
           puts "Revoking from role #{member.roleid}"
           obj.role.revoke_from member

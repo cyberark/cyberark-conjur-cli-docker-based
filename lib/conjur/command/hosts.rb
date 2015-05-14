@@ -62,6 +62,8 @@ class Conjur::Command::Hosts < Conjur::Command
         id = require_arg(args, 'id')
         
         host = api.host(id)
+
+        validate_retire_privileges host
         
         host_layer_roles(host).each do |layer|
           puts "Removing from layer #{layer.id}"

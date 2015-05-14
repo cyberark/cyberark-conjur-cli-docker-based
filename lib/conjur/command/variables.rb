@@ -104,6 +104,8 @@ class Conjur::Command::Variables < Conjur::Command
         id = require_arg(args, 'id')
         
         variable = api.variable(id)
+
+        validate_retire_privileges variable
         
         retire_resource variable
         
