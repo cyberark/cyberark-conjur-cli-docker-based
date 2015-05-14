@@ -21,7 +21,33 @@
 
 class Conjur::Command::Bootstrap < Conjur::Command
   desc "Create initial users, groups, and permissions"
+  long_desc %Q(When you launch a new Conjur master server, it contains only one login: the "admin" user. 
+  The bootstrap command will finish the setup of a new Conjur system by creating other essential records.
+
+  Actions performed by "bootstrap" include:
+
+  * Creation of a group called "security_admin".
+
+  * Giving the "security_admin" the power to manage public keys.
+
+  * Creation of a user called "attic", which will be the owner of retired records.
+
+  * Storing the "attic" user's API key in a variable called "conjur/users/attic/api-key".
+
+  * (optional) Create a new user who will be made a member and admin of the "security_admin" group.
+
+  * (optional) If a new user was created, login as that user.
+  )
   
+  # Determines whether the current logged-in user is sufficiently powerful to perform bootstrap.
+  # This is currently determined by detecting whether the logged-in role:
+  #
+  # * Is a user
+  # * Has admin privilege on the security_admin group role
+  # * Is an owner of the security_admin group resource
+  #
+  # The admin user will always satisfy these conditions, unless they are revoked for some reason.
+  # Other users created by the bootstrap command will (typically) also have these powers.
   def self.security_admin_manager? api
     username = api.username
     user = if username.index('/')
@@ -30,10 +56,14 @@ class Conjur::Command::Bootstrap < Conjur::Command
       api.user(username)
     end
     security_admin = api.group("security_admin")
-    user && 
-      security_admin.exists? && 
-      security_admin.role.members.find{|m| m.member.roleid == user.roleid && m.admin_option} &&
-      user.role.memberships.map(&:roleid).member?(security_admin.resource.ownerid)
+    begin
+      user && 
+        security_admin.exists? && 
+        security_admin.role.members.find{|m| m.member.roleid == user.roleid && m.admin_option} &&
+        user.role.memberships.map(&:roleid).member?(security_admin.resource.ownerid)
+    rescue RestClient::Exception
+      false
+    end
   end
 
   Conjur::CLI.command :bootstrap do |c|
@@ -47,11 +77,15 @@ class Conjur::Command::Bootstrap < Conjur::Command
       else
         puts "Creating group 'security_admin'"
         security_admin = api.create_group("security_admin")
-        security_admin.resource.give_to security_admin
       end
       
-      puts "Permitting group 'security_admin' to manage public keys"
-      api.group("pubkeys-1.0/key-managers").add_member security_admin, admin_option: true
+      security_admin.resource.give_to(security_admin) unless security_admin.resource.ownerid == security_admin.role.roleid
+      
+      key_managers = api.group("pubkeys-1.0/key-managers")
+      unless security_admin.role.memberships.map(&:roleid).member?(key_managers.role.roleid)
+        puts "Permitting group 'security_admin' to manage public keys"
+        key_managers.add_member security_admin, admin_option: true
+      end
       
       security_administrators = security_admin.role.members.select{|m| m.member.roleid.split(':')[1..-1] != [ 'user', 'admin'] }
       puts "Current 'security_admin' members are : #{security_administrators.map{|m| m.member.roleid.split(':')[-1]}.join(', ')}" unless security_administrators.blank?
@@ -69,11 +103,17 @@ class Conjur::Command::Bootstrap < Conjur::Command
         puts "Adminship granted"
       end
       
-      if (attic = api.user("attic")).exists?
-        puts "User 'attic' exists"
+      attic_user_name = "attic"
+      if (attic = api.user(attic_user_name)).exists?
+        puts "User '#{attic_user_name}' already exists"
       else
-        puts "Creating user 'attic'"
-        attic = api.create_user("attic")
+        puts "Creating user '#{attic_user_name}' to own retired records"
+        attic = api.create_user(attic_user_name)
+        api.create_variable "text/plain", 
+          "conjur-api-key", 
+          id: "conjur/users/#{attic_user_name}/api-key", 
+          value: attic.api_key,
+          ownerid: security_admin.role.roleid
       end
       
       if created_user && agree("Login as user '#{created_user.login}'? (answer 'y' or 'yes'):")
