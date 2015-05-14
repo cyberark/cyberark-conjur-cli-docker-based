@@ -56,11 +56,16 @@ class Conjur::Command::Bootstrap < Conjur::Command
       api.user(username)
     end
     security_admin = api.group("security_admin")
+    memberships = user.role.memberships.map(&:roleid) if user
     begin
+      # The user exists
+      # The security_admin group exists
+      # The user has a role which is admin of the security_admin role
+      # The user has the role which owns the security_admin resource
       user && 
         security_admin.exists? && 
-        security_admin.role.members.find{|m| m.member.roleid == user.roleid && m.admin_option} &&
-        user.role.memberships.map(&:roleid).member?(security_admin.resource.ownerid)
+        security_admin.role.members.find{|m| memberships.member?(m.member.roleid) && m.admin_option} &&
+        memberships.member?(security_admin.resource.ownerid)
     rescue RestClient::Exception
       false
     end
