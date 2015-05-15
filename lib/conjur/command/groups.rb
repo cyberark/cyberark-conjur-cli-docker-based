@@ -97,6 +97,8 @@ class Conjur::Command::Groups < Conjur::Command
         
         group = api.group(id)
         
+        validate_retire_privileges group
+        
         retire_resource group
         retire_role group
         

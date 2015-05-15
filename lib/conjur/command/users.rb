@@ -69,6 +69,8 @@ class Conjur::Command::Users < Conjur::Command
         
         user = api.user(id)
         
+        validate_retire_privileges user
+
         retire_resource user
         retire_role user
         

@@ -66,7 +66,7 @@ class Conjur::Command::Bootstrap < Conjur::Command
         security_admin.exists? && 
         security_admin.role.members.find{|m| memberships.member?(m.member.roleid) && m.admin_option} &&
         memberships.member?(security_admin.resource.ownerid)
-    rescue RestClient::Exception
+    rescue RestClient::Forbidden
       false
     end
   end
