@@ -113,7 +113,7 @@ module Conjur
       def validate_privileges message, &block
         valid = begin
           yield
-        rescue RestClient::Exception
+        rescue RestClient::Forbidden
           false
         end
         exit_now! message unless valid
