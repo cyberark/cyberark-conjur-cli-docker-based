@@ -149,4 +149,14 @@ describe Conjur::Command::Resources, logged_in: true do
       expect(JSON.parse( expect { invoke }.to write )).to eq(roles_list)
     end
   end
+  
+  context "interactivity" do
+    subject { Conjur::Command::Resources }
+    describe_command 'resource:annotate -i #{KIND}:#{ID}' do
+      it { 
+        is_expected.to receive(:prompt_for_annotations) 
+        invoke_silently
+      }
+    end
+  end
 end

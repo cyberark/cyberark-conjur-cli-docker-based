@@ -138,12 +138,22 @@ class Conjur::Command::Resources < Conjur::Command
     resource.desc "Set an annotation on a resource"
     resource.arg_name "resource-id name value"
     resource.command :annotate do |c|
+      interactive_option c
+      
       c.action do |global_options, options, args|
         id = full_resource_id require_arg(args, 'resource-id')
-        name = require_arg args, 'name'
-        value = require_arg args, 'value'
-        api.resource(id).annotations[name] = value
-        puts "Set annotation '#{name}' to '#{value}' for resource '#{id}'"
+
+        annotations = if options[:interactive]
+          prompt_for_annotations
+        else
+          name = require_arg args, 'name'
+          value = require_arg args, 'value'
+          { name => value }
+        end
+        unless annotations.blank?
+          api.resource(id).annotations.merge!(annotations)
+          puts "Set annotations #{annotations.keys} for resource '#{id}'"
+        end
       end
     end
 

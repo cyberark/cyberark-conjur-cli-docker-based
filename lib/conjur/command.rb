@@ -58,13 +58,52 @@ module Conjur
         def command.nodoc; true end
       end
 
-      def acting_as_option(command)
+      def acting_as_option command
         return if command.flags.member?(:"as-group") # avoid duplicate flags
         command.arg_name 'Perform all actions as the specified Group'
         command.flag [:"as-group"]
 
         command.arg_name 'Perform all actions as the specified Role'
         command.flag [:"as-role"]
+      end
+      
+      def interactive_option command
+        command.arg_name 'interactive'
+        command.desc 'Create variable interactively'
+        command.switch [:i, :'interactive']
+      end
+      
+      def annotate_option command
+        command.arg_name 'annotate'
+        command.desc 'Add variable annotations interactively'
+        command.switch [:a, :annotate]
+      end
+
+      def prompt_for_annotations
+        highline.say('Add annotations (a name and value for each one):')
+        {}.tap do |annotations|
+          until (name = highline.ask('  annotation name (press enter to quit annotations): ')).empty?
+            annotations[name] = read_till_eof('  annotation value (^D on its own line to finish):')
+          end
+        end
+      end
+      
+      def highline
+        require 'highline'
+        @highline ||= HighLine.new($stdin,$stderr)
+      end
+    
+      def read_till_eof(prompt = nil)
+        highline.say(prompt) if prompt
+        [].tap do |lines|
+          loop do
+            begin
+              lines << highline.ask('')
+            rescue EOFError
+              break
+            end
+          end
+        end.join("\n")
       end
       
       def command_options_for_list(c)
