@@ -1,6 +1,8 @@
 # Unreleased
 
 * Don't require 'admin' user to bootstrap, prompt to create a new security admin during bootstrap
+* Check if user privileges are sufficient before running `retire`
+* Don't revoke a user's access to a record in the middle of retire, because doing so leads to 403 errors later on.
 
 # 4.24.0
 
