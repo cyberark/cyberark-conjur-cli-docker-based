@@ -1,5 +1,8 @@
-# Unreleased
+# 4.25.0
 
+* Variable can be created with the id only, without becoming interactive
+* Run `conjur variable create -i -a` to create interactively with annotations
+* Interactive annotation can be performed on bare resources with `conjur resource annotate -i`.
 * Don't require 'admin' user to bootstrap, prompt to create a new security admin during bootstrap
 * Check if user privileges are sufficient before running `retire`
 * Don't revoke a user's access to a record in the middle of retire, because doing so leads to 403 errors later on.
