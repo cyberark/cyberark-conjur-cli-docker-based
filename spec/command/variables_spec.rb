@@ -24,6 +24,14 @@ describe Conjur::Command::Variables, logged_in: true do
       end
     end
   end
+
+  context "-a without -i" do
+    describe_command 'variable:create -a the-id' do
+      it "is an error" do
+        expect { invoke }.to raise_error("Received --annotate option without --interactive")
+      end
+    end
+  end
   
   context 'non-interactive' do
     describe_command "variable:create the-id" do
@@ -141,7 +149,7 @@ describe Conjur::Command::Variables, logged_in: true do
         
       end
       
-      context "when -i is provided" do
+      context "explicit interactivity" do
         describe_command 'variable:create -i the-id the-value' do
           it { is_expected.not_to receive(:prompt_for_id) }
           it { is_expected.not_to receive(:prompt_for_value) }
@@ -152,8 +160,11 @@ describe Conjur::Command::Variables, logged_in: true do
         end
       end
       
-      context "when -a is provided" do
+      context "interactive annotations" do
         describe_command 'variable:create -a' do
+          it { is_expected.to receive(:prompt_for_annotations) }
+        end
+        describe_command 'variable:create -ia the-id' do
           it { is_expected.to receive(:prompt_for_annotations) }
         end
       end

@@ -47,18 +47,21 @@ class Conjur::Command::Variables < Conjur::Command
         id = args.shift unless args.empty?
         value = args.shift unless args.empty?
         
-        raise "Received conflicting value arguments" if value && options[:value]
+        exit_now! "Received conflicting value arguments" if value && options[:value]
 
         groupid = options[:ownerid]
         mime_type = options[:m]
         kind = options[:k]
         value ||= options[:v]
-        
+        interactive = options[:interactive] || id.blank?
+        annotate = options[:annotate]
+          
+        exit_now! "Received --annotate option without --interactive" if annotate && !interactive
+          
         annotations = {}
-
         # If the user asked for interactive mode, or he didn't specify and id
         # prompt for any missing options.
-        if options[:interactive] || id.blank?
+        if interactive
           id ||= prompt_for_id
 
           groupid ||= prompt_for_group
@@ -67,7 +70,7 @@ class Conjur::Command::Variables < Conjur::Command
 
           mime_type = prompt_for_mime_type if !mime_type || mime_type == @default_mime_type
 
-          annotations = prompt_for_annotations if options[:annotate]
+          annotations = prompt_for_annotations if annotate
 
           value ||= prompt_for_value
         end
