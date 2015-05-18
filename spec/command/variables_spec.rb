@@ -12,10 +12,10 @@ describe Conjur::Command::Variables, logged_in: true do
   end
   let(:id) { 'the-id' }
   let(:variable) { post_response(id) }
-  let (:group) { nil }
-  let (:annotation) { {} }
-  let (:value) { 'the-value' }
-  let (:full_payload) { base_payload }
+  let(:group) { nil }
+  let(:annotation) { {} }
+  let(:value) { 'the-value' }
+  let(:full_payload) { base_payload }
   
   context 'when there are command-line errors' do
     describe_command "variable:create -v the-value-1 the-id the-value-2" do
@@ -51,7 +51,7 @@ describe Conjur::Command::Variables, logged_in: true do
       allow(Conjur::Command::Variables).to receive(:prompt_for_mime_type) { mime_type }
       allow(Conjur::Command::Variables).to receive(:prompt_for_annotations) { annotation }
       allow(Conjur::Command::Variables).to receive(:prompt_for_value)  { value }
-
+        
       expect(RestClient::Request).to receive(:execute).with({
           method: :post,
           url: collection_url,
@@ -67,8 +67,26 @@ describe Conjur::Command::Variables, logged_in: true do
       end
     end
     
+    describe_command "variable:create the-id" do
+      let(:value) { "" }
+      let(:full_payload) { 
+        base_payload.dup.tap do |m|
+          m.delete_if{|k,_| k == :value}
+        end
+      }
+      it "will propagate the user-assigned id without a value" do
+        expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
+      end
+    end
+    
+    let(:base_payload) do
+      { id: id, value: value, mime_type: mime_type, kind: kind }.tap do |t|
+        group && t.merge(ownerid: group)
+      end
+    end
+
     describe_command "variable:create -m application/json" do
-      let (:mime_type) { 'application/json' }
+      let(:mime_type) { 'application/json' }
       let(:payload) { valueless_payload }
       it "propagates the user-assigned MIME type" do
         expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
@@ -76,7 +94,7 @@ describe Conjur::Command::Variables, logged_in: true do
     end
     
     describe_command "variable:create -k password" do
-      let (:kind) { 'password' }
+      let(:kind) { 'password' }
       let(:payload) { valueless_payload }
       it "propagates the user-assigned kind" do
         expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
@@ -106,12 +124,12 @@ describe Conjur::Command::Variables, logged_in: true do
         end
         
         describe_command 'variable:create -m application/json' do
-          let (:mime_type) { 'application/json' }
+          let(:mime_type) { 'application/json' }
           it { is_expected.not_to receive(:prompt_for_mime_type) }
         end
         
         describe_command 'variable:create -k password' do
-          let (:kind) { 'password' }
+          let(:kind) { 'password' }
           it { is_expected.not_to receive(:prompt_for_kind) }
         end
         
@@ -128,7 +146,7 @@ describe Conjur::Command::Variables, logged_in: true do
               }.merge(cert_store_options)).and_return(OpenStruct.new(headers: {}, body: '{}'))
           end
             
-          let (:full_payload) { base_payload.merge(ownerid: 'the-account:group:the-group') }
+          let(:full_payload) { base_payload.merge(ownerid: 'the-account:group:the-group') }
 
           it { is_expected.not_to receive(:prompt_for_group) }
         end
@@ -142,7 +160,7 @@ describe Conjur::Command::Variables, logged_in: true do
               }.merge(cert_store_options)).and_return(OpenStruct.new(headers: {}, body: '{}'))
           end
             
-          let (:full_payload) { base_payload.merge(ownerid: 'the-account:group:the-group') }
+          let(:full_payload) { base_payload.merge(ownerid: 'the-account:group:the-group') }
 
           it { is_expected.not_to receive(:prompt_for_group) }
         end

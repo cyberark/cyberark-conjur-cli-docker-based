@@ -77,7 +77,7 @@ class Conjur::Command::Variables < Conjur::Command
         
         variable_options = options.slice(:ownerid)
         variable_options[:id] = id
-        variable_options[:value] = value if value
+        variable_options[:value] = value unless value.blank?
         var = api.create_variable(mime_type, kind, variable_options)
         api.resource(var).annotations.merge!(annotations) if annotations && !annotations.empty?
         display(var, options)
