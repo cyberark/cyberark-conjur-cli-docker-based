@@ -24,9 +24,18 @@ describe Conjur::Command::Variables, logged_in: true do
       end
     end
   end
+  
+  context 'non-interactive' do
+    describe_command "variable:create the-id" do
+      it "is non-interactive" do
+        allow(Conjur::Command::Variables).to receive(:prompt_for_id).and_raise("Unexpected prompt for id")
+        expect(RestClient::Request).to receive(:execute).and_return(variable)
+        invoke
+      end
+    end
+  end
 
   context 'when there are no command-line errors' do
-    
     before do
       allow(Conjur::Command::Variables).to receive(:prompt_for_id) { id }
       allow(Conjur::Command::Variables).to receive(:prompt_for_group) { group }
@@ -43,13 +52,6 @@ describe Conjur::Command::Variables, logged_in: true do
         }.merge(cert_store_options)).and_return(variable)
     end
     
-    describe_command "variable:create the-different-id" do
-      let (:id) { 'the-different-id' }
-      it "propagates the user-assigned id" do
-        expect { invoke }.to write({ id: 'the-different-id' }).to(:stdout)
-      end
-    end
-    
     describe_command "variable:create the-id the-different-value" do
       let (:value) { 'the-different-value' }
       it "propagates the user-assigned id" do
@@ -59,6 +61,7 @@ describe Conjur::Command::Variables, logged_in: true do
     
     describe_command "variable:create -m application/json" do
       let (:mime_type) { 'application/json' }
+      let(:payload) { valueless_payload }
       it "propagates the user-assigned MIME type" do
         expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
       end
@@ -66,6 +69,7 @@ describe Conjur::Command::Variables, logged_in: true do
     
     describe_command "variable:create -k password" do
       let (:kind) { 'password' }
+      let(:payload) { valueless_payload }
       it "propagates the user-assigned kind" do
         expect { invoke }.to write({ id: 'the-id' }).to(:stdout)
       end
@@ -84,15 +88,12 @@ describe Conjur::Command::Variables, logged_in: true do
           it { is_expected.to receive(:prompt_for_group) }
           it { is_expected.to receive(:prompt_for_kind) }
           it { is_expected.to receive(:prompt_for_mime_type) }
-          it { is_expected.to receive(:prompt_for_annotations) }
+          it { is_expected.not_to receive(:prompt_for_annotations) }
           it { is_expected.to receive(:prompt_for_value) }
         end
         
-        describe_command 'variable:create the-id' do
-          it { is_expected.not_to receive(:prompt_for_id) }
-        end
-        
         describe_command 'variable:create the-id the-value' do
+          it { is_expected.not_to receive(:prompt_for_id) }
           it { is_expected.not_to receive(:prompt_for_value) }
         end
         
@@ -147,11 +148,15 @@ describe Conjur::Command::Variables, logged_in: true do
           it { is_expected.to receive(:prompt_for_group) }
           it { is_expected.to receive(:prompt_for_mime_type) }
           it { is_expected.to receive(:prompt_for_kind) }
-          it { is_expected.to receive(:prompt_for_annotations) }
+          it { is_expected.not_to receive(:prompt_for_annotations) }
         end
       end
       
+      context "when -a is provided" do
+        describe_command 'variable:create -a' do
+          it { is_expected.to receive(:prompt_for_annotations) }
+        end
+      end
     end
-    
   end
 end

@@ -34,37 +34,31 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc "Initial value, which may also be specified as the second command argument after the variable id"
       c.flag [:v, :"value"]
 
-      acting_as_option(c)
-
-      c.arg_name 'interactive'
-      c.desc 'Create variable interactively'
-      c.switch [:i, :'interactive']
+      acting_as_option c
       
+      annotate_option c
+      
+      interactive_option c
+
       c.action do |global_options,options, args|
         @default_mime_type = c.flags[:m].default_value
         @default_kind = c.flags[:k].default_value
         
         id = args.shift unless args.empty?
-
         value = args.shift unless args.empty?
         
         raise "Received conflicting value arguments" if value && options[:value]
 
-        groupid = options[:'ownerid']
-        mime_type = options.delete(:m)
-        kind = options.delete(:k)
-        value ||= options.delete(:v)
+        groupid = options[:ownerid]
+        mime_type = options[:m]
+        kind = options[:k]
+        value ||= options[:v]
         
-        options.delete(:'interactive')
-        options.delete(:"mime-type")
-        options.delete(:"kind")
-        options.delete(:'value')
-
         annotations = {}
 
-        # If the user asked for interactive mode, or he didn't specify
-        # both an id and a value, prompt for any missing options.
-        if options.delete(:i) || !(id && value)
+        # If the user asked for interactive mode, or he didn't specify and id
+        # prompt for any missing options.
+        if options[:interactive] || id.blank?
           id ||= prompt_for_id
 
           groupid ||= prompt_for_group
@@ -73,16 +67,15 @@ class Conjur::Command::Variables < Conjur::Command
 
           mime_type = prompt_for_mime_type if !mime_type || mime_type == @default_mime_type
 
-          annotations = prompt_for_annotations
+          annotations = prompt_for_annotations if options[:annotate]
 
           value ||= prompt_for_value
         end
         
-        options[:id] = id
-        options[:value] = value
-        options[:'ownerid'] = groupid if groupid
-        
-        var = api.create_variable(mime_type, kind, options)
+        variable_options = options.slice(:ownerid)
+        variable_options[:id] = id
+        variable_options[:value] = value if value
+        var = api.create_variable(mime_type, kind, variable_options)
         api.resource(var).annotations.merge!(annotations) if annotations && !annotations.empty?
         display(var, options)
       end
@@ -151,7 +144,6 @@ class Conjur::Command::Variables < Conjur::Command
         $stdout.write api.variable(id).value(options[:version])
       end
     end
-
   end
 
   def self.prompt_for_id
@@ -175,34 +167,7 @@ class Conjur::Command::Variables < Conjur::Command
     highline.ask('Enter the MIME type: ') {|q| q.default = @default_mime_type }
   end
 
-  def self.prompt_for_annotations
-    highline.say('Add annotations (a name and value for each one):')
-    {}.tap do |annotations|
-      until (name = highline.ask('  annotation name (press enter to quit annotations): ')).empty?
-        annotations[name] = read_till_eof('  annotation value (^D to finish):')
-      end
-    end
-  end
-
   def self.prompt_for_value
     read_till_eof('Enter the secret value (^D on its own line to finish):')
-  end
-  
-  def self.highline
-    require 'highline'
-    @highline ||= HighLine.new($stdin,$stderr)
-  end
-
-  def self.read_till_eof(prompt = nil)
-    highline.say(prompt) if prompt
-    [].tap do |lines|
-      loop do
-        begin
-          lines << highline.ask('')
-        rescue EOFError
-          break
-        end
-      end
-    end.join("\n")
   end
 end
