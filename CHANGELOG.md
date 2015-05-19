@@ -1,5 +1,6 @@
 # 4.25.0
 
+* A record can be retired to a specific role, in addition to the default behavior of retiring to the `attic` user.
 * Variable can be created with the id only, without becoming interactive
 * Run `conjur variable create -i -a` to create interactively with annotations
 * Interactive annotation can be performed on bare resources with `conjur resource annotate -i`.

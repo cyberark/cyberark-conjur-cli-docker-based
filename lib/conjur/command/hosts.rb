@@ -58,12 +58,14 @@ class Conjur::Command::Hosts < Conjur::Command
     hosts.desc "Decommission a host"
     hosts.arg_name "id"
     hosts.command :retire do |c|
+      retire_options c
+
       c.action do |global_options,options,args|
         id = require_arg(args, 'id')
         
         host = api.host(id)
 
-        validate_retire_privileges host
+        validate_retire_privileges host, options
         
         host_layer_roles(host).each do |layer|
           puts "Removing from layer #{layer.id}"
@@ -72,9 +74,7 @@ class Conjur::Command::Hosts < Conjur::Command
 
         retire_resource host
         retire_role host
-        
-        puts "Giving ownership to 'attic'"
-        host.resource.give_to api.user('attic')
+        give_away_resource host, options
         
         puts "Host retired"
       end

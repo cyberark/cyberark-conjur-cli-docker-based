@@ -64,18 +64,18 @@ class Conjur::Command::Users < Conjur::Command
     user.desc "Decommission a user"
     user.arg_name "id"
     user.command :retire do |c|
+      retire_options c
+
       c.action do |global_options,options,args|
         id = require_arg(args, 'id')
         
         user = api.user(id)
         
-        validate_retire_privileges user
+        validate_retire_privileges user, options
 
         retire_resource user
         retire_role user
-        
-        puts "Giving ownership to 'attic'"
-        user.resource.give_to api.user('attic')
+        give_away_resource user, options
         
         puts "User retired"
       end
