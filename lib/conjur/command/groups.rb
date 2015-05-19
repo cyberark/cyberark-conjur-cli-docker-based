@@ -92,18 +92,18 @@ class Conjur::Command::Groups < Conjur::Command
     group.desc "Decommission a group"
     group.arg_name "id"
     group.command :retire do |c|
+      retire_options c
+
       c.action do |global_options,options,args|
         id = require_arg(args, 'id')
         
         group = api.group(id)
         
-        validate_retire_privileges group
+        validate_retire_privileges group, options
         
         retire_resource group
         retire_role group
-        
-        puts "Giving ownership to 'attic'"
-        group.resource.give_to api.user('attic')
+        give_away_resource group, options
         
         puts "Group retired"
       end

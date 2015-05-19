@@ -96,17 +96,17 @@ class Conjur::Command::Variables < Conjur::Command
     var.desc "Decommission a variable"
     var.arg_name "id"
     var.command :retire do |c|
+      retire_options c
+      
       c.action do |global_options,options,args|
         id = require_arg(args, 'id')
         
         variable = api.variable(id)
 
-        validate_retire_privileges variable
+        validate_retire_privileges variable, options
         
         retire_resource variable
-        
-        puts "Giving ownership to 'attic'"
-        variable.resource.give_to api.user('attic')
+        give_away_resource variable, options
         
         puts "Variable retired"
       end

@@ -158,7 +158,27 @@ module Conjur
         exit_now! message unless valid
       end
       
-      def validate_retire_privileges record
+      def retire_options command
+        command.arg_name 'role'
+        command.desc "Specify a role to give the retired record to (default: the 'attic' user)"
+        command.long_desc %Q(When retired, all a record's roles and permissions are revoked.
+        
+As a final step, the record is 'given' (e.g. 'conjur resource give') to a destination role.
+The default role to receive the record is the user 'attic'. This option can be used to specify
+an alternative destination role.)
+        command.flag [:d, :"destination-role"]
+      end
+      
+      def destination_role options
+        destination = options[:"destination-role"]
+        if destination
+          api.role(destination)
+        else
+          api.user('attic')
+        end
+      end
+      
+      def validate_retire_privileges record, options
         if record.respond_to?(:role)
           memberships = current_user.role.memberships.map(&:roleid)
           validate_privileges "You can't administer this record" do
@@ -171,6 +191,9 @@ module Conjur
           # The current user has the role which owns the record's resource
           current_user.role.member_of?(record.resource.ownerid)
         end
+        
+        role = destination_role(options)
+        exit_now! "Destination role '#{role.roleid}' doesn't exist" unless role.exists?
       end
       
       def retire_resource obj
@@ -198,6 +221,20 @@ module Conjur
           puts "Revoking from role #{member.roleid}"
           obj.role.revoke_from member
         end
+      end
+      
+      def give_away_resource obj, options
+        destination = options[:"destination-role"]
+        destination_role = if destination
+          api.role(destination)
+        else
+          api.user('attic')
+        end
+
+        exit_now! "Role #{destination_role.roleid} doesn't exist" unless destination_role.exists?
+        
+        puts "Giving ownership to '#{destination_role.roleid}'"
+        obj.resource.give_to destination_role
       end
       
       def display_members(members, options)
