@@ -156,7 +156,7 @@ class Conjur::Command::Variables < Conjur::Command
     end
   end
   
-  def prompt_to_confirm properties
+  def self.prompt_to_confirm properties
     puts
     puts "A new variable will be created with the following properties:"
     puts
