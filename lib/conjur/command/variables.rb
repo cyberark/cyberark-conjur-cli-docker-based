@@ -75,8 +75,9 @@ class Conjur::Command::Variables < Conjur::Command
           value ||= prompt_for_value
         end
         
-        variable_options = options.slice(:ownerid)
+        variable_options = { id: id }
         variable_options[:id] = id
+        variable_options[:ownerid] = groupid if groupid
         variable_options[:value] = value unless value.blank?
         var = api.create_variable(mime_type, kind, variable_options)
         api.resource(var).annotations.merge!(annotations) if annotations && !annotations.empty?
@@ -156,6 +157,7 @@ class Conjur::Command::Variables < Conjur::Command
   def self.prompt_for_group
     highline.ask('Enter the group: ', ->(name) { @group && @group.roleid } ) do |q|
       q.validate = ->(name) do
+        @group = nil
         name.empty? || (@group = api.group(name)).exists?
       end
       q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"

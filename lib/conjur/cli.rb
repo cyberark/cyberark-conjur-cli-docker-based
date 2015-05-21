@@ -113,12 +113,12 @@ module Conjur
         group = Conjur::Command.api.group(as_group)
         role = Conjur::Command.api.role(group.roleid)
         exit_now!("Group '#{as_group}' doesn't exist, or you don't have permission to use it") unless role.exists?
-        options[:"ownerid"] = group.roleid
+        options[:ownerid] = group.roleid
       end
       if as_role = options.delete(:"as-role")
         role = Conjur::Command.api.role(as_role)
         exit_now!("Role '#{as_role}' does not exist, or you don't have permission to use it") unless role.exists?
-        options[:"ownerid"] = role.roleid
+        options[:ownerid] = role.roleid
       end
       
       true
