@@ -45,6 +45,7 @@ describe Conjur::Command::Variables, logged_in: true do
 
   context 'when there are no command-line errors' do
     before do
+      allow(Conjur::Command::Variables).to receive(:prompt_to_confirm) { "yes"}
       allow(Conjur::Command::Variables).to receive(:prompt_for_id) { id }
       allow(Conjur::Command::Variables).to receive(:prompt_for_group) { group }
       allow(Conjur::Command::Variables).to receive(:prompt_for_kind) { kind }
