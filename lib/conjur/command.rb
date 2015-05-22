@@ -267,6 +267,60 @@ an alternative destination role.)
         puts str
       end
 
+      def prompt_to_confirm kind, properties
+        puts
+        puts "A new #{kind} will be created with the following properties:"
+        puts
+        properties.select{|k,v| !v.blank?}.each do |k,v|
+          printf "%-10s: %s\n", k, v
+        end
+        puts
+        
+        exit(0) unless %w(yes y).member?(highline.ask("Proceed? (yes/no): ").strip.downcase)
+      end
+      
+      def integer? v
+        Integer(v, 10) rescue false
+      end
+    
+      def prompt_for_id kind, label = 'id'
+        highline.ask("Enter the #{label}: ") do |q|
+          q.readline = true
+          q.validate = lambda{|id|
+            !id.blank? && !api.send(kind, id).exists?
+          }
+          q.responses[:not_valid] = "A #{kind} called '<%= @answer %>' already exists"
+        end
+      end
+    
+      def prompt_for_group
+        group_ids = api.groups.map(&:id)
+        
+        highline.ask('Enter the group which will own the record (press enter to own the record yourself): ', [ "" ] + group_ids) do |q|
+          require 'readline'
+          Readline.completion_append_character = ""
+          Readline.completer_word_break_characters = ""
+          
+          q.readline = true
+          q.validate = lambda{|id|
+            @group = nil
+            id.empty? || (@group = api.group(id)).exists?
+          }
+          q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
+        end
+        @group ? @group.roleid : nil
+      end
+
+      def prompt_for_idnumber label
+        result = highline.ask("Enter a #{label}: ") do |q|
+          q.validate = lambda{|id|
+            id.blank? || integer?(id)
+          }
+          q.responses[:not_valid] = "The #{label} must be an integer"
+        end
+        result.blank? ? nil : result.to_i
+      end
+
       def prompt_for_password
         require 'highline'
         # use stderr to allow output redirection, e.g.
@@ -278,7 +332,7 @@ an alternative destination role.)
         
         raise "Password does not match confirmation" unless password == confirmation
         
-        password
+        password.blank? ? nil : password
       end
     end
   end
