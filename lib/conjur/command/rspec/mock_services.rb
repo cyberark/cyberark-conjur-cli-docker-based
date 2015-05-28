@@ -37,4 +37,7 @@ end
 
 shared_context "when not logged in", logged_in: false do
   include_context "with mock authn"
+  before do
+    Conjur::Authn.instance_variable_set :@credentials, nil
+  end
 end
