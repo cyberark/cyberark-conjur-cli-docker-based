@@ -61,6 +61,7 @@ class Conjur::Command::Pubkeys < Conjur::Command
       interactive_option c
       
       c.action do |global_options, options, args|
+        options[:interactive] = $stdin.isatty if options[:interactive].nil?
         username = require_arg args, "username"
         if key = args.shift
           if /^@(.+)$/ =~ key
