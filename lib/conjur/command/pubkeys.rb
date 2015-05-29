@@ -75,6 +75,7 @@ class Conjur::Command::Pubkeys < Conjur::Command
             end
           end
         end
+        fail "Cancelled by the user" if key.blank?
         api.add_public_key username, key
         puts "Public key '#{key.split(' ').last}' added"
       end
