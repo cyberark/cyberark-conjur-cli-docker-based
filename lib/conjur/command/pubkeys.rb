@@ -49,13 +49,16 @@ class Conjur::Command::Pubkeys < Conjur::Command
     pubkeys.desc "Add a public key for a user"
     pubkeys.long_desc %Q(Adds a public key for a user. The username is a required argument of this method.
     
-    The public key itself may be provided in several ways.
-    
-    1. After the username argument, the public key can be provided as a literal (quoted) string.
-    2. After the username argument, the path to the public key file can be provided with a leading @ character.
-    3. If the only argument to this command is the username, the key will be read from stdin.
-    4. If you provide the -i (interactive) command option, you'll be prompted for the public key
-    )
+The public key itself may be provided in several ways.
+
+1. After the username argument, the public key can be provided as a literal (quoted) string.
+
+2. After the username argument, the path to the public key file can be provided with a leading @ character.
+
+3. If the only argument to this command is the username, the key will be read from stdin.
+
+4. If you provide the -i (interactive) command option, you'll be prompted for the public key
+)
     pubkeys.arg_name "username key?"
     pubkeys.command :add do |c|
       interactive_option c
