@@ -321,9 +321,14 @@ an alternative destination role.)
           $? == 0
         else
           Conjur.log.debug "ssh-keygen is not available; falling back to simple string testing\n" if Conjur.log
-          # Should be a single line with 3 components
-          key, remainder = key.split("\n")
-          remainder.nil? && key.split(/\s+/).length == 3
+          # Should be a line with at least 2 components,
+          # first one being the algo id and second a base64 string
+          begin
+            Base64.strict_decode64 key.strip[/\Assh-\w+ (\S+).*/, 1]
+            true
+          rescue NoMethodError, ArgumentError
+            false
+          end
         end
       end
       
