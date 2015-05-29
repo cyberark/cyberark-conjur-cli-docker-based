@@ -324,10 +324,16 @@ an alternative destination role.)
         else
           Conjur.log.debug "ssh-keygen is not available; falling back to simple string testing\n" if Conjur.log
           # Should be a line with at least 2 components,
-          # first one being the algo id and second a base64 string
+          # first one being the algo id and second a base64 string.
+          # In principle this means:
+          #   Base64.strict_decode64 key.strip[/\Assh-\w+ (\S+).*/, 1]
+
+          # Since the pubkeys service is more strict: needs a name and
+          # rejects ones with a space, instead reproduce its algorithm here.
           begin
-            Base64.strict_decode64 key.strip[/\Assh-\w+ (\S+).*/, 1]
-            true
+            components = key.strip.split ' '
+            Base64.strict_decode64 components[1]
+            components.length == 3
           rescue NoMethodError, ArgumentError
             false
           end
