@@ -60,7 +60,7 @@ class Conjur::Command::Groups < Conjur::Command
           }
         end
         
-        group_options = { id: id }
+        group_options = { }
         group_options[:ownerid] = groupid if groupid
         group_options[:gidnumber] = gidnumber.to_i unless gidnumber.blank?
           

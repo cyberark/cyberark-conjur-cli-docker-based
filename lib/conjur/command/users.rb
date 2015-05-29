@@ -63,7 +63,11 @@ class Conjur::Command::Users < Conjur::Command
           prompt_to_confirm :user, attributes
         end
         
-        user_options = { id: login }
+        if options[:p] && password.blank?
+          password = prompt_for_password
+        end
+        
+        user_options = { }
         user_options[:ownerid] = groupid if groupid
         user_options[:uidnumber] = uidnumber.to_i if uidnumber
         user_options[:password] = password if password
