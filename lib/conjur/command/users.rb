@@ -50,7 +50,7 @@ class Conjur::Command::Users < Conjur::Command
         if interactive
           login ||= prompt_for_id :user, "login name"
           
-          groupid ||= prompt_for_group
+          groupid ||= prompt_for_group default_hint: "press enter to have the user own their own record"
           uidnumber ||= prompt_for_uidnumber
           password = prompt_for_password unless options[:"no-password"]
           

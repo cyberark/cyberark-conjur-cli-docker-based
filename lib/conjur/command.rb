@@ -334,10 +334,10 @@ an alternative destination role.)
         end
       end
       
-      def prompt_for_group
+      def prompt_for_group default_hint: "press enter to own the record yourself"
         group_ids = api.groups.map(&:id)
         
-        highline.ask('Enter the group which will own the record (press enter to own the record yourself): ', [ "" ] + group_ids) do |q|
+        highline.ask("Enter the group which will own the record (#{default_hint}): ", [ "" ] + group_ids) do |q|
           require 'readline'
           Readline.completion_append_character = ""
           Readline.completer_word_break_characters = ""
