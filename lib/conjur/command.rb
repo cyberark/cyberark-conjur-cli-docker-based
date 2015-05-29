@@ -289,7 +289,9 @@ an alternative destination role.)
           q.validate = lambda{|id|
             !id.blank? && !api.send(kind, id).exists?
           }
-          q.responses[:not_valid] = "A #{kind} called '<%= @answer %>' already exists"
+          q.responses[:not_valid] = "<% if @answer.blank? %>"\
+              "#{label} cannot be blank<% else %>"\
+              "A #{kind} called '<%= @answer %>' already exists<% end %>"
         end
       end
 
