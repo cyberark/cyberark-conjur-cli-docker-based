@@ -292,7 +292,39 @@ an alternative destination role.)
           q.responses[:not_valid] = "A #{kind} called '<%= @answer %>' already exists"
         end
       end
+
+      def prompt_for_public_key
+        public_key = highline.ask("Enter the public key (press enter to skip): ") do |q|
+          q.validate = lambda{|key|
+            if key.blank?
+              true
+            else
+              validate_public_key key
+            end
+          }
+          q.responses[:not_valid] = "Public key format is invalid; please try again"
+        end
+        public_key.blank? ? nil : public_key.strip
+      end
     
+      # http://serverfault.com/questions/453296/how-do-i-validate-a-rsa-ssh-public-key-file-id-rsa-pub
+      def validate_public_key key
+        if system('which ssh-keygen 2>&1 > /dev/null')
+          Conjur.log.debug "Using ssh-keygen to verify the public key\n" if Conjur.log
+          require 'tempfile'
+          tempfile = Tempfile.new 'public_key'
+          tempfile.write(key)
+          tempfile.close
+          `ssh-keygen -l -f #{tempfile.path}`
+          $? == 0
+        else
+          Conjur.log.debug "ssh-keygen is not available; falling back to simple string testing\n" if Conjur.log
+          # Should be a single line with 3 components
+          key, remainder = key.split("\n")
+          remainder.nil? && key.split(/\s+/).length == 3
+        end
+      end
+      
       def prompt_for_group
         group_ids = api.groups.map(&:id)
         

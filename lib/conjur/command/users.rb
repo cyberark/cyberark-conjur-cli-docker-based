@@ -69,7 +69,16 @@ class Conjur::Command::Users < Conjur::Command
         user_options[:password] = password if password
         user = api.create_user(login, user_options)
 
+        puts "User created"
         display user
+        
+        if interactive
+          public_key = prompt_for_public_key
+          if public_key
+            api.add_public_key user.login, public_key
+            puts "Public key added"
+          end
+        end
       end
     end
 

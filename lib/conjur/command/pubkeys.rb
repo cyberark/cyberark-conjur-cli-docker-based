@@ -47,8 +47,19 @@ class Conjur::Command::Pubkeys < Conjur::Command
     end
 
     pubkeys.desc "Add a public key for a user"
-    pubkeys.arg_name "username key"
+    pubkeys.long_desc %Q(Adds a public key for a user. The username is a required argument of this method.
+    
+    The public key itself may be provided in several ways.
+    
+    1. After the username argument, the public key can be provided as a literal (quoted) string.
+    2. After the username argument, the path to the public key file can be provided with a leading @ character.
+    3. If the only argument to this command is the username, the key will be read from stdin.
+    4. If you provide the -i (interactive) command option, you'll be prompted for the public key
+    )
+    pubkeys.arg_name "username key?"
     pubkeys.command :add do |c|
+      interactive_option c
+      
       c.action do |global_options, options, args|
         username = require_arg args, "username"
         if key = args.shift
@@ -56,7 +67,13 @@ class Conjur::Command::Pubkeys < Conjur::Command
             key = File.read(File.expand_path($1))
           end
         else
-          key = STDIN.read.strip
+          key = if options[:interactive]
+            prompt_for_public_key
+          else
+            STDIN.read.strip.tap do |k|
+              exit_now! "Invalid public key format" unless validate_public_key(k)
+            end
+          end
         end
         api.add_public_key username, key
         puts "Public key '#{key.split(' ').last}' added"
