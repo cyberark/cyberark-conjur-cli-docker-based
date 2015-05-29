@@ -35,20 +35,54 @@ class Conjur::Command::Users < Conjur::Command
 
       acting_as_option(c)
 
+      interactive_option c
+
       c.action do |global_options,options,args|
-        login = require_arg(args, 'login')
+        login = args.shift
 
-        opts = options.slice(:ownerid, :uidnumber)
-        if opts[:uidnumber] 
-          raise "uidnumber should be integer" unless /\d+/ =~ opts[:uidnumber]
-          opts[:uidnumber] = opts[:uidnumber].to_i
-        end
+        interactive = options[:interactive] || login.blank?
 
-        if options[:p]
-          opts[:password] = prompt_for_password
+        groupid = options[:ownerid]
+        uidnumber = options[:uidnumber]
+        password = nil
+        exit_now! "uidnumber should be integer" unless uidnumber.blank? || /\d+/ =~ uidnumber
+          
+        if interactive
+          login ||= prompt_for_id :user, "login name"
+          
+          groupid ||= prompt_for_group hint: "press enter to have the user own their own record"
+          uidnumber ||= prompt_for_uidnumber
+          password = prompt_for_password unless options[:"no-password"]
+          
+          attributes = {
+            "Login"    => login,
+            "Owner" => groupid,
+            "UID Number"  => uidnumber
+          }
+          attributes["Password"] = "********" unless password.blank?
+          prompt_to_confirm :user, attributes
         end
         
-        display api.create_user(login, opts)
+        if options[:p] && password.blank?
+          password = prompt_for_password
+        end
+        
+        user_options = { }
+        user_options[:ownerid] = groupid if groupid
+        user_options[:uidnumber] = uidnumber.to_i if uidnumber
+        user_options[:password] = password if password
+        user = api.create_user(login, user_options)
+
+        puts "User created"
+        display user
+        
+        if interactive
+          public_key = prompt_for_public_key
+          if public_key
+            api.add_public_key user.login, public_key
+            puts "Public key added"
+          end
+        end
       end
     end
 
@@ -127,7 +161,9 @@ class Conjur::Command::Users < Conjur::Command
         display api.find_users(uidnumber: uidnumber)
       end
     end
-
   end
-
+    
+  def self.prompt_for_uidnumber
+    prompt_for_idnumber "uid number"
+  end
 end

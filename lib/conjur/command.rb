@@ -18,6 +18,8 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+require 'base64'
+
 module Conjur
   class Command
     extend Conjur::IdentifierManipulation
@@ -267,6 +269,106 @@ an alternative destination role.)
         puts str
       end
 
+      def prompt_to_confirm kind, properties
+        puts
+        puts "A new #{kind} will be created with the following properties:"
+        puts
+        properties.select{|k,v| !v.blank?}.each do |k,v|
+          printf "%-10s: %s\n", k, v
+        end
+        puts
+        
+        exit(0) unless %w(yes y).member?(highline.ask("Proceed? (yes/no): ").strip.downcase)
+      end
+      
+      def integer? v
+        Integer(v, 10) rescue false
+      end
+    
+      def prompt_for_id kind, label = 'id'
+        highline.ask("Enter the #{label}: ") do |q|
+          q.readline = true
+          q.validate = lambda{|id|
+            !id.blank? && !api.send(kind, id).exists?
+          }
+          q.responses[:not_valid] = "<% if @answer.blank? %>"\
+              "#{label} cannot be blank<% else %>"\
+              "A #{kind} called '<%= @answer %>' already exists<% end %>"
+        end
+      end
+
+      def prompt_for_public_key
+        public_key = highline.ask("Enter the public key (press enter to skip): ") do |q|
+          q.validate = lambda{|key|
+            if key.blank?
+              true
+            else
+              validate_public_key key
+            end
+          }
+          q.responses[:not_valid] = "Public key format is invalid; please try again"
+        end
+        public_key.blank? ? nil : public_key.strip
+      end
+    
+      # http://serverfault.com/questions/453296/how-do-i-validate-a-rsa-ssh-public-key-file-id-rsa-pub
+      def validate_public_key key
+        if system('which ssh-keygen 2>&1 > /dev/null')
+          Conjur.log.debug "Using ssh-keygen to verify the public key\n" if Conjur.log
+          require 'tempfile'
+          tempfile = Tempfile.new 'public_key'
+          tempfile.write(key)
+          tempfile.close
+          `ssh-keygen -l -f #{tempfile.path}`
+          $? == 0
+        else
+          Conjur.log.debug "ssh-keygen is not available; falling back to simple string testing\n" if Conjur.log
+          # Should be a line with at least 2 components,
+          # first one being the algo id and second a base64 string.
+          # In principle this means:
+          #   Base64.strict_decode64 key.strip[/\Assh-\w+ (\S+).*/, 1]
+
+          # Since the pubkeys service is more strict: needs a name and
+          # rejects ones with a space, instead reproduce its algorithm here.
+          begin
+            components = key.strip.split ' '
+            Base64.strict_decode64 components[1]
+            components.length == 3
+          rescue NoMethodError, ArgumentError
+            false
+          end
+        end
+      end
+      
+      def prompt_for_group options = {}
+        options[:hint] ||= "press enter to own the record yourself"
+        group_ids = api.groups.map(&:id)
+        
+        highline.ask("Enter the group which will own the record (#{options[:hint]}): ", [ "" ] + group_ids) do |q|
+          require 'readline'
+          Readline.completion_append_character = ""
+          Readline.completer_word_break_characters = ""
+          
+          q.readline = true
+          q.validate = lambda{|id|
+            @group = nil
+            id.empty? || (@group = api.group(id)).exists?
+          }
+          q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
+        end
+        @group ? @group.roleid : nil
+      end
+
+      def prompt_for_idnumber label
+        result = highline.ask("Enter a #{label}: ") do |q|
+          q.validate = lambda{|id|
+            id.blank? || integer?(id)
+          }
+          q.responses[:not_valid] = "The #{label} must be an integer"
+        end
+        result.blank? ? nil : result.to_i
+      end
+
       def prompt_for_password
         require 'highline'
         # use stderr to allow output redirection, e.g.
@@ -274,6 +376,14 @@ an alternative destination role.)
         hl = HighLine.new($stdin, $stderr)
     
         password = hl.ask("Enter the password (it will not be echoed): "){ |q| q.echo = false }
+        if password.blank?
+          if hl.agree "No password (y/n)?"
+            return nil
+          else
+            return prompt_for_password
+          end
+        end
+
         confirmation = hl.ask("Confirm the password: "){ |q| q.echo = false }
         
         raise "Password does not match confirmation" unless password == confirmation

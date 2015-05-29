@@ -37,12 +37,34 @@ class Conjur::Command::Groups < Conjur::Command
 
       acting_as_option(c)
 
+      interactive_option c
+
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = args.shift
+        
+        interactive = options[:interactive] || id.blank?
 
-        options[:gidnumber] = Integer(options[:gidnumber]) if options[:gidnumber]
+        groupid = options[:ownerid]
+        gidnumber = options[:gidnumber]
 
-        group = api.create_group(id, options)
+        if interactive
+          id ||= prompt_for_id :group
+          
+          groupid ||= prompt_for_group
+          gidnumber ||= prompt_for_gidnumber
+          
+          prompt_to_confirm :group, {
+            "Id"    => id,
+            "Owner" => groupid,
+            "Gidnumber" => gidnumber
+          }
+        end
+        
+        group_options = { }
+        group_options[:ownerid] = groupid if groupid
+        group_options[:gidnumber] = gidnumber.to_i unless gidnumber.blank?
+          
+        group = api.create_group(id, group_options)
         display(group, options)
       end
     end
@@ -170,7 +192,9 @@ class Conjur::Command::Groups < Conjur::Command
       end
 
     end
-
+  end
+    
+  def self.prompt_for_gidnumber
+    prompt_for_idnumber "gid number"
   end
 end
-

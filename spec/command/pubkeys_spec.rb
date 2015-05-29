@@ -61,6 +61,8 @@ describe Conjur::Command::Pubkeys, logged_in: true do
     let(:stdin_contents){ "ssh-rsa blahblah keyname" }
     it "calls api.add_public_key('alice', stdin) and prints the key name" do
       expect(STDIN).to receive(:read).and_return(stdin_contents)
+      allow(STDIN).to receive(:isatty).and_return(false)
+      expect(described_class).to receive(:validate_public_key).and_return(true)
       expect(described_class.api).to receive(:add_public_key).with('alice', stdin_contents)
       expect{ invoke }.to write("Public key 'keyname' added")
     end

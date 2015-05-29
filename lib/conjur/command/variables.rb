@@ -62,7 +62,7 @@ class Conjur::Command::Variables < Conjur::Command
         # If the user asked for interactive mode, or he didn't specify and id
         # prompt for any missing options.
         if interactive
-          id ||= prompt_for_id
+          id ||= prompt_for_id :variable
           
           groupid ||= prompt_for_group
 
@@ -74,7 +74,7 @@ class Conjur::Command::Variables < Conjur::Command
 
           value ||= prompt_for_value
           
-          prompt_to_confirm "Id"    => id,
+          prompt_to_confirm :variable, "Id"    => id,
             "Kind"  => kind,
             "MIME type" => mime_type,
             "Owner" => groupid,
@@ -82,7 +82,6 @@ class Conjur::Command::Variables < Conjur::Command
         end
         
         variable_options = { id: id }
-        variable_options[:id] = id
         variable_options[:ownerid] = groupid if groupid
         variable_options[:value] = value unless value.blank?
         var = api.create_variable(mime_type, kind, variable_options)
@@ -156,46 +155,6 @@ class Conjur::Command::Variables < Conjur::Command
     end
   end
   
-  def self.prompt_to_confirm properties
-    puts
-    puts "A new variable will be created with the following properties:"
-    puts
-    properties.select{|k,v| !v.blank?}.each do |k,v|
-      printf "%-10s: %s\n", k, v
-    end
-    puts
-    
-    exit(0) unless %w(yes y).member?(highline.ask("Proceed? (yes/no): ").strip.downcase)
-  end
-
-  def self.prompt_for_id
-    highline.ask('Enter the id: ') do |q|
-      q.readline = true
-      q.validate = lambda{|id|
-        !id.blank? && !api.variable(id).exists?
-      }
-      q.responses[:not_valid] = "A variable called '<%= @answer %>' already exists"
-    end
-  end
-
-  def self.prompt_for_group
-    group_ids = api.groups.map(&:id)
-    
-    highline.ask('Enter the group (press enter to own the record yourself): ', [ "" ] + group_ids) do |q|
-      require 'readline'
-      Readline.completion_append_character = ""
-      Readline.completer_word_break_characters = ""
-      
-      q.readline = true
-      q.validate = lambda{|id|
-        @group = nil
-        id.empty? || (@group = api.group(id)).exists?
-      }
-      q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
-    end
-    @group ? @group.roleid : nil
-  end
-
   def self.prompt_for_kind
     highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
   end
