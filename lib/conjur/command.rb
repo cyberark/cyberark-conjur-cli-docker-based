@@ -362,11 +362,19 @@ an alternative destination role.)
         hl = HighLine.new($stdin, $stderr)
     
         password = hl.ask("Enter the password (it will not be echoed): "){ |q| q.echo = false }
+        if password.blank?
+          if hl.agree "No password (y/n)?"
+            return nil
+          else
+            return prompt_for_password
+          end
+        end
+
         confirmation = hl.ask("Confirm the password: "){ |q| q.echo = false }
         
         raise "Password does not match confirmation" unless password == confirmation
         
-        password.blank? ? nil : password
+        password
       end
     end
   end
