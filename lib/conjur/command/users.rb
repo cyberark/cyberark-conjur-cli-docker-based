@@ -73,7 +73,6 @@ class Conjur::Command::Users < Conjur::Command
         user_options[:password] = password if password
         user = api.create_user(login, user_options)
 
-        puts "User created"
         display user
         
         if interactive
