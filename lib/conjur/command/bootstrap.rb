@@ -57,25 +57,37 @@ class Conjur::Command::Bootstrap < Conjur::Command
     end
     security_admin = api.group("security_admin")
     memberships = user.role.memberships.map(&:roleid) if user
-    begin
-      # The user exists
-      # The security_admin group exists
-      # The user has a role which is admin of the security_admin role
-      # The user has the role which owns the security_admin resource
-      user && 
-        security_admin.exists? && 
-        security_admin.role.members.find{|m| memberships.member?(m.member.roleid) && m.admin_option} &&
-        memberships.member?(security_admin.resource.ownerid)
-    rescue RestClient::Forbidden
+    
+    if user
+      if security_admin.exists?
+        begin
+          # The user has a role which is admin of the security_admin role
+          # The user has the role which owns the security_admin resource
+          security_admin.role.members.find{|m| memberships.member?(m.member.roleid) && m.admin_option} &&
+            memberships.member?(security_admin.resource.ownerid)
+        rescue RestClient::Forbidden
+          false
+        end
+      else
+        user.login == "admin"
+      end
+    else
       false
     end
   end
 
   Conjur::CLI.command :bootstrap do |c|
+    c.desc "Don't perform up-front checks to see if you are sufficiently privileged to run this command."
+    c.switch [:f, :force]
+        
     c.action do |global_options,options,args|
       require 'highline/import'
+      
+      # Ensure there's a logged in user
+      Conjur::Authn.connect
 
-      exit_now! "You must be an administrator to bootstrap Conjur" unless security_admin_manager?(api)
+      force = options[:force]
+      exit_now! "You must be an administrator to bootstrap Conjur" unless force || security_admin_manager?(api)
         
       if (security_admin = api.group("security_admin")).exists?
         puts "Group 'security_admin' exists"
