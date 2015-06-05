@@ -1,52 +1,57 @@
+# 4.25.1
+
+* Remove spurious line written to stdout during user creation.
+* Fix up-front permission checking in `conjur bootstrap` so that it will run on a fresh server.
+
 # 4.25.0
 
 * A record can be retired to a specific role, in addition to the default behavior of retiring to the `attic` user.
-* Variable can be created with the id only, without becoming interactive
-* Run `conjur variable create -i -a` to create interactively with annotations
+* Variable can be created with the id only, without becoming interactive.
+* Run `conjur variable create -i -a` to create interactively with annotations.
 * Interactive annotation can be performed on bare resources with `conjur resource annotate -i`.
-* Don't require 'admin' user to bootstrap, prompt to create a new security admin during bootstrap
-* Check if user privileges are sufficient before running `retire`
+* Don't require 'admin' user to bootstrap, prompt to create a new security admin during bootstrap.
+* Check if user privileges are sufficient before running `retire`.
 * Don't revoke a user's access to a record in the middle of retire, because doing so leads to 403 errors later on.
-* Interactive mode of user, group and pubkey creation
+* Interactive mode of user, group and pubkey creation.
 
 # 4.24.0
 
-* Interactive mode for variable creation
+* Interactive mode for variable creation.
 
 # 4.23.0
 
-* Don't check if netrc is world-readable on Windows, since the answer is not reliable
-* Use new [conjur](https://supermarket.chef.io/cookbooks/conjur) cookbook for conjurize
-* Fix faulty initialization of plugins list, if it's nil, in the .conjurrc
-* Log DSL commands to stderr, even if CONJURAPI_LOG is not explicitly configured
+* Don't check if netrc is world-readable on Windows, since the answer is not reliable.
+* Use new [conjur](https://supermarket.chef.io/cookbooks/conjur) cookbook for conjurize.
+* Fix faulty initialization of plugins list, if it's nil, in the .conjurrc.
+* Log DSL commands to stderr, even if CONJURAPI_LOG is not explicitly configured.
 * In policy DSL, allow creation of records without an explicit `id`. In this case, the current scope is used as the `id`.
 
 # 4.22.0
 
-* New 'plugin' subcommand to manage CLI plugins
-* Configure SSL certificate from Conjur.configuration
-* Print the error message if there's a problem loading a plugin
+* New 'plugin' subcommand to manage CLI plugins.
+* Configure SSL certificate from Conjur.configuration.
+* Print the error message if there's a problem loading a plugin.
 
 # 4.21.1
 
-* Configure trust to the new certificate in `conjur init`, before attempting to contact the Conjur server
+* Configure trust to the new certificate in `conjur init`, before attempting to contact the Conjur server.
 
 # 4.21.0
 
-* Use user cache dir for mimetype cache
-* Retrieve the whole certificate chain on conjur init
+* Use user cache dir for mimetype cache.
+* Retrieve the whole certificate chain on conjur init.
 
 # 4.20.1
 
-* Improve the error reporting
+* Improve the error reporting.
 
 # 4.20.0
 
-* GID manipulation commands
+* GID manipulation commands.
 
 # 4.19.0
 
-* Add command `conjur role graph` for batch retrieval of role relationships
+* Add command `conjur role graph` for batch retrieval of role relationships.
 
 # 4.18.5
 
