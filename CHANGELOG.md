@@ -1,3 +1,6 @@
+# 4.25.2
+* Fixes a conflict with RVM: Sets `GEM_HOME` and `GEM_PATH to nil.
+
 # 4.25.1
 
 * Remove spurious line written to stdout during user creation.
