@@ -317,7 +317,7 @@ describe Conjur::Command::Audit, logged_in: true do
         let(:ssh_event) { default_audit_event.merge('kind' => 'audit', 'facility' => 'ssh',  'action' => 'sudo', 'command' => '/bin/ls', 'system_user' => 'test_user', 'target_user' => 'root') }
         context 'when sudo successful' do
           let(:test_event) { ssh_event.merge('allowed' => true) }
-          it 'prints <user> ran <command> for successful command' do
+          it 'prints <user> ran <command>' do
             expect { invoke }.to write(" test_user ran '/bin/ls' as root")
           end
         end
@@ -325,7 +325,7 @@ describe Conjur::Command::Audit, logged_in: true do
         context 'when sudo fails' do
           let(:test_event) { ssh_event.merge('allowed' => false) }
           
-          it 'prints <user> attempted to run <command> for successful command' do
+          it 'prints <user> attempted to run <command>' do
             expect { invoke }.to write(" test_user attempted to run '/bin/ls' as root")
           end
         end
