@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require 'conjur/cli'
 
 class ConjurCompletion
   def initialize (line, point)
@@ -24,12 +25,14 @@ class ConjurCompletion
                    group
                  else
                    if @current_word == 1 then
-                     compgen ['audit', 'authn', 'bootstrap', 'env',
-                              'group', 'help', 'host', 'id',
-                              'init', 'layer', 'plugin', 'policy',
-                              'pubkeys', 'resource', 'role', 'script',
-                              'user', 'variable'] +
-                             (_flags short='', long=['help','version'])
+                     #compgen ['audit', 'authn', 'bootstrap', 'env',
+                     #         'group', 'help', 'host', 'id',
+                     #         'init', 'layer', 'plugin', 'policy',
+                     #         'pubkeys', 'resource', 'role', 'script',
+                     #         'user', 'variable'] +
+                     #        (_flags short='', long=['help','version'])
+                     compgen (subcommands Conjur::CLI::commands).keys.map(&:to_s) +
+                             (_flags short='', long=['help', 'version'])
                    else
                      # this is not my mission and I wish to return to shell
                      exit 1
@@ -40,6 +43,12 @@ class ConjurCompletion
     end
   end
 
+  def subcommands cmd
+    cmd.select do |i, a|
+      a.nodoc.nil?
+    end
+  end
+  
   def conjur_cmd
     ENV['CONJUR_CMD'] or 'conjur'
   end
