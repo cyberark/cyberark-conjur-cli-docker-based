@@ -16,39 +16,29 @@ class ConjurCompletion
       @current_word += 1
     end
 
-    candidates = case @words[1]
-                 when 'audit'
-                   audit
-                 when 'authn'
-                   authn
-                 when 'group'
-                   group
-                 else
-                   if @current_word == 1 then
-                     #compgen ['audit', 'authn', 'bootstrap', 'env',
-                     #         'group', 'help', 'host', 'id',
-                     #         'init', 'layer', 'plugin', 'policy',
-                     #         'pubkeys', 'resource', 'role', 'script',
-                     #         'user', 'variable'] +
-                     #        (_flags short='', long=['help','version'])
-                     compgen (subcommands Conjur::CLI::commands).keys.map(&:to_s) +
-                             (_flags short='', long=['help', 'version'])
-                   else
-                     # this is not my mission and I wish to return to shell
-                     exit 1
-                   end
-                 end
-    if candidates != nil then
-      puts candidates.join "\n"
+    index = 1
+    cmd = Conjur::CLI
+    loop do
+      word = @words[index]
+      sub = subcommands cmd
+      if sub.has_key? word.to_sym
+        cmd = cmd.commands[word.to_sym]
+        index += 1
+      else
+        break
+      end
     end
+
+    candidates = compgen ((_subcommands cmd) + (_flags cmd))    
+    puts candidates.join "\n"
   end
 
   def subcommands cmd
-    cmd.select do |i, a|
-      a.nodoc.nil?
+    cmd.commands.select do |_, c|
+      c.nodoc.nil?
     end
   end
-  
+
   def conjur_cmd
     ENV['CONJUR_CMD'] or 'conjur'
   end
@@ -57,28 +47,43 @@ class ConjurCompletion
     line.split(/ |(?<==)/)
   end
 
-  def compgen(completions)
+  public
+  def compgen completions
+    completions.flatten!
     word = @words[@current_word]
-    completions.select do |candidate|
-      candidate.start_with? word and
-        candidate != word
-    end.map do |candidate|
-      if candidate.end_with? '='
-      then candidate
-      else candidate + ' '
+    if word == '' and completions.all? { |c| c.start_with? '-' }
+      []
+    else
+      completions.select do |candidate|
+        candidate.start_with? word and
+          candidate != word
+      end.map do |candidate|
+        "#{candidate}#{' ' if not candidate.end_with? '='}"
       end
     end
   end
 
-  def _flags (short='', long=[], assoc=[])
-    short.split('').map do |flag|
-      "-#{flag}"
-    end +
-      long.map do |flag|
-      "--#{flag}"
-    end +
-      assoc.map do |flag|
-      "--#{flag}="
+  def _subcommands cmd
+    (subcommands cmd).keys.map(&:to_s)
+  end
+
+  def _flags cmd
+    cmd.flags.values.map do |flag|
+      candidates = [flag.name]
+      if flag.aliases
+        candidates += flag.aliases
+      end
+      candidates.map do |c|
+        "-#{'-' if c.length > 1}#{c}#{'=' if c.length > 1}"
+      end
+    end + cmd.switches.values.map do |switch|
+      candidates = [switch.name]
+      if switch.aliases
+        candidates += switch.aliases
+      end
+      candidates.map do |c|    
+        "-#{'-' if c.length > 1}#{c}"
+      end
     end
   end
 
@@ -86,76 +91,16 @@ class ConjurCompletion
     roles = (JSON.load `#{conjur_cmd} role memberships`).map do |role|
       role.split(':').drop(1).join(':')
     end
-    compgen roles
   end
   
   def _group
     groups = (JSON.load `#{conjur_cmd} group list`).map do |group|
       group['id'].split(':').drop(2)
     end
-    compgen groups.flatten
-  end
-
-  def audit
-    compgen ['all','resource','role']
-  end
-
-  def authn
-    compgen ['authenticate', 'login', 'logout', 'whoami']
-  end
-  
-  def group
-    case @words[2]
-    when 'create'
-      group_create
-    when 'list'
-      group_list
-    when 'members'
-      group_members
-    else
-      if @current_word == 2 then
-        compgen ['create', 'gidsearch', 'list', 'members',
-                 'retire', 'show', 'update']
-      else
-        # this is not my mission and I wish to return to shell
-        exit 1
-      end
-    end
-  end
-  
-  def group_create
-    case @words[@current_word-1]
-    when '--as-role='
-      _role
-    when '--as-group='
-      _group
-    else
-      if @words[@current_word].start_with? '-' then
-        compgen _flags short='i',
-                       long=['interactive','no-interactive'],
-                       assoc=['as-group','as-role','gidnumber']
-      end
-    end
-  end
-  
-  def group_list
-    if @words[@current_word-1] == '--as-role=' then
-      _role
-    elsif @words[@current_word].start_with? '-' then
-      compgen _flags short='ilors',
-                     long=['ids','no-ids','raw-annotations','no-raw-annotations'],
-                     assoc=['limit','offset','role','search']
-    end
-  end
-
-  def group_members
-    compgen ['add', 'list', 'remove'] +
-            (_flags short='V',
-                   long=['verbose','no-verbose'])
-  end
-  
+  end  
 end
 
-if __FILE__ == $0
+# execute using environment if called as a script
+if Pathname.new(__FILE__).basename == Pathname.new($0).basename
   ConjurCompletion.new ENV['COMP_LINE'], ENV['COMP_POINT'].to_i
 end
