@@ -27,7 +27,13 @@ class Conjur::Command::ShellInit < Conjur::Command
     hide_docs c
     c.desc 'Provide the command to initialize the shell for conjur'
     c.action do |global_options,options,args|
-      puts 'complete -o nospace -C _conjur conjur'
+      cmd = <<-eoc
+complete -o nospace -C _conjur conjur;
+if [ "$(type -t __rvm_unload)" == "function" ]; then
+__rvm_unload;
+fi
+eoc
+      puts cmd.tr "\n", " "
     end
   end
 end
