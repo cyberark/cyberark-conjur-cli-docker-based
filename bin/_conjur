@@ -29,7 +29,16 @@ class ConjurCompletion
       end
     end
 
-    candidates = compgen ((_subcommands cmd) + (_flags cmd))    
+    candidates = compgen case @words[@current_word-1]
+                         when "--as-role="
+                           _role
+                         when "--as-group="
+                           _group
+                         else
+                           (_subcommands cmd) +
+                             (_flags cmd) +
+                             (_args cmd)
+                         end
     puts candidates.join "\n"
   end
 
@@ -45,22 +54,6 @@ class ConjurCompletion
   
   def tokenize_cmd line
     line.split(/ |(?<==)/)
-  end
-
-  public
-  def compgen completions
-    completions.flatten!
-    word = @words[@current_word]
-    if word == '' and completions.all? { |c| c.start_with? '-' }
-      []
-    else
-      completions.select do |candidate|
-        candidate.start_with? word and
-          candidate != word
-      end.map do |candidate|
-        "#{candidate}#{' ' if not candidate.end_with? '='}"
-      end
-    end
   end
 
   def _subcommands cmd
@@ -87,17 +80,55 @@ class ConjurCompletion
     end
   end
 
-  def _role
-    roles = (JSON.load `#{conjur_cmd} role memberships`).map do |role|
-      role.split(':').drop(1).join(':')
+  def _args cmd
+    (case cmd.arguments_description
+    when "role"
+      _role
+    when "group"
+      _group
+    when "resource"
+      _resource
+    end if defined? cmd.arguments_description) || []
+  end
+
+  public
+  def compgen completions
+    completions.flatten!
+    word = @words[@current_word]
+    if word == '' and completions.all? { |c| c.start_with? '-' }
+      []
+    else
+      completions.select do |candidate|
+        candidate.start_with? word and
+          candidate != word
+      end.map do |candidate|
+        "#{candidate}#{' ' if not candidate.end_with? '='}"
+      end
     end
+  end
+
+  def _role
+    Conjur::Command.api.resources
+      .map do |resource| resource.attributes["permissions"] end
+      .reject(&:empty?)
+      .flatten
+      .map do |permissions| permissions["role"] end
+      .uniq
+      .map do |role| role.split(":").drop(1).join("\:") end
   end
   
   def _group
-    groups = (JSON.load `#{conjur_cmd} group list`).map do |group|
-      group['id'].split(':').drop(2)
-    end
-  end  
+    Conjur::Command.api.resources({kind: "group"})
+      .map(&:attributes)
+      .map do |r| r["id"].split(":").drop(2).join("\:") end
+  end
+
+  def _resource
+    Conjur::Command.api.resources
+      .map(&:attributes)
+      .map do |r| r["id"].split(":").drop(1).join("\:") end
+  end
+  
 end
 
 # execute using environment if called as a script

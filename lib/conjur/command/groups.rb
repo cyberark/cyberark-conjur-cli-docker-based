@@ -30,7 +30,7 @@ class Conjur::Command::Groups < Conjur::Command
   desc "Manage groups"
   command :group do |group|
     group.desc "Create a new group"
-    group.arg_name "id"
+    group.arg_name "group"
     group.command :create do |c|
       c.desc "GID number to be associated with the group (optional)"
       c.flag [:gidnumber]
@@ -79,21 +79,21 @@ class Conjur::Command::Groups < Conjur::Command
     end
 
     group.desc "Show a group"
-    group.arg_name "id"
+    group.arg_name "group"
     group.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'group')
         display(api.group(id), options)
       end
     end
     
     group.desc "Update group's attributes (eg. gidnumber)"
-    group.arg_name "id"
+    group.arg_name "group"
     group.command :update do |c|
       c.desc "GID number to be associated with the group"
       c.flag [:gidnumber]
       c.action do |global_options, options, args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'group')
 
         options[:gidnumber] = Integer(options[:gidnumber])
         api.group(id).update(options)
@@ -112,12 +112,12 @@ class Conjur::Command::Groups < Conjur::Command
     end
 
     group.desc "Decommission a group"
-    group.arg_name "id"
+    group.arg_name "group"
     group.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'group')
         
         group = api.group(id)
         
