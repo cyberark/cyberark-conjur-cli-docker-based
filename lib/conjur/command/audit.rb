@@ -24,12 +24,22 @@ class Conjur::Command
           "reported #{statement}"+ message_part
         }
       }
+
+      def ssh_sudo_message(e)
+        s = "#{e[:system_user]}"
+        s << " " << (e[:allowed] ? "ran" : "attempted to run")
+        s << " '" << e[:command] << "' as " << e[:target_user]
+        s
+      end
       
       def short_event_format e
         e.symbolize_keys!
         s = "[#{Time.parse(e[:timestamp])}]"
         s << " #{e[:user]}"
         s << " (as #{e[:acting_as]})" if e[:acting_as] != e[:user]
+        if e[:facility] == 'ssh' && e[:action] == 'sudo'
+          e[:audit_message] = ssh_sudo_message(e)
+        end
         formatter = SHORT_FORMATS["#{e[:kind]}:#{e[:action]}"] || SHORT_FORMATS[e[:kind]]
         if formatter
           s << " " << formatter.call(e)
