@@ -28,6 +28,7 @@ module Conjur
     
     class << self
       attr_accessor :prefix
+      
       def method_missing *a, &b
         Conjur::CLI.send *a, &b
       end
@@ -39,6 +40,14 @@ module Conjur
 
       def require_arg(args, name)
         args.shift or raise "Missing parameter: #{name}"
+      end
+
+      def assert_empty(args)
+        exit_now! "Received extra command arguments" unless args.empty?
+      end
+      
+      def api= api
+        @@api = api
       end
 
       def api
