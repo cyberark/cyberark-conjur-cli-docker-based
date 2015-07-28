@@ -29,9 +29,6 @@ class Conjur::Command::ShellInit < Conjur::Command
     c.action do |global_options,options,args|
       cmd = <<-eoc
 complete -o nospace -C _conjur conjur;
-if [ "$(type -t __rvm_unload)" == "function" ]; then
-__rvm_unload;
-fi
 eoc
       puts cmd.tr "\n", " "
     end
