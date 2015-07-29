@@ -86,21 +86,21 @@ class Conjur::Command::Users < Conjur::Command
     end
 
     user.desc "Show a user"
-    user.arg_name "id"
+    user.arg_name "user"
     user.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'user')
         display(api.user(id), options)
       end
     end
 
     user.desc "Decommission a user"
-    user.arg_name "id"
+    user.arg_name "user"
     user.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'user')
         
         user = api.user(id)
         

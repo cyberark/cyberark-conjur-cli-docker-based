@@ -2,6 +2,7 @@
 
 require 'json'
 require 'conjur/cli'
+require 'shellwords'
 
 class ConjurCompletion
   def initialize (line, point)
@@ -21,7 +22,7 @@ class ConjurCompletion
     loop do
       word = @words[index]
       sub = subcommands cmd
-      if sub.has_key? word.to_sym
+      if sub.has_key? word.to_sym and index < @current_word
         cmd = cmd.commands[word.to_sym]
         index += 1
       else
@@ -29,15 +30,30 @@ class ConjurCompletion
       end
     end
 
+    @command_word = index
+    @num_flags = @num_args = 0
+    while index < @current_word
+      word = @words[index]
+      if word.start_with? '-'
+        @num_flags += 1
+        index += 1
+      elsif word.length
+        @num_args += 1
+      end
+      index += 1
+    end
+
     candidates = compgen case @words[@current_word-1]
                          when "--as-role="
                            _role
                          when "--as-group="
-                           _group
+                           _resource 'group'
                          else
-                           (_subcommands cmd) +
-                             (_flags cmd) +
-                             (_args cmd)
+                           if @words[@current_word].start_with? '-'
+                             _flags cmd
+                           else
+                             (_subcommands cmd) + (_args cmd, @num_args)
+                           end
                          end
     puts candidates.join "\n"
   end
@@ -46,10 +62,6 @@ class ConjurCompletion
     cmd.commands.select do |_, c|
       c.nodoc.nil?
     end
-  end
-
-  def conjur_cmd
-    ENV['CONJUR_CMD'] or 'conjur'
   end
   
   def tokenize_cmd line
@@ -80,55 +92,56 @@ class ConjurCompletion
     end
   end
 
-  def _args cmd
-    (case cmd.arguments_description
-    when "role"
-      _role
-    when "group"
-      _group
-    when "resource"
+  def _args cmd, num_args
+    desc = cmd.arguments_description if defined? cmd.arguments_description
+    desc = desc.to_s.downcase.split[num_args]
+    case desc
+    when 'resource'
       _resource
-    end if defined? cmd.arguments_description) || []
+    when 'role'
+      _role
+    when 'file'
+      _file
+    else
+      _resource desc if ['group',
+                         'user',
+                         'variable',
+                         'host',
+                         'layer',
+                        ].member? desc
+    end || []
   end
 
   public
   def compgen completions
     completions.flatten!
     word = @words[@current_word]
-    if word == '' and completions.all? { |c| c.start_with? '-' }
-      []
-    else
-      completions.select do |candidate|
-        candidate.start_with? word and
-          candidate != word
-      end.map do |candidate|
-        "#{candidate}#{' ' if not candidate.end_with? '='}"
-      end
+    completions.select do |candidate|
+      candidate.start_with? word and
+        candidate != word
+    end.map do |candidate|
+      "#{candidate}#{' ' if not candidate.end_with? '='}"
     end
   end
 
-  def _role
-    Conjur::Command.api.resources
-      .map do |resource| resource.attributes["permissions"] end
-      .reject(&:empty?)
-      .flatten
-      .map do |permissions| permissions["role"] end
-      .uniq
-      .map do |role| role.split(":").drop(1).join("\:") end
+  def _resource resource_kind=nil
+    drop_fields = 1
+    drop_fields += 1 if resource_kind
+    Conjur::Command.api.resources({kind: resource_kind})
+      .map(&:attributes)
+      .map do |r| r['id'].split(':').drop(drop_fields).join('\:') end
   end
   
-  def _group
-    Conjur::Command.api.resources({kind: "group"})
-      .map(&:attributes)
-      .map do |r| r["id"].split(":").drop(2).join("\:") end
+  def _role
+    Conjur::Command.api.current_role.all
+      .map(&:roleid)
+      .map do |r| r.split(':').drop(1).join('\:') end
   end
 
-  def _resource
-    Conjur::Command.api.resources
-      .map(&:attributes)
-      .map do |r| r["id"].split(":").drop(1).join("\:") end
+  def _file
+    word = @words[@current_word]
+    `bash -c "compgen -f #{word}"`.shellsplit
   end
-  
 end
 
 # execute using environment if called as a script

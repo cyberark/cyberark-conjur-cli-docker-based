@@ -62,7 +62,7 @@ annotations on the policy. The policy role becomes the owner of the owned policy
 --as-group and --as-role options can be used to set the owner of the policy role. The default
 owner of the policy role is the logged-in user (you), as always.
     DESC
-    policy.arg_name "(policy-file | STDIN)"
+    policy.arg_name "FILE"
     policy.command :load do |c|
       acting_as_option(c)
 

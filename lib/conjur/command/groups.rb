@@ -30,7 +30,7 @@ class Conjur::Command::Groups < Conjur::Command
   desc "Manage groups"
   command :group do |group|
     group.desc "Create a new group"
-    group.arg_name "group"
+    group.arg_name "GROUP"
     group.command :create do |c|
       c.desc "GID number to be associated with the group (optional)"
       c.flag [:gidnumber]
@@ -79,21 +79,21 @@ class Conjur::Command::Groups < Conjur::Command
     end
 
     group.desc "Show a group"
-    group.arg_name "group"
+    group.arg_name "GROUP"
     group.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'group')
+        id = require_arg(args, 'GROUP')
         display(api.group(id), options)
       end
     end
     
     group.desc "Update group's attributes (eg. gidnumber)"
-    group.arg_name "group"
+    group.arg_name "GROUP"
     group.command :update do |c|
       c.desc "GID number to be associated with the group"
       c.flag [:gidnumber]
       c.action do |global_options, options, args|
-        id = require_arg(args, 'group')
+        id = require_arg(args, 'GROUP')
 
         options[:gidnumber] = Integer(options[:gidnumber])
         api.group(id).update(options)
@@ -112,12 +112,12 @@ class Conjur::Command::Groups < Conjur::Command
     end
 
     group.desc "Decommission a group"
-    group.arg_name "group"
+    group.arg_name "GROUP"
     group.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'group')
+        id = require_arg(args, 'GROUP')
         
         group = api.group(id)
         
@@ -135,18 +135,18 @@ class Conjur::Command::Groups < Conjur::Command
     group.command :members do |members|
 
       members.desc "Lists all direct members of the group. The membership list is not recursively expanded."
-      members.arg_name "group"
+      members.arg_name "GROUP"
       members.command :list do |c|
         c.desc "Verbose output"
         c.switch [:V,:verbose]
         c.action do |global_options,options,args|
-          group = require_arg(args, 'group')
+          group = require_arg(args, 'GROUP')
           display_members api.group(group).role.members, options
         end
       end
 
       members.desc "Add a new group member"
-      members.arg_name "group member"
+      members.arg_name "GROUP USER"
       members.command :add do |c|
         c.desc "Also grant the admin option"
         c.switch [:a, :admin]
@@ -158,8 +158,8 @@ class Conjur::Command::Groups < Conjur::Command
         c.switch [:r, :'revoke-admin']
 
         c.action do |global_options,options,args|
-          group = require_arg(args, 'group')
-          member = require_arg(args, 'member')
+          group = require_arg(args, 'GROUP')
+          member = require_arg(args, 'USER')
           member = assume_user_kind(member)
 
           group = api.group(group)
@@ -179,11 +179,11 @@ class Conjur::Command::Groups < Conjur::Command
       end
 
       members.desc "Remove a group member"
-      members.arg_name "group member"
+      members.arg_name "GROUP USER"
       members.command :remove do |c|
         c.action do |global_options,options,args|
-          group = require_arg(args, 'group')
-          member = require_arg(args, 'member')
+          group = require_arg(args, 'GROUP')
+          member = require_arg(args, 'USER')
           member = assume_user_kind(member)
 
           api.group(group).remove_member member
