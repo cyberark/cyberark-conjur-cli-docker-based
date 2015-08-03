@@ -1,3 +1,8 @@
+# 4.26.0
+
+* New command `conjur privilege` for execution of privileged commands on Conjur 4.5+.
+* New implementation of bash completions.
+
 # 4.25.2
 * Fixes a conflict with RVM: Sets `GEM_HOME` and `GEM_PATH to nil.
 
