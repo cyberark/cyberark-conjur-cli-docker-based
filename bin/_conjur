@@ -1,153 +1,26 @@
 #!/usr/bin/env ruby
+#
+# Copyright (C) 2015 Conjur Inc
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal in
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+# the Software, and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+# IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
 
-require 'conjur/cli'
-require 'shellwords'
+require 'conjur/complete'
 
-class Conjur::CLI::Completion
-  def initialize line, point=nil
-    @line = line
-    @words = tokenize_cmd @line
-    point ||= @line.length
-    @current_word=(tokenize_cmd @line.slice(0,point)).length-1
-    # fix arrays for empty "current word"
-    # ie "conjur group list "
-    if @line.match /[ =]$/ then
-      @words << ''
-      @current_word += 1
-    end
-
-    index = 1
-    cmd = Conjur::CLI
-    loop do
-      word = @words[index]
-      sub = subcommands cmd
-      if sub.has_key? word.to_sym and index < @current_word
-        cmd = cmd.commands[word.to_sym]
-        index += 1
-      else
-        break
-      end
-    end
-
-    @command = cmd
-    @command_word = index if index > 1
-    @num_flags = @num_args = 0
-    while index < @current_word
-      word = @words[index]
-      if word.start_with? '-'
-        @num_flags += 1
-        index += 1
-      elsif word.length
-        @num_args += 1
-      end
-      index += 1
-    end
-  end
-
-  def subcommands cmd
-    cmd.commands.select do |_, c|
-      c.nodoc.nil?
-    end
-  end
-  
-  def tokenize_cmd line
-    line.split(/ |(?<==)/)
-  end
-
-  def _subcommands cmd
-    (subcommands cmd).keys.map(&:to_s)
-  end
-
-  def _flags cmd
-    cmd.flags.values.map do |flag|
-      candidates = [flag.name]
-      if flag.aliases
-        candidates += flag.aliases
-      end
-      candidates.map do |c|
-        "-#{'-' if c.length > 1}#{c}#{'=' if c.length > 1}"
-      end
-    end + cmd.switches.values.map do |switch|
-      candidates = [switch.name]
-      if switch.aliases
-        candidates += switch.aliases
-      end
-      candidates.map do |c|    
-        "-#{'-' if c.length > 1}#{c}"
-      end
-    end
-  end
-
-  def _args cmd, num_args
-    desc = cmd.arguments_description if defined? cmd.arguments_description
-    desc = desc.to_s.downcase.split[num_args]
-    case desc
-    when 'resource'
-      _resource
-    when 'role'
-      _role
-    when 'file'
-      _file
-    else
-      _resource desc if ['group',
-                         'user',
-                         'variable',
-                         'host',
-                         'layer',
-                        ].member? desc
-    end || []
-  end
-
-  def drop_tokens string, num_tokens
-    string.split(':').drop(num_tokens).join('\:')
-  end
-
-  public
-
-  def compgen
-    word = @words[@current_word]
-    prev = @words[@current_word-1]
-    case prev
-    when '--as-role='
-      _role
-    when '--as-group='
-      _resource 'group'
-    else
-      if word.start_with? '-'
-        _flags @command
-      else
-        (_subcommands @command) + (_args @command, @num_args)
-      end
-    end.flatten
-      .select do |candidate|
-      candidate.start_with? word end
-      .map do |candidate|
-      "#{candidate}#{' ' if not candidate.end_with? '='}" end
-  end
-
-  def _resource resource_kind=nil
-    drop_fields = 1
-    drop_fields += 1 if resource_kind
-    Conjur::Command.api.resources({kind: resource_kind})
-      .map(&:attributes)
-      .map do |r| drop_tokens r['id'], drop_fields end
-  end
-  
-  def _role
-    Conjur::Command.api.current_role.all
-      .map(&:roleid)
-      .map do |r| drop_tokens r, 1 end
-  end
-
-  def _file
-    word = @words[@current_word]
-    # use Bash's file completion for compatibility
-    `bash -c "compgen -f #{word}"`.shellsplit
-  end
-end
-
-# print completions if executed as a script
-if Pathname.new(__FILE__).basename == Pathname.new($0).basename
-  completion = Conjur::CLI::Completion.new ENV['COMP_LINE'], ENV['COMP_POINT'].to_i
-  puts completion.compgen.join "\n"
-end
+completions = Conjur::CLI::Complete.new ENV['COMP_LINE'], ENV['COMP_POINT'].to_i
+puts completions.to_ary
