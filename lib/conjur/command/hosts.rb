@@ -27,7 +27,7 @@ class Conjur::Command::Hosts < Conjur::Command
   desc "Manage hosts"
   command :host do |hosts|
     hosts.desc "Create a new host"
-    hosts.arg_name "HOST"
+    hosts.arg_name "NAME"
     hosts.command :create do |c|
       c.arg_name "password"
       c.flag [:p,:password]
@@ -36,7 +36,7 @@ class Conjur::Command::Hosts < Conjur::Command
 
       c.action do |global_options,options,args|
         id = args.shift
-        options[:HOST] = id if id
+        options[:id] = id if id
 
         unless id
           ActiveSupport::Deprecation.warn "id argument will be required in future releases"
