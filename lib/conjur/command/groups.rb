@@ -30,7 +30,6 @@ class Conjur::Command::Groups < Conjur::Command
   desc "Manage groups"
   command :group do |group|
     group.desc "Create a new group"
-    group.arg_name "GROUP"
     group.command :create do |c|
       c.desc "GID number to be associated with the group (optional)"
       c.flag [:gidnumber]

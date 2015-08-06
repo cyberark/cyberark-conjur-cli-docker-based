@@ -62,11 +62,13 @@ module Conjur
 
       def acting_as_option command
         return if command.flags.member?(:"as-group") # avoid duplicate flags
-        command.arg_name 'Perform all actions as the specified Group'
-        command.flag [:"as-group"]
+        command.desc 'Perform all actions as the specified Group'
+        command.arg_name 'GROUP'
+        command.flag [:'as-group']
 
-        command.arg_name 'Perform all actions as the specified Role'
-        command.flag [:"as-role"]
+        command.desc 'Perform all actions as the specified Role'
+        command.arg_name 'ROLE'
+        command.flag [:'as-role']
       end
       
       def interactive_option command
@@ -111,6 +113,7 @@ module Conjur
       def command_options_for_list(c)
         return if c.flags.member?(:role) # avoid duplicate flags
         c.desc "Role to act as. By default, the current logged-in role is used."
+        c.arg_name 'ROLE'
         c.flag [:role]
     
         c.desc "Full-text search on resource id and annotation values" 

@@ -22,15 +22,15 @@ class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
     var.desc "Create and store a variable"
-    var.arg_name "id [value]"
+    var.arg_name "NAME VALUE"
     var.command :create do |c|
-      c.arg_name "mime_type"
+      c.arg_name "MIME-TYPE"
       c.flag [:m, :"mime-type"], default_value: 'text/plain'
 
-      c.arg_name "kind"
+      c.arg_name "KIND"
       c.flag [:k, :"kind"], default_value: 'secret'
 
-      c.arg_name "value"
+      c.arg_name "VALUE"
       c.desc "Initial value, which may also be specified as the second command argument after the variable id"
       c.flag [:v, :"value"]
 
@@ -91,21 +91,21 @@ class Conjur::Command::Variables < Conjur::Command
     end
 
     var.desc "Show a variable"
-    var.arg_name "id"
+    var.arg_name "VARIABLE"
     var.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'VARIABLE')
         display(api.variable(id), options)
       end
     end
 
     var.desc "Decommission a variable"
-    var.arg_name "id"
+    var.arg_name "VARIABLE"
     var.command :retire do |c|
       retire_options c
       
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'VARIABLE')
         
         variable = api.variable(id)
 
@@ -130,10 +130,10 @@ class Conjur::Command::Variables < Conjur::Command
     var.desc "Access variable values"
     var.command :values do |values|
       values.desc "Add a value"
-      values.arg_name "variable ( value | STDIN )"
+      values.arg_name "VARIABLE VALUE"
       values.command :add do |c|
         c.action do |global_options,options,args|
-          id = require_arg(args, 'variable')
+          id = require_arg(args, 'VARIABLE')
           value = args.shift || STDIN.read
 
           api.variable(id).add_value(value)
@@ -143,13 +143,13 @@ class Conjur::Command::Variables < Conjur::Command
     end
 
     var.desc "Get a value"
-    var.arg_name "variable"
+    var.arg_name "VARIABLE"
     var.command :value do |c|
       c.desc "Version number"
       c.flag [:v, :version]
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'variable')
+        id = require_arg(args, 'VARIABLE')
         $stdout.write api.variable(id).value(options[:version])
       end
     end

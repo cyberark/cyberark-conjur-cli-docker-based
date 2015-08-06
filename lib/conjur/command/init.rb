@@ -39,6 +39,7 @@ class Conjur::Command::Init < Conjur::Command
 
   Conjur::CLI.command :init do |c|
     c.desc "Hostname of the Conjur endpoint (required for virtual appliance)"
+    c.arg_name 'HOSTNAME'
     c.flag ["h", "hostname"]
 
     c.desc "Conjur organization account name (not required for appliance)"
@@ -48,6 +49,7 @@ class Conjur::Command::Init < Conjur::Command
     c.flag ["c", "certificate"]
 
     c.desc "File to write the configuration to"
+    c.arg_name 'FILE'
     c.flag ["f", "file"]
 
     c.desc "Force overwrite of existing files"

@@ -102,7 +102,8 @@ class Conjur::CLI::Complete
   end
 
   def complete kind
-    case kind.to_s.downcase
+    kind = kind.to_s.downcase.gsub(/[^a-z]/, '')
+    case kind
     when 'resource'
       complete_resource
     when 'role'
@@ -152,7 +153,7 @@ class Conjur::CLI::Complete
       kind = desc.to_s.downcase
     else
       desc = cmd.arguments_description if defined? cmd.arguments_description
-      kind = desc.to_s.downcase.split[num_args]
+      kind = desc.to_s.downcase.split[num_args-1]
     end
     complete kind
   end
