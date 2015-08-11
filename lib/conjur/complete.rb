@@ -26,6 +26,8 @@ require 'shellwords'
 
 # Class for generating `conjur` bash completions
 class Conjur::CLI::Complete
+  attr_reader :line, :words, :current_word, :commands, :switch_words,
+              :flag_words, :arg_words, :command_words
   def initialize line, point=nil
     @line = line
     @words = tokenize_cmd @line
@@ -37,50 +39,15 @@ class Conjur::CLI::Complete
       @words << ''
       @current_word += 1
     end
-    @command, index = walk_to_subcommand @words, @current_word
-    @flag_words, @arg_words = classify_words @words.drop(index)
-  end
-
-  # Finds the most specific subcommand in {Conjur::CLI.commands}
-  #
-  # @param words [Array] the words being completed
-  # @param current_word [Integer] the index of the word being completed
-  # @return [Conjur::CLI::Command, Integer] the GLI object of the subcommand,
-  #   then its index in `words`
-  def walk_to_subcommand words, current_word
-    index = 1
-    command = Conjur::CLI
-    loop do
-      word = words[index]
-      sub = subcommands command
-      if sub.has_key? word.to_sym and index < current_word
-        command = command.commands[word.to_sym]
-        index += 1
-      else
-        break
-      end
-    end
-    return command, index
-  end
-
-  # Find words belonging to flags and arguments
-  #
-  # @param words [Array] the words being classified
-  # @return [Array, Array] the flags and their associated values, then
-  #   the arguments
-  def classify_words words
-    flags = []
-    args = []
-    while not words.empty?
-      if words.first.start_with? '-'
-        flags.push [words.first, words.drop(1).first]
-        words = words.drop(1)
-      elsif words.first.length
-        args.push words.first
-      end
-      words = words.drop(1)
-    end
-    return flags, args
+    @commands,
+    @switch_words,
+    @flag_words,
+    @arg_words = parse_command @words, @current_word
+    @command_words = @commands
+                     .drop(1)
+                     .map(&:name)
+                     .map(&:to_s)
+                     .unshift('conjur')
   end
 
   # Generate array of subcommands for which documentation is not hidden
@@ -93,6 +60,17 @@ class Conjur::CLI::Complete
     end
   end
 
+  # Generate array of symbols representing switches for +cmd+ and
+  # their aliases
+  #
+  # @param cmd [Conjur::CLI::Command] the command to search
+  # @return [Array] the symbols representing switches and their aliases
+  def switches cmd
+    cmd.switches.map { |_,switch|
+      [switch.name] + (switch.aliases or [])
+    }.flatten
+  end
+
   # Split line according on spaces and after '='
   #
   # @param line [String] to split
@@ -101,6 +79,54 @@ class Conjur::CLI::Complete
     line.split(/ |(?<==)/)
   end
 
+  def flag_to_sym flag
+    flag.match(/--?([^=]+)=?/)[1].to_sym
+  end
+
+  def parse_command words, current_word
+    command = Conjur::CLI
+    commands = [command]
+    switches = []
+    flags = []
+    arguments = []
+    index = 1
+    loop do
+      word = words[index]
+      case classify_word word, command
+      when :switch
+        switches.push word
+      when :flag
+        flags.push [word, words[index+1]]
+        index += 1
+      when :subcommand
+        command = command.commands[word.to_sym]
+        commands.push command
+      when :argument
+        arguments.push word
+      end
+      index += 1
+      break if index >= current_word
+    end
+    return commands, switches, flags, arguments
+  end
+
+  def classify_word word, command
+    if word.start_with? '-'
+      sym = flag_to_sym word
+      if switches(command).member? sym
+        :switch
+      else
+        :flag
+      end
+    else
+      if subcommands(command).has_key? word.to_sym
+        :subcommand
+      else
+        :argument
+      end
+    end
+  end
+  
   def complete kind
     kind = kind.to_s.downcase.gsub(/[^a-z]/, '')
     case kind
@@ -147,9 +173,9 @@ class Conjur::CLI::Complete
   def complete_args cmd, prev, num_args
     kind=nil
     if prev.start_with? '-'
-      flag_name=prev.match(/--?([^=]+)=?/)[1].to_sym
+      flag_name=flag_to_sym prev
       flag = cmd.flags[flag_name]
-      desc = flag.argument_name
+      desc = flag.argument_name if defined? flag.argument_name
       kind = desc.to_s.downcase
     else
       desc = cmd.arguments_description if defined? cmd.arguments_description
@@ -172,7 +198,9 @@ class Conjur::CLI::Complete
 
   def complete_role
     Conjur::Command.api.current_role.all
-      .map do |r| Resource.new(r.roleid).shellescape end
+      .map { |r| Resource.new(r.roleid) }
+      .reject { |r| r.kind.start_with? '@' }
+      .map(&:shellescape)
   end
 
   def complete_file word
@@ -188,10 +216,10 @@ class Conjur::CLI::Complete
     word = @words[@current_word]
     prev = @words[@current_word-1]
     if word.start_with? '-'
-      complete_flags @command
+      complete_flags @commands.last
     else
-      (subcommands @command).keys.map(&:to_s) +
-        (complete_args @command, prev, @arg_words.length)
+      (subcommands @commands.last).keys.map(&:to_s) +
+        (complete_args @commands.last, prev, @arg_words.length)
     end.flatten
       .select do |candidate|
       candidate.start_with? word end
