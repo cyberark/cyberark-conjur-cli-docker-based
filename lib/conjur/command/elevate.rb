@@ -20,7 +20,7 @@
 #
 
 # Implement privileged modes such as 'sudo' and 'reveal'
-class Conjur::Command::Privilege < Conjur::DSLCommand
+class Conjur::Command::Elevate < Conjur::DSLCommand
   desc "Run a sub-command with elevated privileges"
   long_desc <<-DESC
 If you are allowed to do this by the Conjur server, all server-side permission checks will be bypassed and any

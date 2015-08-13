@@ -190,6 +190,8 @@ an alternative destination role.)
       end
       
       def validate_retire_privileges record, options
+        return true if api.global_privilege_permitted? 'sudo'
+        
         if record.respond_to?(:role)
           memberships = current_user.role.memberships.map(&:roleid)
           validate_privileges "You can't administer this record" do

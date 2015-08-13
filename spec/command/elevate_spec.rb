@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe Conjur::Command::Privilege do
-  describe_command "privilege sudo user show alice" do
+describe Conjur::Command::Elevate do
+  describe_command "elevate user show alice" do
     include_context "with mock authn"
     
     let(:token) { {login: 'dknuth'} }
