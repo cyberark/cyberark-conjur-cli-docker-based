@@ -36,7 +36,6 @@ $ conjur elevate user retire alice
   DESC
   command :elevate do |c|
     c.action do |global_options,options,args|
-      privilege = require_arg(args, 'privilege')
       exit_now! "Subcommand is required" if args.empty?
       
       Conjur::Command.api = api.with_privilege "sudo"
@@ -62,7 +61,6 @@ $ conjur reveal group list -i
   DESC
   command :reveal do |c|
     c.action do |global_options,options,args|
-      privilege = require_arg(args, 'privilege')
       exit_now! "Subcommand is required" if args.empty?
       
       Conjur::Command.api = api.with_privilege "reveal"
