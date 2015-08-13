@@ -116,7 +116,6 @@ class Conjur::Command::Bootstrap < Conjur::Command
         puts "User created"
         puts "Making '#{username}' a member and admin of group 'security_admin'"
         security_admin.add_member user, admin_option: true
-        security_admin.resource.permit "read", user
         puts "Adminship granted"
       end
       

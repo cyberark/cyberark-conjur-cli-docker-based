@@ -1,6 +1,6 @@
 # 4.26.0
 
-* New command `conjur privilege` for execution of privileged commands on Conjur 4.5+.
+* New commands `elevate` and `reveal` for execution of privileged commands on Conjur 4.5+.
 * New implementation of bash completions.
 
 # 4.25.2

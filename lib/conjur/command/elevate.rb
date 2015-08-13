@@ -21,38 +21,51 @@
 
 # Implement privileged modes such as 'sudo' and 'reveal'
 class Conjur::Command::Privilege < Conjur::DSLCommand
-  desc "Run a sub-command in privileged mode"
+  desc "Run a sub-command with elevated privileges"
   long_desc <<-DESC
-Conjur supports the granting of global privileges to roles (typically, groups). These privileges are:
+If you are allowed to do this by the Conjur server, all server-side permission checks will be bypassed and any
+action will be allowed.
 
-* sudo - bypasses server-side permission checks and allows any action
+To be able to run this command, you must have the 'sudo' privilege on the resource '!:!:conjur'.
 
-* reveal - bypasses server-side permission checks on operations which list and show data
-
-This command can be used to activate a privileged mode, which must of course be actually held by the
-current logged-in role.
-
-EXAMPLES
+EXAMPLE
 
 Force retirement of a user:
 
-$ conjur privilege sudo user retire alice
-  
-
-List all groups:
-
-$ conjur privilege reveal group list -i
-
+$ conjur elevate user retire alice
   DESC
-  arg_name "privilege"
-  command :privilege do |c|
+  command :elevate do |c|
     c.action do |global_options,options,args|
       privilege = require_arg(args, 'privilege')
       exit_now! "Subcommand is required" if args.empty?
       
-      $stderr.puts "Invoking subcommand with privilege '#{privilege}'"
+      Conjur::Command.api = api.with_privilege "sudo"
+      Conjur::CLI.run args
+    end
+  end
+  
+  desc "Run a sub-command in 'reveal' mode"
+  long_desc <<-DESC
+If you are allowed to do this by the Conjur server, you can inspect all data in the Conjur
+authorization service. For example, you can list and search for all resources, regardless of
+your ownership and privileges. You can also show details on any resource, and you can perform
+permission checks on any resource.
+
+To be able to run this command, you must have the 'reveal' privilege on the resource '!:!:conjur'.
+
+EXAMPLE
+
+List all groups:
+
+$ conjur reveal group list -i
+
+  DESC
+  command :reveal do |c|
+    c.action do |global_options,options,args|
+      privilege = require_arg(args, 'privilege')
+      exit_now! "Subcommand is required" if args.empty?
       
-      Conjur::Command.api = api.with_privilege privilege
+      Conjur::Command.api = api.with_privilege "reveal"
       Conjur::CLI.run args
     end
   end
