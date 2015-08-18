@@ -230,11 +230,11 @@ end
 
 class Conjur::CLI::Complete::Resource
   attr_reader :account, :kind, :name
-  attr_writer :include_account
+  attr_accessor :include_account
   def initialize resource_string, include_account=false
     @include_account = include_account
     fields = resource_string.split ':'
-    raise ArgumentError.new "too many fields (#{args.first})" if fields.length > 3
+    raise ArgumentError.new "too many fields (#{resource_string})" if fields.length > 3
     fields.unshift nil while fields.length < 3
     @account, @kind, @name = fields
   end
