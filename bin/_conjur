@@ -22,5 +22,6 @@
 
 require 'conjur/complete'
 
-completions = Conjur::CLI::Complete.new ENV['COMP_LINE'], ENV['COMP_POINT'].to_i
-puts completions.to_ary
+line = ENV['COMP_LINE']
+point = ENV['COMP_POINT'].to_i
+puts Conjur::CLI::Complete.new(line, point).completions

@@ -212,7 +212,7 @@ class Conjur::CLI::Complete
     `bash -c "compgen -A hostname"`.shellsplit
   end
 
-  def to_ary
+  def completions
     word = @words[@current_word]
     prev = @words[@current_word-1]
     if word.start_with? '-'

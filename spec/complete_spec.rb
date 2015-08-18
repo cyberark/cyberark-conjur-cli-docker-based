@@ -1,5 +1,11 @@
 require 'spec_helper'
 
+describe Conjur::CLI::Complete do
+  it 'completes' do
+    expect(described_class.new('conjur gr').completions).to eq ['group ']
+  end
+end
+
 describe Conjur::CLI::Complete::Resource do
   describe 'splits resource ids' do
     describe '#initialize(resource_string)' do
