@@ -90,7 +90,7 @@ class Conjur::CLI::Complete
     flags = []
     arguments = []
     index = 1
-    loop do
+    until index >= current_word do
       word = words[index]
       case classify_word word, command
       when :switch
@@ -105,7 +105,6 @@ class Conjur::CLI::Complete
         arguments.push word
       end
       index += 1
-      break if index >= current_word
     end
     return commands, switches, flags, arguments
   end
