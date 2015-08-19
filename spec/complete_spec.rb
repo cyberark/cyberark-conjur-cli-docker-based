@@ -197,13 +197,5 @@ describe Conjur::CLI::Complete::Resource do
         end
       end
     end
-
-    describe '#shellescape' do
-      it 'uses \: instead of : as a separator' do
-        fields = 'first', 'second'
-        dummy = described_class.new fields.join(':')
-        expect(dummy.shellescape).to eq fields.join('\:')
-      end
-    end
   end
 end

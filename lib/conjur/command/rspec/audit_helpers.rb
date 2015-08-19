@@ -14,7 +14,6 @@ shared_context "default audit behavior" do
                     "account"=>"the-account"
                     }
                   },
-      "user" => "account:user:alice",
       "acting_as" => "account:group:admins",
       "conjur" =>   { # new behaviour
                   "user" => "account:user:alice",

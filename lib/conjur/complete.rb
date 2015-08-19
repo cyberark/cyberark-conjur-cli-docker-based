@@ -26,28 +26,32 @@ require 'shellwords'
 
 # Class for generating `conjur` bash completions
 class Conjur::CLI::Complete
-  attr_reader :line, :words, :current_word, :commands, :switch_words,
-              :flag_words, :arg_words, :command_words
+  attr_reader :line, :words, :current_word_index, :commands,
+              :switch_words, :flag_words, :arg_words, :command_words
   def initialize line, point=nil
     @line = line
     @words = tokenize_cmd @line
     point ||= @line.length
-    @current_word=(tokenize_cmd @line.slice(0,point)).length-1
+    @current_word_index=(tokenize_cmd @line.slice(0,point)).length-1
     # fix arrays for empty "current word"
     # ie "conjur group list "
     if @line.match(/[ =]$/)
       @words << ''
-      @current_word += 1
+      @current_word_index += 1
     end
     @commands,
     @switch_words,
     @flag_words,
-    @arg_words = parse_command @words, @current_word
+    @arg_words = parse_command @words, @current_word_index
     @command_words = @commands
                      .drop(1)
                      .map(&:name)
                      .map(&:to_s)
                      .unshift('conjur')
+  end
+
+  public def current_word offset=0
+    @words[@current_word_index + offset]
   end
 
   # Generate array of subcommands for which documentation is not hidden
@@ -83,14 +87,14 @@ class Conjur::CLI::Complete
     flag.match(/--?([^=]+)=?/)[1].to_sym
   end
 
-  def parse_command words, current_word
+  def parse_command words, current_word_index
     command = Conjur::CLI
     commands = [command]
     switches = []
     flags = []
     arguments = []
     index = 1
-    until index >= current_word do
+    until index >= current_word_index do
       word = words[index]
       case classify_word word, command
       when :switch
@@ -125,7 +129,7 @@ class Conjur::CLI::Complete
       end
     end
   end
-  
+
   def complete kind
     kind = kind.to_s.downcase.gsub(/[^a-z]/, '')
     case kind
@@ -134,7 +138,7 @@ class Conjur::CLI::Complete
     when 'role'
       complete_role
     when 'file'
-      complete_file @words[@current_word]
+      complete_file current_word
     when 'hostname'
       complete_hostname
     else
@@ -147,7 +151,7 @@ class Conjur::CLI::Complete
       ].member? kind
     end or []
   end
-  
+
   # generate completions for the switches and flags of a Conjur::CLI::Command
   #
   # @param cmd [Conjur::CLI::Command] command for which to search for flags
@@ -190,7 +194,7 @@ class Conjur::CLI::Complete
       if resource_kind
         res.name
       else
-        res.shellescape
+        res.to_s
       end
     end
   end
@@ -199,7 +203,7 @@ class Conjur::CLI::Complete
     Conjur::Command.api.current_role.all
       .map { |r| Resource.new(r.roleid) }
       .reject { |r| r.kind.start_with? '@' }
-      .map(&:shellescape)
+      .map(&:to_s)
   end
 
   def complete_file word
@@ -212,17 +216,27 @@ class Conjur::CLI::Complete
   end
 
   def completions
-    word = @words[@current_word]
-    prev = @words[@current_word-1]
-    if word.start_with? '-'
+    prev = current_word(-1)
+    if current_word.start_with? '-'
       complete_flags @commands.last
     else
       (subcommands @commands.last).keys.map(&:to_s) +
         (complete_args @commands.last, prev, @arg_words.length)
     end.flatten
       .select do |candidate|
-      candidate.start_with? word end
+      candidate.start_with? current_word.sub('\:',':') end
       .map do |candidate|
+      # if the current word is colon separated, strip its complete tokens
+      # eg. for --as-role=user:ryanprior, we're actually only completing 'ryanprior'
+      # because bash treats 'user' as a separate word
+      non_escaped_colon_regex = /(?<!\\):/
+      num_tokens = current_word.split(non_escaped_colon_regex).length
+      if num_tokens > 1
+        candidate = candidate
+                    .split(non_escaped_colon_regex)
+                    .drop(num_tokens-1)
+                    .join(':')
+      end
       "#{candidate}#{' ' if not candidate.end_with? '='}" end
   end
 end
@@ -244,9 +258,5 @@ class Conjur::CLI::Complete::Resource
 
   def to_s
     to_ary.join ':'
-  end
-
-  def shellescape
-    to_ary.join '\:'
   end
 end
