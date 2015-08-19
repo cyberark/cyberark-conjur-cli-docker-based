@@ -1,8 +1,127 @@
 require 'spec_helper'
 
 describe Conjur::CLI::Complete do
-  it 'completes' do
-    expect(described_class.new('conjur gr').completions).to eq ['group ']
+  def expects_completions_for string, point=nil
+    expect(described_class.new("conjur #{string}",point)
+            .completions
+            .map { |c| c.chomp ' ' })
+  end
+
+  describe 'conjur bash completion' do
+    describe 'for conjur subcommands beginning' do
+
+      before(:each) { expect(Conjur::Command).not_to receive :api }
+
+      context 'with "conjur gr"' do
+        it { expects_completions_for('gr').to include 'group' }
+      end
+
+      context 'with "conjur group"' do
+        it { expects_completions_for('group').to contain_exactly 'group' }
+      end
+
+      context 'with "conjur p"' do
+        it { expects_completions_for('p').to include 'plugin',
+                                                     'policy',
+                                                     'pubkeys' }
+      end
+
+      context 'with "conjur host l"' do
+        it { expects_completions_for('host l').to include 'layers',
+                                                          'list' }
+      end
+
+      context 'with "conjur policy"' do
+        it { expects_completions_for('policy ').to include 'load' }
+      end
+    end
+
+    describe 'for deprecated subcommands such as `conjur field`' do
+      it { expects_completions_for('fi').not_to include 'field' }
+    end
+
+    describe 'for command flags beginning' do
+
+      before(:each) { expect(Conjur::Command).not_to receive :api }
+
+      context 'conjur -' do
+        it { expects_completions_for('-').to include '--version' }
+      end
+
+      context 'conjur role memberships -' do
+        it { expects_completions_for('role memberships -')
+             .to include '-s', '--system'}
+      end
+
+      context 'conjur audit all -' do
+        it { expects_completions_for('audit all -')
+             .to include '-f', '--follow', '-l', '--limit=',
+                         '-o', '--offset=', '-s', '--short' }
+      end
+
+      context 'conjur layer create --as-' do
+        it { expects_completions_for('layer create --as-')
+             .to include '--as-role=' }
+      end
+
+      context 'conjur group create --as-role' do
+        it { expects_completions_for('layer create --as-role')
+             .to contain_exactly '--as-role=' }
+      end
+    end
+
+    describe 'for arguments' do
+
+      let (:api) { double('api') }
+      before(:each) {
+        expect(Conjur::Command).to receive(:api).at_least(:once).and_return api
+      }
+
+      describe 'expecting a resource' do
+
+        def mock_resources
+          fake_results = yield.map { |result|
+            double('resource', :attributes => { 'id' => result })
+          }
+          expect(Conjur::Command.api).to receive(:resources)
+                                          .once.and_return fake_results
+        end
+
+        context 'with kind "user"' do
+          let (:users) { ['Tweedledum', 'Tweedledee'] }
+          before(:each) { mock_resources { users.map { |user| "user:#{user}" }}}
+          it { expects_completions_for('conjur user show ')
+               .to contain_exactly(*users) }
+        end
+
+        context 'with kind "group"' do
+          let (:groups) { ['sharks', 'jets'] }
+          before(:each) {
+            mock_resources { groups.map { |group| "group:#{group}" }}
+          }
+          context 'for a command' do
+            it { expects_completions_for('conjur group show ')
+                 .to contain_exactly(*groups) }
+          end
+          context 'for a flag' do
+            it { expects_completions_for('conjur group create --as-group=')
+                 .to contain_exactly(*groups) }
+          end
+        end
+
+        context 'with kind "layer"' do
+          let (:layers) { ['limbo', 'lust', 'gluttony', 'greed',
+                           'anger', 'heresy', 'violence', 'fraud',
+                           'treachery'] }
+
+          before(:each) {
+            mock_resources { layers.map { |layer| "layer:#{layer}" }}
+          }
+          it {expects_completions_for('conjur layer show ')
+               .to contain_exactly(*layers) }
+        end
+      end
+    end
   end
 end
 
