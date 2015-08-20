@@ -50,7 +50,7 @@ class Conjur::CLI::Complete
                      .unshift('conjur')
   end
 
-  public def current_word offset=0
+  def current_word offset=0
     @words[@current_word_index + offset]
   end
 
@@ -239,6 +239,7 @@ class Conjur::CLI::Complete
       end
       "#{candidate}#{' ' if not candidate.end_with? '='}" end
   end
+  public :current_word, :completions
 end
 
 class Conjur::CLI::Complete::Resource
