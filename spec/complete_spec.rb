@@ -54,7 +54,7 @@ describe Conjur::CLI::Complete do
       end
 
       context 'conjur audit all -' do
-        it { expects_completions_for('audit all -')
+        it { expects_completions_for('audit all -s -')
              .to include '-f', '--follow', '-l', '--limit=',
                          '-o', '--offset=', '-s', '--short' }
       end
@@ -79,6 +79,15 @@ describe Conjur::CLI::Complete do
 
       describe 'expecting a resource' do
 
+        let (:users) { ['Tweedledum', 'Tweedledee'] }
+        let (:groups) { ['sharks', 'jets'] }
+        let (:layers) { ['limbo', 'lust', 'gluttony', 'greed',
+                           'anger', 'heresy', 'violence', 'fraud',
+                           'treachery'] }
+        let (:variables) { ['id/superman', 'id/batman', 'id/spiderman'] }
+        let (:hosts) { ['skynet', 'hal9000', 'deep-thought'] }
+
+
         def mock_resources
           fake_results = yield.map { |result|
             double('resource', :attributes => { 'id' => result })
@@ -88,39 +97,94 @@ describe Conjur::CLI::Complete do
         end
 
         context 'with kind "user"' do
-          let (:users) { ['Tweedledum', 'Tweedledee'] }
           before(:each) { mock_resources { users.map { |user| "user:#{user}" }}}
-          it { expects_completions_for('conjur user show ')
+          it { expects_completions_for('user show ')
                .to contain_exactly(*users) }
         end
 
         context 'with kind "group"' do
-          let (:groups) { ['sharks', 'jets'] }
           before(:each) {
             mock_resources { groups.map { |group| "group:#{group}" }}
           }
           context 'for a command' do
-            it { expects_completions_for('conjur group show ')
+            it { expects_completions_for('group show ')
                  .to contain_exactly(*groups) }
           end
           context 'for a flag' do
-            it { expects_completions_for('conjur group create --as-group=')
+            it { expects_completions_for('group create --as-group=')
                  .to contain_exactly(*groups) }
           end
         end
 
         context 'with kind "layer"' do
-          let (:layers) { ['limbo', 'lust', 'gluttony', 'greed',
-                           'anger', 'heresy', 'violence', 'fraud',
-                           'treachery'] }
-
           before(:each) {
             mock_resources { layers.map { |layer| "layer:#{layer}" }}
           }
-          it {expects_completions_for('conjur layer show ')
+          it { expects_completions_for('layer show ')
                .to contain_exactly(*layers) }
         end
+
+        context 'with kind "variable"' do
+          before(:each) {
+            mock_resources { variables.map { |variable| "variable:#{variable}" }}
+          }
+          it { expects_completions_for('variable show ')
+               .to contain_exactly(*variables) }
+        end
+
+        context 'with kind "host"' do
+          before(:each) {
+            mock_resources { hosts.map { |host| "host:#{host}" }}
+          }
+          it { expects_completions_for('host show ')
+               .to contain_exactly(*hosts)
+          }
+        end
+
+        context 'without kind specified' do
+          let (:resources) { (users+groups+layers+variables+hosts)
+                             .map { |res| "arbitrarykind:#{res}" }}
+          before(:each) { mock_resources { resources }}
+          it 'should show all resources with their reported kinds' do
+            expects_completions_for('resource show ')
+               .to contain_exactly(*resources)
+          end
+        end
       end
+
+      describe 'expecting a role' do
+        let (:roles) { ['layer:population/tire',
+                        'host:bubs-4k',
+                        'user:strongbad',
+                        'user:strongsad',
+                        'user:strongmad']}
+        before(:each) {
+          role_doubles = roles.map { |role| double('role', :roleid => role) }
+          expect(api).to receive(:current_role).once
+                          .and_return double('current_role', :all => role_doubles)
+        }
+        it { expects_completions_for('role memberships ')
+             .to contain_exactly(*roles) }
+        it 'completes colon separated values per-token' do
+          expects_completions_for('layer list --role=host:b')
+            .to contain_exactly 'bubs-4k'
+        end
+        it 'recognizes shell-escaped colons' do
+          expects_completions_for('role members layer\:pop')
+            .to contain_exactly 'layer:population/tire'
+        end
+      end
+    end
+
+    describe 'completes mid-line' do
+      it 'completes a subcommand not at the end of a line' do
+        expect(described_class.new('conjur gr create dwarves/7', 9).completions)
+          .to include 'group '
+      end
+      it 'tolerates garbage flags and arguments' do
+        expect(described_class.new('conjur omg --lol wat pu').completions)
+          .to include 'pubkeys '
+        end
     end
   end
 end
