@@ -1,5 +1,6 @@
+#!/usr/bin/env ruby
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2015 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,21 +20,8 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-class Conjur::Command::Script < Conjur::DSLCommand
-  desc "Execute Conjur DSL scripts"
-  command :script do |script|
-    script.desc "Run a Conjur DSL script"
-    script.arg_name "script"
-    script.command :execute do |c|
-      acting_as_option(c)
+require 'conjur/complete'
 
-      c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-      c.arg_name "FILE"
-      c.flag [:c, :context]
-
-      c.action do |global_options,options,args|
-        run_script args, options
-      end
-    end
-  end
-end
+line = ENV['COMP_LINE']
+point = ENV['COMP_POINT'].to_i
+puts Conjur::CLI::Complete.new(line, point).completions

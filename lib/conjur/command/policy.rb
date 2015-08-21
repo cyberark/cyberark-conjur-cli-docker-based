@@ -62,7 +62,7 @@ annotations on the policy. The policy role becomes the owner of the owned policy
 --as-group and --as-role options can be used to set the owner of the policy role. The default
 owner of the policy role is the logged-in user (you), as always.
     DESC
-    policy.arg_name "(policy-file | STDIN)"
+    policy.arg_name "FILE"
     policy.command :load do |c|
       acting_as_option(c)
 
@@ -71,7 +71,7 @@ owner of the policy role is the logged-in user (you), as always.
       c.flag [:collection]
 
       c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-      c.arg_name "context"
+      c.arg_name "FILE"
       c.flag [:c, :context]
 
       c.action do |global_options,options,args|

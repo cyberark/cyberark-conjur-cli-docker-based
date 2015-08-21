@@ -30,6 +30,7 @@ ENV['CONJURRC'] = '/dev/null'
 
 require 'conjur/cli'
 require 'conjur/api'
+require 'conjur/complete'
 
 shared_context "fresh config" do
   before {
