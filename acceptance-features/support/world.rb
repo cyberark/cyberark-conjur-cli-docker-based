@@ -1,4 +1,9 @@
+require 'aruba/api'
+require 'conjur/api'
+
 module ConjurCLIWorld
+  include Aruba::Api
+  
   def last_json
     stdout_from(@last_cmd)
   end
@@ -62,7 +67,6 @@ module ConjurCLIWorld
   end
 end
 
-require 'conjur/api'
 module ConjurWorld
   def last_json
     last_stdout
@@ -135,10 +139,6 @@ module ConjurWorld
 
   def prepend_namespace id
     "#{namespace}-#{id}"
-  end
-
-  def namespace
-    @namespace ||= "ns-#{Time.now.to_i}-#{rand(1 << 32)}"
   end
 
   def expand_roles string
