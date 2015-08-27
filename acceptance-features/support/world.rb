@@ -56,6 +56,7 @@ module ConjurCLIWorld
   protected
   
   def process_cmd(cmd)
+    cmd = cmd.dup
     cmd.gsub!("$ns", namespace)
     cmd.gsub!("$pubkeys_url", Conjur.configuration.pubkeys_url)
     
