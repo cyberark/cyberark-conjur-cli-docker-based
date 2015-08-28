@@ -1,3 +1,11 @@
+# 4.27.0
+
+* New commands `elevate` and `reveal` for execution of privileged commands on Conjur 4.5+.
+
+# 4.26.0
+
+* New implementation of bash completions.
+
 # 4.25.2
 * Fixes a conflict with RVM: Sets `GEM_HOME` and `GEM_PATH to nil.
 

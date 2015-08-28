@@ -15,8 +15,8 @@ When(/^I( successfully)? run with role expansion "(.*)"$/) do |successfully, cmd
   end
   self.last_cmd = cmd
   if successfully
-    step "I successfully run \"#{cmd}\""
+    step "I successfully run `#{cmd}`"
   else
-    step "I run \"#{cmd}\""
+    step "I run `#{cmd}`"
   end
 end

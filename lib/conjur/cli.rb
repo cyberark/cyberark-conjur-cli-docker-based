@@ -63,7 +63,7 @@ module Conjur
       # do too much effort, and GLIs support for aliasing doesn't work out so well with
       # subcommands.
       def run args
-       args = args.shift.split(':') + args unless args.empty?
+        args = args.shift.split(':') + args unless args.empty?
         super args
       end
 

@@ -16,6 +16,9 @@ shared_context "with mock authn" do
   let(:netrcfile) { Tempfile.new 'authtest' }
   let(:netrc) { Netrc.read(netrcfile.path) }
   let(:account) { 'the-account' }
+  let(:username) { 'dknuth' }
+  let(:api_key) { 'sekrit' }
+  let(:api) { Conjur::API.new_from_key(username, api_key) }
   before do
     allow(Conjur::Core::API).to receive(:conjur_account) { account }
     allow(Conjur::Authn).to receive_messages(netrc: netrc, host: authn_host)
@@ -25,9 +28,6 @@ end
 
 shared_context "when logged in", logged_in: true do
   include_context "with mock authn"
-  let(:username) { 'dknuth' }
-  let(:api_key) { 'sekrit' }
-  let(:api) { Conjur::API.new_from_key(username, api_key) }
   before do
     allow(api).to receive(:credentials) { {} }
     netrc[authn_host] = [username, api_key]

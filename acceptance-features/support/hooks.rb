@@ -8,6 +8,11 @@ username, password = Conjur::Authn.get_credentials
 raise "Not logged in to Conjur" unless username && password
 puts "Logging in as #{username}"
 
+# Future Aruba
+#Aruba.configure do |config|
+#  config.exit_timeout = 15
+#end
+
 Before('@conjurapi-log') do
   set_env 'CONJURAPI_LOG', 'stderr'
 end
@@ -30,10 +35,12 @@ Before do
   JsonSpec.memorize "MY_ROLEID", %Q("#{user.roleid}")
   
   @admin_api.group("pubkeys-1.0/key-managers").add_member @security_admin
+  @admin_api.resource('!:!:conjur').permit 'elevate', user, grant_option: true
+  @admin_api.resource('!:!:conjur').permit 'reveal',  user, grant_option: true
   
   conjur_api.create_user "attic@#{@namespace}"
   
-  @aruba_timeout_seconds = 10
+  @aruba_timeout_seconds = 30
 end
 
 After do

@@ -49,6 +49,8 @@ class Conjur::Command::Bootstrap < Conjur::Command
   # The admin user will always satisfy these conditions, unless they are revoked for some reason.
   # Other users created by the bootstrap command will (typically) also have these powers.
   def self.security_admin_manager? api
+    return true if elevated?
+    
     username = api.username
     user = if username.index('/')
       nil
@@ -116,7 +118,6 @@ class Conjur::Command::Bootstrap < Conjur::Command
         puts "User created"
         puts "Making '#{username}' a member and admin of group 'security_admin'"
         security_admin.add_member user, admin_option: true
-        security_admin.resource.permit "read", user
         puts "Adminship granted"
       end
       
