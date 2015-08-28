@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in conjur.gemspec
 gemspec
 
-gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'feature/verify-global-privilege'
+gem 'conjur-api', '>=4.19.0', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'master'
 
 group :test, :development do
   gem 'pry'
