@@ -21,6 +21,12 @@
 
 # Implement privileged modes such as 'elevate' and 'reveal'
 class Conjur::Command::Elevate < Conjur::DSLCommand
+  
+  def self.subcommand args
+    code = Conjur::CLI.run args
+    raise GLI::CustomExit.new("Subcommand failed", code) unless code == 0
+  end
+  
   desc "Run a sub-command with elevated privileges"
   long_desc <<-DESC
 If you are allowed to do this by the Conjur server, all server-side permission checks will be bypassed and any
@@ -39,7 +45,7 @@ $ conjur elevate user retire alice
       exit_now! "Subcommand is required" if args.empty?
       
       Conjur::Command.api = api.with_privilege "elevate"
-      Conjur::CLI.run args
+      subcommand args
     end
   end
   
@@ -64,7 +70,7 @@ $ conjur reveal group list -i
       exit_now! "Subcommand is required" if args.empty?
       
       Conjur::Command.api = api.with_privilege "reveal"
-      Conjur::CLI.run args
+      subcommand args
     end
   end
 end

@@ -15,6 +15,6 @@ Feature: 'elevate' can be used to activate root-like privileges
     Then the exit status should be 1
   
   Scenario: The secret value is accessible with 'elevate' privilege
-    Given I successfully run `conjur resource permit '!:!:conjur' alice@$ns elevate`
+    Given I successfully run `conjur resource permit '!:!:conjur' user:alice@$ns elevate`
     And I login as "alice@$ns"
     Then I successfully run `conjur elevate variable value $ns/secret`
