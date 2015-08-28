@@ -190,7 +190,7 @@ an alternative destination role.)
       end
       
       def validate_retire_privileges record, options
-        return true if api.global_privilege_permitted? 'sudo'
+        return true if api.global_privilege_permitted? 'elevate'
         
         if record.respond_to?(:role)
           memberships = current_user.role.memberships.map(&:roleid)

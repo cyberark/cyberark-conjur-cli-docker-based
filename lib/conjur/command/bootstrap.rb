@@ -49,7 +49,7 @@ class Conjur::Command::Bootstrap < Conjur::Command
   # The admin user will always satisfy these conditions, unless they are revoked for some reason.
   # Other users created by the bootstrap command will (typically) also have these powers.
   def self.security_admin_manager? api
-    return true if api.global_privilege_permitted? 'sudo'
+    return true if api.global_privilege_permitted? 'elevate'
     
     username = api.username
     user = if username.index('/')
