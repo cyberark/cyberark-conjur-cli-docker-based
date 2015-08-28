@@ -27,6 +27,7 @@ class Conjur::Command::Env < Conjur::Command
 
   def self.common_parameters c
     c.desc "Environment configuration file"
+    c.arg_name "FILE"
     c.default_value ".conjurenv"
     c.flag ["c"]
     

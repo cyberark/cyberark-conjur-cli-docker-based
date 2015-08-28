@@ -25,7 +25,7 @@ class Conjur::Command::Users < Conjur::Command
   command :user do |user|
 
     user.desc "Create a new user"
-    user.arg_name "login"
+    user.arg_name "NAME"
     user.command :create do |c|
       c.desc "Prompt for a password for the user (default: --no-password)"
       c.switch [:p,:password]
@@ -86,21 +86,21 @@ class Conjur::Command::Users < Conjur::Command
     end
 
     user.desc "Show a user"
-    user.arg_name "id"
+    user.arg_name "USER"
     user.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'USER')
         display(api.user(id), options)
       end
     end
 
     user.desc "Decommission a user"
-    user.arg_name "id"
+    user.arg_name "USER"
     user.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'USER')
         
         user = api.user(id)
         
@@ -137,12 +137,12 @@ class Conjur::Command::Users < Conjur::Command
     end
 
     user.desc "Update user's attributes (only uidnumber supported now)"
-    user.arg_name "login" 
+    user.arg_name "USER" 
     user.command :update do |c|
       c.desc "UID number to be associated with user"
       c.flag [:uidnumber]
       c.action do |global_options, options, args|
-        login=require_arg(args,'login')
+        login=require_arg(args,'USER')
         raise "Uidnumber should be integer" unless /\d+/ =~ options[:uidnumber]
         options[:uidnumber]=options[:uidnumber].to_i
         api.user(login).update(options)
@@ -151,7 +151,7 @@ class Conjur::Command::Users < Conjur::Command
     end
 
     user.desc "Find the user by UID" 
-    user.arg_name "uid" 
+    user.arg_name "uid"
     user.command :uidsearch do |c| 
       c.action do |global_options, options, args| 
         uidnumber = require_arg(args,'uid')

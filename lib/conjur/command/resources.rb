@@ -24,12 +24,12 @@ class Conjur::Command::Resources < Conjur::Command
   command :resource do |resource|
 
     resource.desc "Create a new resource"
-    resource.arg_name "resource-id"
+    resource.arg_name "RESOURCE"
     resource.command :create do |c|
       acting_as_option(c)
 
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
+        id = full_resource_id( require_arg(args, "RESOURCE") )
         resource = api.resource(id)
 
         if ownerid = options.delete(:ownerid)
@@ -42,32 +42,32 @@ class Conjur::Command::Resources < Conjur::Command
     end
 
     resource.desc "Show a resource"
-    resource.arg_name "resource-id"
+    resource.arg_name "RESOURCE"
     resource.command :show do |c|
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
+        id = full_resource_id( require_arg(args, "RESOURCE") )
         display api.resource(id).attributes
       end
     end
 
     resource.desc "Determines whether a resource exists"
-    resource.arg_name "resource-id"
+    resource.arg_name "RESOURCE"
     resource.command :exists do |c|
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
+        id = full_resource_id( require_arg(args, "RESOURCE") )
         puts api.resource(id).exists?
       end
     end
 
     resource.desc "Give a privilege on a resource"
-    resource.arg_name "resource-id role privilege"
+    resource.arg_name "RESOURCE ROLE PRIVILEGE"
     resource.command :permit do |c|
       c.desc "allow transfer to other roles"
       c.switch [:g, :grantable]
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
-        role = require_arg(args, "role")
-        privilege = require_arg(args, "privilege")
+        id = full_resource_id( require_arg(args, "RESOURCE") )
+        role = require_arg(args, "ROLE")
+        privilege = require_arg(args, "PRIVILEGE")
         unless options[:g]
           api.resource(id).permit privilege, role
         else
@@ -79,12 +79,12 @@ class Conjur::Command::Resources < Conjur::Command
     end
 
     resource.desc "Deny a privilege on a resource"
-    resource.arg_name "resource-id role privilege"
+    resource.arg_name "RESOURCE ROLE PRIVILEGE"
     resource.command :deny do |c|
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
-        role = require_arg(args, "role")
-        privilege = require_arg(args, "privilege")
+        id = full_resource_id( require_arg(args, "RESOURCE") )
+        role = require_arg(args, "ROLE")
+        privilege = require_arg(args, "PRIVILEGE")
         api.resource(id).deny privilege, role
         puts "Permission revoked"
       end
@@ -97,13 +97,13 @@ class Conjur::Command::Resources < Conjur::Command
   When the role argument is used, either the logged-in user must either own the specified
   resource or be an admin of the specified role (i.e. be granted the specified role with grant option).
   """
-    resource.arg_name "resource-id privilege"
+    resource.arg_name "RESOURCE PRIVILEGE"
     resource.command :check do |c|
       c.desc "Role to check. By default, the current logged-in role is used"
       c.flag [:r,:role]
 
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
+        id = full_resource_id( require_arg(args, "RESOURCE") )
         privilege = args.shift or raise "Missing parameter: privilege"
         if role = options[:role]
           role = api.role(role)
@@ -115,38 +115,38 @@ class Conjur::Command::Resources < Conjur::Command
     end
 
     resource.desc "Grant ownership on a resource to a new owner"
-    resource.arg_name "resource-id owner"
+    resource.arg_name "RESOURCE USER"
     resource.command :give do |c|
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
-        owner = require_arg(args, "owner")
+        id = full_resource_id( require_arg(args, "RESOURCE") )
+        owner = require_arg(args, "USER")
         api.resource(id).give_to owner
         puts "Ownership granted"
       end
     end
 
     resource.desc "List roles with a specified permission on the resource"
-    resource.arg_name "resource-id permission"
+    resource.arg_name "RESOURCE PERMISSION"
     resource.command :permitted_roles do |c|
       c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "resource-id") )
-        permission = require_arg(args, "permission")
+        id = full_resource_id( require_arg(args, "RESOURCE") )
+        permission = require_arg(args, "PERMISSION")
         display api.resource(id).permitted_roles(permission)
       end
     end
 
     resource.desc "Set an annotation on a resource"
-    resource.arg_name "resource-id name value"
+    resource.arg_name "RESOURCE ANNOTATION value"
     resource.command :annotate do |c|
       interactive_option c
       
       c.action do |global_options, options, args|
-        id = full_resource_id require_arg(args, 'resource-id')
+        id = full_resource_id require_arg(args, 'RESOURCE')
 
         annotations = if options[:interactive]
           prompt_for_annotations
         else
-          name = require_arg args, 'name'
+          name = require_arg args, 'ANNOTATION'
           value = require_arg args, 'value'
           { name => value }
         end
@@ -158,21 +158,21 @@ class Conjur::Command::Resources < Conjur::Command
     end
 
     resource.desc "Show an annotation for a resource"
-    resource.arg_name "resource-id name"
+    resource.arg_name "RESOURCE ANNOTATION"
     resource.command :annotation do |c|
       c.action do |global_options, options, args|
-        id = full_resource_id require_arg args, 'resource-id'
-        name = require_arg args, 'name'
+        id = full_resource_id require_arg args, 'RESOURCE'
+        name = require_arg args, 'ANNOTATION'
         value = api.resource(id).annotations[name]
         puts value unless value.nil?
       end
     end
 
     resource.desc "Print annotations as JSON"
-    resource.arg_name 'resource-id'
+    resource.arg_name 'RESOURCE'
     resource.command :annotations do |c|
       c.action do |go, o, args|
-        id = full_resource_id require_arg args, 'resource-id'
+        id = full_resource_id require_arg args, 'RESOURCE'
         annots = api.resource(id).annotations.to_h
         puts annots.to_json
       end

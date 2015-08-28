@@ -27,7 +27,7 @@ class Conjur::Command::Roles < Conjur::Command
   command :role do |role|
 
     role.desc "Create a new role"
-    role.arg_name "role"
+    role.arg_name "ROLE"
     role.command :create do |c|
       acting_as_option(c)
       
@@ -35,7 +35,7 @@ class Conjur::Command::Roles < Conjur::Command
       c.switch "json"
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'role')
+        id = require_arg(args, 'ROLE')
         role = api.role(id)
 
         if ownerid = options.delete(:ownerid)
@@ -54,13 +54,13 @@ class Conjur::Command::Roles < Conjur::Command
     end
 
     role.desc "Determines whether a role exists"
-    role.arg_name "role"
+    role.arg_name "ROLE"
     role.command :exists do |c|
       c.desc "Output a JSON response with a single field, exists"
       c.switch "json"
       
       c.action do |global_options,options,args|
-        id = require_arg(args, 'role')
+        id = require_arg(args, 'ROLE')
         role = api.role(id)
         if options[:json]
           display({
@@ -73,7 +73,7 @@ class Conjur::Command::Roles < Conjur::Command
     end
 
     role.desc "Lists role memberships. The role membership list is recursively expanded."
-    role.arg_name "role"
+    role.arg_name "ROLE"
 
     role.command :memberships do |c|
       c.desc "Whether to show system (internal) roles"
@@ -91,7 +91,7 @@ class Conjur::Command::Roles < Conjur::Command
     end
 
     role.desc "Lists all direct members of the role. The membership list is not recursively expanded."
-    role.arg_name "role"
+    role.arg_name "ROLE"
     role.command :members do |c|
       c.desc "Verbose output"
       c.switch [:V,:verbose]
@@ -103,14 +103,14 @@ class Conjur::Command::Roles < Conjur::Command
     end
 
     role.desc "Grant a role to another role. You must have admin permission on the granting role."
-    role.arg_name "role member"
+    role.arg_name "ROLE-1 ROLE-2"
     role.command :grant_to do |c|
       c.desc "Whether to grant with admin option"
       c.switch [:a,:admin]
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'role')
-        member = require_arg(args, 'member')
+        id = require_arg(args, 'ROLE-1')
+        member = require_arg(args, 'ROLE-2')
         role = api.role(id)
         grant_options = {}
         grant_options[:admin_option] = true if options[:admin]
@@ -121,11 +121,11 @@ class Conjur::Command::Roles < Conjur::Command
 
 
     role.desc "Revoke a role from another role. You must have admin permission on the revoking role."
-    role.arg_name "role member"
+    role.arg_name "ROLE-1 ROLE-2"
     role.command :revoke_from do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'role')
-        member = require_arg(args, 'member')
+        id = require_arg(args, 'ROLE-1')
+        member = require_arg(args, 'ROLE-2')
         role = api.role(id)
         role.revoke_from member
         puts "Role revoked"
@@ -176,7 +176,7 @@ If the --short flag is not present, the JSON output will be more verbose:
 EOD
     
     role.desc "Describe role memberships as a digraph"
-    role.arg_name "role", :multiple
+    role.arg_name "ROLE", :multiple
     role.command :graph do |c|
       c.desc "Output formats [#{GRAPH_FORMATS}]"
       c.flag [:f,:format], default_value: 'json', must_match: GRAPH_FORMATS

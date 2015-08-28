@@ -27,7 +27,7 @@ class Conjur::Command::Hosts < Conjur::Command
   desc "Manage hosts"
   command :host do |hosts|
     hosts.desc "Create a new host"
-    hosts.arg_name "id"
+    hosts.arg_name "NAME"
     hosts.command :create do |c|
       c.arg_name "password"
       c.flag [:p,:password]
@@ -47,21 +47,21 @@ class Conjur::Command::Hosts < Conjur::Command
     end
 
     hosts.desc "Show a host"
-    hosts.arg_name "id"
+    hosts.arg_name "HOST"
     hosts.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'HOST')
         display(api.host(id), options)
       end
     end
 
     hosts.desc "Decommission a host"
-    hosts.arg_name "id"
+    hosts.arg_name "HOST"
     hosts.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'HOST')
         
         host = api.host(id)
 
@@ -89,11 +89,11 @@ class Conjur::Command::Hosts < Conjur::Command
     end
 
     hosts.desc "[Deprecated] Enroll a new host into conjur"
-    hosts.arg_name "host"
+    hosts.arg_name "HOST"
     hosts.command :enroll do |c|
       hide_docs(c)
       c.action do |global_options, options, args|
-        id = require_arg(args, 'host')
+        id = require_arg(args, 'HOST')
         enrollment_url = api.host(id).enrollment_url
         puts enrollment_url
         $stderr.puts "On the target host, please execute the following command:"
@@ -102,10 +102,10 @@ class Conjur::Command::Hosts < Conjur::Command
     end
 
     hosts.desc "List the layers to which the host belongs"
-    hosts.arg_name "id"
+    hosts.arg_name "HOST"
     hosts.command :layers do |c|
       c.action do |global_options, options, args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'HOST')
         host = api.host(id)
         display host_layer_roles(host).map(&:identifier), options
       end

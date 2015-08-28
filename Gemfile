@@ -9,5 +9,6 @@ gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'fea
 
 group :test, :development do
   gem 'pry'
+  gem 'pry-doc'
   gem 'ruby-prof'
 end

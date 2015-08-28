@@ -49,31 +49,31 @@ class Conjur::Command::Plugin < Conjur::Command
     end
 
     cmd.desc 'Install a plugin'
-    cmd.arg_name 'name'
+    cmd.arg_name 'PLUGIN'
     cmd.command :install do |c|
       c.arg_name 'version'
       c.desc 'Version of the plugin to install'
       c.flag [:v, :version], :default_value => Gem::Requirement.default
 
       c.action do |_, options, args|
-        install_plugin(require_arg(args, 'name'), options[:version])
+        install_plugin(require_arg(args, 'PLUGIN'), options[:version])
       end
     end
 
     cmd.desc 'Uninstall a plugin'
-    cmd.arg_name 'name'
+    cmd.arg_name 'PLUGIN'
     cmd.command :uninstall do |c|
       c.action do |_, _, args|
-        name = require_arg(args, 'name')
+        name = require_arg(args, 'PLUGIN')
         uninstall_plugin(name)
       end
     end
 
     cmd.desc "Show a plugin's details"
-    cmd.arg_name 'name'
+    cmd.arg_name 'PLUGIN'
     cmd.command :show do |c|
       c.action do |_, _, args|
-        name = require_arg(args, 'name')
+        name = require_arg(args, 'PLUGIN')
         begin
           gem = Gem::Specification.find_by_name "conjur-asset-#{name}"
           puts "Name: #{name}"
