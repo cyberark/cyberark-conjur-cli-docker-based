@@ -1,3 +1,7 @@
+# 4.27.0
+
+* Underyling privilege behind `elevate` is renamed from `sudo` to `elevate`
+
 # 4.26.0
 
 * New commands `elevate` and `reveal` for execution of privileged commands on Conjur 4.5+.
