@@ -19,14 +19,20 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-# Implement privileged modes such as 'sudo' and 'reveal'
+# Implement privileged modes such as 'elevate' and 'reveal'
 class Conjur::Command::Elevate < Conjur::DSLCommand
+  
+  def self.subcommand args
+    code = Conjur::CLI.run args
+    raise GLI::CustomExit.new("Subcommand failed", code) unless code == 0
+  end
+  
   desc "Run a sub-command with elevated privileges"
   long_desc <<-DESC
 If you are allowed to do this by the Conjur server, all server-side permission checks will be bypassed and any
 action will be allowed.
 
-To be able to run this command, you must have the 'sudo' privilege on the resource '!:!:conjur'.
+To be able to run this command, you must have the 'elevate' privilege on the resource '!:!:conjur'.
 
 EXAMPLE
 
@@ -38,8 +44,8 @@ $ conjur elevate user retire alice
     c.action do |global_options,options,args|
       exit_now! "Subcommand is required" if args.empty?
       
-      Conjur::Command.api = api.with_privilege "sudo"
-      Conjur::CLI.run args
+      Conjur::Command.api = api.with_privilege "elevate"
+      subcommand args
     end
   end
   
@@ -64,7 +70,7 @@ $ conjur reveal group list -i
       exit_now! "Subcommand is required" if args.empty?
       
       Conjur::Command.api = api.with_privilege "reveal"
-      Conjur::CLI.run args
+      subcommand args
     end
   end
 end

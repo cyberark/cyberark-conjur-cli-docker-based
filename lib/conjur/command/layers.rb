@@ -6,7 +6,7 @@ class Conjur::Command::Layers < Conjur::Command
   # Form an account:kind:hostid from the host argument
   # Or interpret a fully-qualified role id
   def self.require_hostid_arg(args)
-    hostid = require_arg(args, 'host')
+    hostid = require_arg(args, 'HOST')
     unless hostid.index(':')
       hostid = [ Conjur::Core::API.conjur_account, 'host', hostid ].join(':')
     end
@@ -25,9 +25,9 @@ class Conjur::Command::Layers < Conjur::Command
   end
 
   def self.parse_layer_permission_args(global_options, options, args)
-    id = require_arg(args, "layer")
-    role = require_arg(args, "role")
-    privilege = require_arg(args, "privilege")
+    id = require_arg(args, "LAYER")
+    role = require_arg(args, "ROLE")
+    privilege = require_arg(args, "PRIVILEGE")
     role_name = interpret_layer_privilege privilege
     [ id, role_name, role ]
   end
@@ -36,12 +36,12 @@ class Conjur::Command::Layers < Conjur::Command
   command :layer do |layer|
 
     layer.desc "Create a new layer"
-    layer.arg_name "id"
+    layer.arg_name "LAYER"
     layer.command :create do |c|
       acting_as_option(c)
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'LAYER')
 
         layer = api.create_layer(id, options)
         display(layer, options)
@@ -58,33 +58,33 @@ class Conjur::Command::Layers < Conjur::Command
     end
 
     layer.desc "Show a layer"
-    layer.arg_name "id"
+    layer.arg_name "LAYER"
     layer.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'LAYER')
         display(api.layer(id), options)
       end
     end
 
     layer.desc "Provision a layer by creating backing resources in an IaaS / PaaS system"
-    layer.arg_name "layer"
+    layer.arg_name "LAYER"
     layer.command :provision do |c|
       hide_docs(c)
 
       c.desc "Provisioner to use (aws)"
-      c.arg_name "provisioner"
+      c.arg_name "PROVISIONER"
       c.flag [ :provisioner ]
 
       c.desc "Variable holding a credential used to connect to the provisioner"
-      c.arg_name "variableid"
+      c.arg_name "VARIABLE"
       c.flag [ :credential ]
 
       c.desc "AWS bucket to contain the bootstrap credentials (will be created if missing)"
-      c.arg_name "bucket"
+      c.arg_name "BUCKET"
       c.flag [ :bucket ]
 
       c.action do |global_options, options, args|
-        id = require_arg(args, 'layer')
+        id = require_arg(args, 'LAYER')
         provisioner = options[:provisioner] or exit_now!("Missing argument: provisioner")
         credential = options[:credential] or exit_now!("Missing argument: credential")
         bucket = options[:bucket] or exit_now!("Missing argument: bucket")
@@ -110,7 +110,7 @@ class Conjur::Command::Layers < Conjur::Command
       hosts.long_desc <<-DESC
 Privilege may be : execute, update
       DESC
-      hosts.arg_name "layer role privilege"
+      hosts.arg_name "LAYER ROLE PRIVILEGE"
       hosts.command :permit do |c|
         c.action do |global_options,options,args|
           id, role_name, role = parse_layer_permission_args(global_options, options, args)
@@ -120,7 +120,7 @@ Privilege may be : execute, update
       end
 
       hosts.desc "Remove a privilege on hosts in the layer"
-      hosts.arg_name "layer role privilege"
+      hosts.arg_name "LAYER ROLE PRIVILEGE"
       hosts.command :deny do |c|
         c.action do |global_options,options,args|
           id, role_name, role = parse_layer_permission_args(global_options, options, args)
@@ -130,11 +130,11 @@ Privilege may be : execute, update
       end
 
       hosts.desc "List roles that have permission on the hosts"
-      hosts.arg_name "layer privilege"
+      hosts.arg_name "LAYER PRIVILEGE"
       hosts.command :permitted_roles do |c|
         c.action do |global_options,options,args|
-          id = require_arg(args, "layer")
-          role_name = interpret_layer_privilege require_arg(args, "privilege")
+          id = require_arg(args, 'LAYER')
+          role_name = interpret_layer_privilege require_arg(args, 'PRIVILEGE')
 
           members = api.layer(id).hosts_members(role_name).map(&:member).select do |m|
             m.kind != "@"
@@ -144,10 +144,10 @@ Privilege may be : execute, update
       end
 
       hosts.desc "Add a host to an layer"
-      hosts.arg_name "layer host"
+      hosts.arg_name "LAYER HOST"
       hosts.command :add do |c|
         c.action do |global_options, options, args|
-          id = require_arg(args, 'layer')
+          id = require_arg(args, 'LAYER')
           hostid = require_hostid_arg(args)
 
           api.layer(id).add_host hostid
@@ -156,10 +156,10 @@ Privilege may be : execute, update
       end
 
       hosts.desc "Remove a host from an layer"
-      hosts.arg_name "layer host"
+      hosts.arg_name "LAYER HOST"
       hosts.command :remove do |c|
         c.action do |global_options, options, args|
-          id = require_arg(args, 'layer')
+          id = require_arg(args, 'LAYER')
           hostid = require_hostid_arg(args)
 
           api.layer(id).remove_host hostid

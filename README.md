@@ -18,6 +18,12 @@ Or install it yourself as:
 
     $ gem install conjur-cli
 
+### Bash completion
+
+To enable bash completions, run this command:
+
+    $ conjur shellinit >> ~/.bashrc
+
 ## Contributing
 
 1. Fork it

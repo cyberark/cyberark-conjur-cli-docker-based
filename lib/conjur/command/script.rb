@@ -28,7 +28,7 @@ class Conjur::Command::Script < Conjur::DSLCommand
       acting_as_option(c)
 
       c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-      c.arg_name "context"
+      c.arg_name "FILE"
       c.flag [:c, :context]
 
       c.action do |global_options,options,args|
