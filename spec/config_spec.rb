@@ -16,7 +16,7 @@ describe Conjur::Config do
       ENV['HOME'] = realhome
     end
 
-    let(:deprecation_warning) { "WARNING: .conjurrc file from current directory is used. This behaviour is deprecated. Use ENV['CONJURRC'] to explicitly define custom configuration file if needed" }
+    let(:deprecation_warning) { /\.conjurrc/ }
 
     shared_examples "no deprecation warning" do
       it "does not issue a deprecation warning" do
@@ -36,7 +36,6 @@ describe Conjur::Config do
 
       it { is_expected.to include('/etc/conjur.conf') }
       it { is_expected.to include("#{homedir}/.conjurrc") }
-      it { is_expected.to include('.conjurrc') }
 
       before do
         allow(File).to receive(:expand_path).and_call_original
@@ -47,6 +46,10 @@ describe Conjur::Config do
         before { allow(File).to receive(:file?).with('.conjurrc').and_return true }
         it "Issues a deprecation warning" do 
           expect { subject }.to write(deprecation_warning).to(:stderr)
+        end
+
+        it "doesn't use the file" do
+          expect(subject).to_not include '.conjurrc'
         end
 
         context "but the current directory is home" do

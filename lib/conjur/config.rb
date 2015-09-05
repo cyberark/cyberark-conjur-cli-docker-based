@@ -37,11 +37,11 @@ module Conjur
           homefile = File.expand_path "~/.conjurrc"
           pwdfile = File.expand_path ".conjurrc"
           if homefile != pwdfile && File.file?(pwdfile)
-            $stderr.puts "WARNING: .conjurrc file from current directory is " +
-                "used. This behaviour is deprecated. Use ENV['CONJURRC'] to " +
-                "explicitly define custom configuration file if needed"
+            $stderr.puts """NOTE:\t.conjurrc file detected in the current directory.\n"\
+                "\tIt's no longer consulted in this version. Please explicitly\n"\
+                "\tset CONJURRC=./.conjurrc if you're sure you want to use it."
           end
-          [ homefile, pwdfile ]
+          [ homefile ]
         end
       end
 
