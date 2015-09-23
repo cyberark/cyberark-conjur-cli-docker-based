@@ -330,6 +330,17 @@ describe Conjur::Command::Audit, logged_in: true do
           end
         end
       end
+
+      describe '(conjur:use_extra_privilege)' do
+        let(:priv) { 'elevate' }
+        let(:test_event) { default_audit_event.merge('kind' => 'conjur', 'action' => 'use_extra_privilege', 'privilege' => priv) }
+        
+        it_behaves_like 'it supports standard prefix:'
+        it_behaves_like 'it recognizes error messages:'
+        it 'prints the extra privilege' do
+          expect { invoke }.to write(" requested extra privilege #{priv}")
+        end
+      end
         
     end
   end
