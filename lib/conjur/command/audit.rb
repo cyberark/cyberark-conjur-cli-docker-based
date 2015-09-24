@@ -22,7 +22,8 @@ class Conjur::Command
           message_part = e[:audit_message] ? "; message: #{e[:audit_message]}" : ""
           statement = [ action_part, actor_part, resource_part, allowed_part ].compact.join(" ")
           "reported #{statement}"+ message_part
-        }
+        },
+        'conjur:use_extra_privilege' => lambda{|e| "requested extra privilege #{e[:privilege]}"}
       }
 
       def ssh_sudo_message(e)
