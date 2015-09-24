@@ -50,7 +50,7 @@ ids.
 
 The first path element of each id is the collection. Policies are separated into collections
 according to software development lifecycle. The default collection for a policy is $USER@$HOSTNAME,
-in other words, the username and hostname on which the policy is created. This is approriate for
+in other words, the username and hostname on which the policy is created. This is appropriate for
 policy development and local testing. Once tested, policies can be created in more official
 environments such as ci, stage, and production.
 
