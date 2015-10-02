@@ -58,7 +58,7 @@ describe Conjur::Command::Variables, logged_in: true do
           url: collection_url,
           headers: {},
           payload: full_payload
-        }.merge(cert_store_options)).and_return(variable)
+        }).and_return(variable)
     end
     
     describe_command "variable:create the-id the-different-value" do
@@ -144,7 +144,7 @@ describe Conjur::Command::Variables, logged_in: true do
                 method: :head,
                 url: 'https://authz.example.com/the-account/roles/group/the-group',
                 headers: {}
-              }.merge(cert_store_options)).and_return(OpenStruct.new(headers: {}, body: '{}'))
+              }).and_return(OpenStruct.new(headers: {}, body: '{}'))
           end
             
           let(:full_payload) { base_payload.merge(ownerid: 'the-account:group:the-group') }
@@ -158,7 +158,7 @@ describe Conjur::Command::Variables, logged_in: true do
                 method: :head,
                 url: 'https://authz.example.com/the-account/roles/group/the-group',
                 headers: {}
-              }.merge(cert_store_options)).and_return(OpenStruct.new(headers: {}, body: '{}'))
+              }).and_return(OpenStruct.new(headers: {}, body: '{}'))
           end
             
           let(:full_payload) { base_payload.merge(ownerid: 'the-account:group:the-group') }

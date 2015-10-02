@@ -35,7 +35,7 @@ describe Conjur::Command::Groups, logged_in: true do
         url: "https://authz.example.com/the-account/roles/group/group/?members&member=user:alice",
         headers: {},
         payload: nil
-      }.merge(cert_store_options))
+      })
       invoke
     end
   end
@@ -47,7 +47,7 @@ describe Conjur::Command::Groups, logged_in: true do
         url: "https://authz.example.com/the-account/roles/group/group/?members&member=user:alice",
         headers: {},
         payload: { admin_option: true }
-      }.merge(cert_store_options))
+      })
       invoke
     end
   end
@@ -58,7 +58,7 @@ describe Conjur::Command::Groups, logged_in: true do
         url: "https://authz.example.com/the-account/roles/group/group/?members&member=user:alice",
         headers: {},
         payload: { admin_option: true }
-      }.merge(cert_store_options))
+      })
       invoke
     end
   end
@@ -70,7 +70,7 @@ describe Conjur::Command::Groups, logged_in: true do
         url: "https://authz.example.com/the-account/roles/group/group/?members&member=user:alice",
         headers: {},
         payload: { admin_option: false }
-       }.merge(cert_store_options))
+       })
       invoke
     end
   end

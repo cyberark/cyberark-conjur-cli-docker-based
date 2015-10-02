@@ -64,7 +64,7 @@ describe Conjur::Command::Users, logged_in: true do
         password: api_key,
         headers: { },
         payload: "new-password"
-       }.merge(cert_store_options))
+       })
     end
     
     describe_command "user:update_password -p new-password" do
