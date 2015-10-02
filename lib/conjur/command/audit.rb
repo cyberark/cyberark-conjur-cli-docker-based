@@ -71,13 +71,26 @@ class Conjur::Command
       end
       
       def show_audit_events events, options
+        @count ||= 0
+        
         events = [events] unless events.kind_of?(Array)
         # offset and limit options seem to be broken. this is a temporary workaround (should be applied on server-side eventually)
         events = events.drop(options[:offset]) if options[:offset]
         events = events.take(options[:limit]) if options[:limit]
 
         if options[:short]
-          events.each{|e| puts short_event_format(e)}
+          events.each do |e|
+            puts short_event_format(e)
+            
+            # Undocumented, but for the sake of testing.... Allow
+            # --limit with --follow. When we hit the limit, bail out
+            # immediately: don't raise any exceptions, don't print any
+            # messages, just exit with status 0.
+            @count += 1
+            if options[:follow] && @count == options[:limit]
+              exit_now! 0
+            end
+          end
         else
           events.each{|e| puts JSON.pretty_generate(e) }
         end
