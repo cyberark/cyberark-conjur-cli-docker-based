@@ -20,7 +20,7 @@ describe Conjur::Command::Elevate do
         url: "https://core.example.com/users/alice",
         username: "dknuth",
         headers: {:authorization=>"Token token=\"eyJsb2dpbiI6ImRrbnV0aCJ9\"", x_conjur_privilege: "elevate"}
-      }.merge(cert_store_options)).and_return(double(:response, body: "[]"))
+      }).and_return(double(:response, body: "[]"))
       
       invoke
     end
