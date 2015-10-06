@@ -19,3 +19,7 @@ Then /^it prints the path to temporary file which contains: '(.*)'$/ do |content
   actual_content=File.read(filename) rescue ""
   expect(actual_content).to match(content)
 end
+
+Then /^the output from "([^"]*)" should match \/([^\/]*)\/$/ do |cmd, expected|
+  assert_matching_output(expected, output_from(cmd))
+end
