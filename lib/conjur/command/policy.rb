@@ -84,5 +84,33 @@ owner of the policy role is the logged-in user (you), as always.
         end
       end
     end
+
+    policy.desc 'Decommision a policy'
+    policy.arg_name 'POLICY'
+    policy.command :retire do |c|
+      retire_options c
+
+      c.action do |global_options, options, args |
+        id = "policy:#{require_arg(args, 'POLICY')}"
+
+        # policy isn't a rolsource (yet), but we can pretend
+        Policy = Struct.new(:role, :resource)
+        policy = Policy.new(api.role(id), api.resource(id))
+
+        validate_retire_privileges(policy, options)
+        
+        retire_resource(policy)
+        
+        # The policy resource is owned by the policy role. Having the
+        # policy role is what allows us to administer it. So, we have
+        # to give the resource away before we can revoke the role.
+        give_away_resource(policy, options)
+        
+        retire_role(policy)
+
+        puts 'Policy retired'
+      end
+    end
+    
   end
 end
