@@ -17,7 +17,11 @@ Then(/^the model should contain "(.*?)" \/(.*?)\/$/) do |kind, id|
 end
 Then(/^the "(.*?)" "(.*?)" should be owned by "(.*?)"$/) do |kind, id, owner|
   step "the model should contain \"#{kind}\" \"#{id}\""
-  @mock_api.thing(kind, id).ownerid.should == owner
+  if kind == 'role' || kind == 'resource'
+    @mock_api.thing(kind, id).acting_as.should == owner
+  else
+    @mock_api.thing(kind, id).ownerid.should == owner
+  end
 end
 
 Then(/^the "(.*?)" "(.*?)" should not have an owner$/) do |kind, id|
