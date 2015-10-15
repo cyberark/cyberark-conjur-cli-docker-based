@@ -1,7 +1,7 @@
 # 4.28.0
 * Add `conjur policy retire` to allow retiring a policy.
-* Fix `--as-group` and `--as-role` options for `conjur policy load`.
-* Fix `--follow` option for `conjur audit
+* Fix `--as-group` and `--as-role` options for `conjur policy load`. Either can now be used to specify ownership of the policy.
+* Fix `--follow` option for `conjur audit`.
 
 # 4.27.0
 
