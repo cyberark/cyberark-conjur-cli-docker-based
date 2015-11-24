@@ -1,3 +1,6 @@
+# 4.28.1
+* Add `--collection` option for `conjur script execute`. Scripts are now portable across environments, like policies.
+
 # 4.28.0
 * Add `conjur policy retire` to allow retiring a policy.
 * Fix `--as-group` and `--as-role` options for `conjur policy load`. Either can now be used to specify ownership of the policy.
