@@ -4,7 +4,8 @@ require 'conjur/dsl/runner'
 describe Conjur::Command::Policy do
   describe ".default_collection_user" do
     it "returns the current username" do
-      expect(Conjur::Command::Policy.default_collection_user).to eq(`whoami`.strip)
+      # expect(Conjur::Command::Policy.default_collection_user).to eq(`whoami`.strip)
+      expect(`whoami`.downcase).to include(Conjur::Command::Policy.default_collection_user.downcase)
     end
   end
 
