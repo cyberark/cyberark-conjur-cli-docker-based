@@ -22,12 +22,13 @@ require 'conjur/command/dsl_command'
 
 require 'etc'
 require 'socket'
+require 'active_support/core_ext/object'
 
 class Conjur::Command::Script < Conjur::DSLCommand
   class << self
     def default_collection_user
       # More accurate than Etc.getlogin
-      Etc.getpwuid(Process.uid).name
+      Etc.getpwuid(Process.uid).try(&:name) || Etc.getlogin
     end
 
     def default_collection_hostname
