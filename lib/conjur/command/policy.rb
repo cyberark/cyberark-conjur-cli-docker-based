@@ -20,26 +20,7 @@
 #
 require 'conjur/command/dsl_command'
 
-require 'etc'
-require 'socket'
-require 'active_support/core_ext/object'
-
 class Conjur::Command::Policy < Conjur::DSLCommand
-  class << self
-    def default_collection_user
-      # More accurate than Etc.getlogin
-      Etc.getpwuid(Process.uid).try(&:name) || Etc.getlogin
-    end
-    
-    def default_collection_hostname
-      Socket.gethostname
-    end
-  
-    def default_collection_name
-      [ default_collection_user, default_collection_hostname ].join('@')
-    end
-  end
-
   desc "Manage policies"
   command :policy do |policy|
     policy.desc "Load a policy from Conjur DSL"
@@ -66,21 +47,19 @@ owner of the policy role is the logged-in user (you), as always.
     policy.arg_name "FILE"
     policy.command :load do |c|
       acting_as_option(c)
+      collection_option(c)
+      context_option(c)
 
-      c.desc "Policy collection, defaulting to $USER@$HOSTNAME"
-      c.arg_name "collection"
-      c.flag [:collection]
+      c.action do |_, options, args|
+        collection = options[:collection]
 
-      c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-      c.arg_name "FILE"
-      c.flag [:c, :context]
-
-      c.action do |global_options,options,args|
-        collection = options[:collection] || default_collection_name
-
-        run_script args, options do |runner, &block|
-          runner.scope collection do
-            block.call
+        if collection.nil?
+          run_script args, options
+        else
+          run_script args, options do |runner, &block|
+            runner.scope collection do
+              block.call
+            end
           end
         end
       end

@@ -1,3 +1,6 @@
+# 4.28.2
+* `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
+
 # 4.28.1
 * Add `--collection` option for `conjur script execute`. Scripts are now portable across environments, like policies.
 

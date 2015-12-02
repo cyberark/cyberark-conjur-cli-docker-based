@@ -79,6 +79,18 @@ module Conjur
         command.arg_name 'ROLE'
         command.flag [:'as-role']
       end
+
+      def collection_option command
+        command.desc 'An optional prefix for created roles and resources'
+        command.arg_name 'collection'
+        command.flag [:collection]
+      end
+
+      def context_option command
+        command.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
+        command.arg_name "FILE"
+        command.flag [:c, :context]
+      end
       
       def interactive_option command
         command.arg_name 'interactive'
