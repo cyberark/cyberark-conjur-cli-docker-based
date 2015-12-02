@@ -25,16 +25,12 @@ class Conjur::Command::Policy < Conjur::DSLCommand
   command :policy do |policy|
     policy.desc "Load a policy from Conjur DSL"
     policy.long_desc <<-DESC
-This method is EXPERIMENTAL and subject to change
-
 Loads a Conjur policy from DSL, applying particular conventions to the role and resource
 ids.
 
-The first path element of each id is the collection. Policies are separated into collections
-according to software development lifecycle. The default collection for a policy is $USER@$HOSTNAME,
-in other words, the username and hostname on which the policy is created. This is appropriate for
-policy development and local testing. Once tested, policies can be created in more official
-environments such as ci, stage, and production.
+The first path element of each id is the collection. Policies can be separated into collections
+according to software development lifecycle. This allows you to migrate the same policy across environments.
+Often-used collection names: ci, stage, and production.
 
 The second path element of each id is the policy name and version, following the convention
 policy-x.y.z, where x, y, and z are the semantic version of the policy.
