@@ -33,6 +33,9 @@ class Conjur::Command::Users < Conjur::Command
       c.desc "UID number to be associated with user (optional)"
       c.flag [:uidnumber]
 
+      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional)"
+      c.flag [:cidr]
+
       acting_as_option(c)
 
       interactive_option c
@@ -44,9 +47,11 @@ class Conjur::Command::Users < Conjur::Command
 
         groupid = options[:ownerid]
         uidnumber = options[:uidnumber]
+        cidr = format_cidr(options[:cidr])
         password = nil
-        exit_now! "uidnumber should be integer" unless uidnumber.blank? || /\d+/ =~ uidnumber
-          
+
+        validate_uidnumber(uidnumber)
+
         if interactive
           login ||= prompt_for_id :user, "login name"
           
@@ -57,7 +62,8 @@ class Conjur::Command::Users < Conjur::Command
           attributes = {
             "Login"    => login,
             "Owner" => groupid,
-            "UID Number"  => uidnumber
+            "UID Number"  => uidnumber,
+            "CIDR" => cidr
           }
           attributes["Password"] = "********" unless password.blank?
           prompt_to_confirm :user, attributes
@@ -70,6 +76,7 @@ class Conjur::Command::Users < Conjur::Command
         user_options = { }
         user_options[:ownerid] = groupid if groupid
         user_options[:uidnumber] = uidnumber.to_i if uidnumber
+        user_options[:cidr] = cidr unless cidr.empty?
         user_options[:password] = password if password
         user = api.create_user(login, user_options)
 
@@ -136,17 +143,29 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
-    user.desc "Update user's attributes (only uidnumber supported now)"
+    user.desc "Update a user's attributes"
     user.arg_name "USER" 
     user.command :update do |c|
-      c.desc "UID number to be associated with user"
+      c.desc "UID number to be associated with user (optional)"
       c.flag [:uidnumber]
+
+      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional)"
+      c.flag [:cidr]
+
       c.action do |global_options, options, args|
         login=require_arg(args,'USER')
-        raise "Uidnumber should be integer" unless /\d+/ =~ options[:uidnumber]
-        options[:uidnumber]=options[:uidnumber].to_i
-        api.user(login).update(options)
-        puts "UID set" 
+
+        uidnumber = options[:uidnumber]
+        cidr = format_cidr(options[:cidr])
+
+        validate_uidnumber(uidnumber)
+
+        user_options = { }
+        user_options[:uidnumber] = uidnumber.to_i if uidnumber
+        user_options[:cidr] = cidr unless cidr.empty?
+
+        api.user(login).update(user_options)
+        puts "User updated"
       end
     end
 
@@ -164,5 +183,13 @@ class Conjur::Command::Users < Conjur::Command
     
   def self.prompt_for_uidnumber
     prompt_for_idnumber "uid number"
+  end
+
+  def self.format_cidr(cidr)
+    (cidr || '').split(',').each {|x| x.strip!}
+  end
+
+  def self.validate_uidnumber(uidnumber)
+    exit_now! 'uidnumber should be integer' unless uidnumber.blank? || /\d+/ =~ uidnumber
   end
 end
