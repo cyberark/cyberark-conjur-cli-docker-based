@@ -76,7 +76,7 @@ class Conjur::Command::Users < Conjur::Command
         user_options = { }
         user_options[:ownerid] = groupid if groupid
         user_options[:uidnumber] = uidnumber.to_i if uidnumber
-        user_options[:cidr] = cidr unless cidr.empty?
+        user_options[:cidr] = cidr unless cidr.nil?
         user_options[:password] = password if password
         user = api.create_user(login, user_options)
 

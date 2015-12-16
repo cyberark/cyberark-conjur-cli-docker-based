@@ -48,7 +48,7 @@ class Conjur::Command::Hosts < Conjur::Command
 
         host_options = { }
         host_options[:id] = id if id
-        host_options[:cidr] = cidr unless cidr.empty?
+        host_options[:cidr] = cidr unless cidr.nil?
 
         display api.create_host(host_options), host_options
       end
