@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2013-2015 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -99,7 +99,7 @@ class Conjur::Command::Hosts < Conjur::Command
     hosts.desc "Update a hosts's attributes"
     hosts.arg_name "HOST"
     hosts.command :update do |c|
-      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional)"
+      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional). Use 'all' to reset"
       c.flag [:cidr]
 
       c.action do |global_options, options, args|
@@ -110,7 +110,7 @@ class Conjur::Command::Hosts < Conjur::Command
         cidr = format_cidr(options[:cidr])
 
         host_options = { }
-        host_options[:cidr] = cidr unless cidr.empty?
+        host_options[:cidr] = cidr unless cidr.nil?
 
         host.update(host_options)
         puts "Host updated"
@@ -142,6 +142,13 @@ class Conjur::Command::Hosts < Conjur::Command
   end
 
   def self.format_cidr(cidr)
-    (cidr || '').split(',').each {|x| x.strip!}
+    case cidr
+    when 'all'
+      []
+    when nil
+      nil
+    else
+      cidr.split(',').each {|x| x.strip!}
+    end
   end
 end

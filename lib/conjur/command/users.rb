@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2013-2015 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -149,7 +149,7 @@ class Conjur::Command::Users < Conjur::Command
       c.desc "UID number to be associated with user (optional)"
       c.flag [:uidnumber]
 
-      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional)"
+      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional). Use 'all' to reset"
       c.flag [:cidr]
 
       c.action do |global_options, options, args|
@@ -162,7 +162,7 @@ class Conjur::Command::Users < Conjur::Command
 
         user_options = { }
         user_options[:uidnumber] = uidnumber.to_i if uidnumber
-        user_options[:cidr] = cidr unless cidr.empty?
+        user_options[:cidr] = cidr unless cidr.nil?
 
         api.user(login).update(user_options)
         puts "User updated"
@@ -186,7 +186,14 @@ class Conjur::Command::Users < Conjur::Command
   end
 
   def self.format_cidr(cidr)
-    (cidr || '').split(',').each {|x| x.strip!}
+    case cidr
+    when 'all'
+      []
+    when nil
+      nil
+    else
+      cidr.split(',').each {|x| x.strip!}
+    end
   end
 
   def self.validate_uidnumber(uidnumber)
