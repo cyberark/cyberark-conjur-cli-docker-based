@@ -31,16 +31,41 @@ describe Conjur::Command::Users, logged_in: true do
           invoke
         end
       end
+      describe_command "#{cmd} --cidr 192.168.1.1,127.0.0.0/32 the-user" do
+        it "Creates a user with specified CIDR" do
+          expect_any_instance_of(Conjur::API).to receive(:create_user).with(
+              "the-user", { cidr: ['192.168.1.1', '127.0.0.0/32'] }
+          ).and_return new_user
+          invoke
+        end
+      end
     end
   end
 
-  context "updating UID number" do  
+  context "updating user attributes" do
     describe_command "user update --uidnumber 12345 the-user" do
       it "updates the uidnumber" do
         stub_user = double()
         expect_any_instance_of(Conjur::API).to receive(:user).with("the-user").and_return stub_user
         expect(stub_user).to receive(:update).with(uidnumber: 12345).and_return ""
-        expect { invoke }.to write "UID set"
+        expect { invoke }.to write "User updated"
+      end
+    end
+    describe_command "user update --cidr 127.0.0.0/32 the-user" do
+      it "updates the CIDR" do
+        stub_user = double()
+        expect_any_instance_of(Conjur::API).to receive(:user).with("the-user").and_return stub_user
+        expect(stub_user).to receive(:update).with(cidr: ['127.0.0.0/32']).and_return ""
+        expect { invoke }.to write "User updated"
+      end
+    end
+
+    describe_command "user update --cidr all the-user" do
+      it "resets the CIDR restrictions" do
+        stub_user = double()
+        expect_any_instance_of(Conjur::API).to receive(:user).with("the-user").and_return stub_user
+        expect(stub_user).to receive(:update).with(cidr: []).and_return ""
+        expect { invoke }.to write "User updated"
       end
     end
   end

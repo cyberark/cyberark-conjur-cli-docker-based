@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2013-2015 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -32,17 +32,25 @@ class Conjur::Command::Hosts < Conjur::Command
       c.arg_name "password"
       c.flag [:p,:password]
 
+      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional)"
+      c.flag [:cidr]
+
       acting_as_option(c)
 
       c.action do |global_options,options,args|
         id = args.shift
-        options[:id] = id if id
 
         unless id
           ActiveSupport::Deprecation.warn "id argument will be required in future releases"
         end
 
-        display api.create_host(options), options
+        cidr = format_cidr(options[:cidr])
+
+        host_options = { }
+        host_options[:id] = id if id
+        host_options[:cidr] = cidr unless cidr.nil?
+
+        display api.create_host(host_options), host_options
       end
     end
 
@@ -88,6 +96,27 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
+    hosts.desc "Update a hosts's attributes"
+    hosts.arg_name "HOST"
+    hosts.command :update do |c|
+      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional). Use 'all' to reset"
+      c.flag [:cidr]
+
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'HOST')
+
+        host = api.host(id)
+
+        cidr = format_cidr(options[:cidr])
+
+        host_options = { }
+        host_options[:cidr] = cidr unless cidr.nil?
+
+        host.update(host_options)
+        puts "Host updated"
+      end
+    end
+
     hosts.desc "[Deprecated] Enroll a new host into conjur"
     hosts.arg_name "HOST"
     hosts.command :enroll do |c|
@@ -109,6 +138,17 @@ class Conjur::Command::Hosts < Conjur::Command
         host = api.host(id)
         display host_layer_roles(host).map(&:identifier), options
       end
+    end
+  end
+
+  def self.format_cidr(cidr)
+    case cidr
+    when 'all'
+      []
+    when nil
+      nil
+    else
+      cidr.split(',').each {|x| x.strip!}
     end
   end
 end
