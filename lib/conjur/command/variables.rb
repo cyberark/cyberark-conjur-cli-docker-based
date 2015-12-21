@@ -153,24 +153,107 @@ class Conjur::Command::Variables < Conjur::Command
         $stdout.write api.variable(id).value(options[:version])
       end
     end
-  end
-  
-  def self.prompt_for_kind
-    highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
+
+    var.command :expire do |c|
+      c.arg_name "NOW"
+      c.desc 'Set variable to expire immediately'
+      c.switch [:n, :'now'], :negatable => false
+
+      c.arg_name "DAYS"
+      c.desc 'Set variable to expire after the given number of days'
+      c.flag [:d, :'days']
+
+      c.arg_name "MONTHS"
+      c.desc 'Set variable to expire after the given number of months'
+      c.flag [:m, :'months']
+
+      c.arg_name "DURATION"
+      c.desc 'Set variable to expire after the given ISO8601 duration'
+      c.flag [:i, :'in']
+
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'VARIABLE')
+
+        exit_now! 'Specify only one duration' if durations(options) > 1
+        exit_now! 'Specify at least one duration' if durations(options) == 0
+
+        now = options[:n]
+        days = options[:d]
+        months = options[:m]
+
+        case
+        when now.present?
+          duration = 'P0Y'
+        when days.present?
+          duration = "P#{days.to_i}D"
+        when months.present?
+          duration = "P#{months.to_i}M"
+        else
+          duration = options[:i]
+        end
+
+        display api.variable(id).expire(duration)
+      end
+    end
+
+    var.desc 'List expiring variables. If no interval is specified, show all visible variables with an expiration.'
+    var.command :expirations do |c|
+      c.arg_name 'DAYS'
+      c.desc 'Display variables that expire within the given number of days'
+      c.flag [:d, :'days']
+
+      c.arg_name 'MONTHS'
+      c.desc 'Display variables that expire within the given number of months'
+      c.flag [:m, :'months']
+
+      c.arg_name 'IN'
+      c.desc 'Display variables that expire within the given ISO8601 interval'
+      c.flag [:i, :'in']
+
+      c.action do | global_options, options, args|
+
+        days = options[:d]
+        months = options[:m]
+        duration = options[:i]
+
+        exit_now! 'Specify only one duration' if durations(options) > 1
+
+        case
+        when days.present?
+          duration = "P#{days.to_i}D"
+        when months.present?
+          duration = "P#{months.to_i}M"
+        end
+
+        display api.variable_expirations
+      end
+    end
+
   end
 
-  def self.prompt_for_mime_type
-    highline.choose do |menu|
-      menu.prompt = 'Enter the MIME type: '
-      menu.choice  @default_mime_type 
-      menu.choices *%w(application/json application/xml application/x-yaml application/x-pem-file)
-      menu.choice "other", nil do |c|
-        @highline.ask('Enter a custom mime type: ')
+  class << self
+    def prompt_for_kind
+      highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
+    end
+    
+    def prompt_for_mime_type
+      highline.choose do |menu|
+        menu.prompt = 'Enter the MIME type: '
+        menu.choice  @default_mime_type 
+        menu.choices *%w(application/json application/xml application/x-yaml application/x-pem-file)
+        menu.choice "other", nil do |c|
+          @highline.ask('Enter a custom mime type: ')
+        end
       end
+    end
+    
+    def prompt_for_value
+      read_till_eof('Enter the secret value (^D on its own line to finish):')
+    end
+    
+    def durations(options)
+      [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
     end
   end
 
-  def self.prompt_for_value
-    read_till_eof('Enter the secret value (^D on its own line to finish):')
-  end
 end
