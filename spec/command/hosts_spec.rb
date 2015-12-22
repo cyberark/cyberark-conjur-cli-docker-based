@@ -38,6 +38,16 @@ describe Conjur::Command::Hosts, logged_in: true do
         invoke
       end
     end
+    describe_command "host:create --as-group security_admin --cidr 192.168.1.1,127.0.0.0/32" do
+      it "Creates a host with specified CIDR" do
+        expect(api).to receive(:group).with("security_admin").and_return(double(:group, roleid: "the-account:group:security_admin"))
+        expect(api).to receive(:role).with("the-account:group:security_admin").and_return(double(:group_role, exists?: true))
+        expect_any_instance_of(Conjur::API).to receive(:create_host).with(
+            { ownerid: "the-account:group:security_admin", cidr: ['192.168.1.1', '127.0.0.0/32'] }
+        ).and_return new_host
+        invoke
+      end
+    end
   end
 
   context "updating host attributes" do

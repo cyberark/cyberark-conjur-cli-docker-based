@@ -44,13 +44,11 @@ class Conjur::Command::Hosts < Conjur::Command
           ActiveSupport::Deprecation.warn "id argument will be required in future releases"
         end
 
-        cidr = format_cidr(options[:cidr])
-
-        host_options = { }
-        host_options[:id] = id if id
-        host_options[:cidr] = cidr unless cidr.nil?
-
-        display api.create_host(host_options), host_options
+        cidr = format_cidr(options.delete(:cidr))
+        options[:id] = id if id
+        options[:cidr] = cidr unless cidr.nil?
+          
+        display api.create_host(options), options
       end
     end
 

@@ -1,3 +1,7 @@
+# 4.29.0
+
+* Add `cidr` commands to user and host
+
 # 4.28.2
 * `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
 
