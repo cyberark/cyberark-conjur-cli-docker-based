@@ -69,8 +69,8 @@ module Conjur
 
       def load_plugins
         # These used to be plugins but now they are in the core CLI
-        plugins = Conjur::Config.plugins - %w(layer pubkeys)
-        
+        plugins = Conjur::Config.plugins - %w(audit-send host-factory layer pubkeys)
+        puts "plugins: #{plugins.inspect}"
         plugins.each do |plugin|
           begin
             filename = "conjur-asset-#{plugin}"

@@ -35,7 +35,4 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake', '~> 10.0'
   gem.add_development_dependency 'io-grab', '~> 0.0.1'
   gem.add_development_dependency 'json_spec'
-  # For cukes
-  gem.add_development_dependency 'conjur-asset-audit-send'
-  gem.add_development_dependency 'conjur-asset-host-factory'
 end
