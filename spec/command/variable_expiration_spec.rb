@@ -25,7 +25,7 @@ describe Conjur::Command::Variables, :logged_in => true do
             :url => 'https://core.example.com/variables/foo/expiration',
             :headers => {},
             :payload => {:duration => duration}
-          }).and_return('{}')
+          }).and_return(double('response', :body => '{}'))
       end
       
       shared_examples 'it sets variable expiration' do 
@@ -73,12 +73,14 @@ describe Conjur::Command::Variables, :logged_in => true do
 
   context "getting variable expirations" do
     context "with valid arguments" do
+      let (:expected_params) { nil }
+      let (:expected_headers) { {}.tap {|h| h.merge!(:params => expected_params) if expected_params} }
       before do
         expect(RestClient::Request).to receive(:execute).with({
             :method => :get,
             :url => 'https://core.example.com/variables/expirations',
-            :headers => {}
-          }).and_return('[]')
+            :headers => expected_headers
+          }).and_return(double('response', :body => '[]'))
       end
 
       shared_examples 'it writes expiration list' do
@@ -92,14 +94,17 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
 
       describe_command 'variable:expirations --days 1' do
+        let (:expected_params) { { :duration => 'P1D' } }
         it_behaves_like 'it writes expiration list' 
       end
 
       describe_command 'variable:expirations --months 1' do
+        let (:expected_params) { { :duration => 'P1M' } }
         it_behaves_like 'it writes expiration list' 
       end
 
       describe_command 'variable:expirations --in P1D' do
+        let (:expected_params) { { :duration => 'P1D' } }
         it_behaves_like 'it writes expiration list' 
       end
 

@@ -154,6 +154,7 @@ class Conjur::Command::Variables < Conjur::Command
       end
     end
 
+    var.desc 'Set the expiration for a variable'
     var.command :expire do |c|
       c.arg_name "NOW"
       c.desc 'Set variable to expire immediately'
@@ -196,7 +197,8 @@ class Conjur::Command::Variables < Conjur::Command
       end
     end
 
-    var.desc 'List expiring variables. If no interval is specified, show all visible variables with an expiration.'
+    var.desc 'Display expiring variables'
+    var.long_desc 'Only variables that expire within the given duration are displayed. If no duration is provided, show all visible variables that are set to expire.'
     var.command :expirations do |c|
       c.arg_name 'DAYS'
       c.desc 'Display variables that expire within the given number of days'
@@ -225,7 +227,7 @@ class Conjur::Command::Variables < Conjur::Command
           duration = "P#{months.to_i}M"
         end
 
-        display api.variable_expirations
+        display api.variable_expirations(duration)
       end
     end
 
