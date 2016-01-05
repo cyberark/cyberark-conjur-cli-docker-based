@@ -17,13 +17,14 @@ Gem::Specification.new do |gem|
 
 
   gem.add_dependency 'activesupport'
-  gem.add_dependency 'conjur-api', '~> 4.19'
+  gem.add_dependency 'conjur-api', '~> 4.20'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc', '~> 0.10.2'
   gem.add_dependency 'methadone'
   gem.add_dependency 'deep_merge'
   gem.add_dependency 'xdg'
+  gem.add_dependency 'iso8601'
 
   gem.add_runtime_dependency 'cas_rest_client'
 

@@ -17,6 +17,7 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+require 'iso8601'
 
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
@@ -193,7 +194,7 @@ class Conjur::Command::Variables < Conjur::Command
           duration = options[:i]
         end
 
-        display api.variable(id).expire(duration)
+        display api.variable(id).expire(ISO8601::Duration.new(duration).to_seconds)
       end
     end
 
@@ -227,7 +228,7 @@ class Conjur::Command::Variables < Conjur::Command
           duration = "P#{months.to_i}M"
         end
 
-        display api.variable_expirations(duration)
+        display api.variable_expirations(duration.try {|d| ISO8601::Duration.new(d).to_seconds})
       end
     end
 
