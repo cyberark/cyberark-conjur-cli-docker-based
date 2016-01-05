@@ -49,11 +49,6 @@ describe Conjur::Command::Variables, :logged_in => true do
         it_behaves_like 'it sets variable expiration'
       end
 
-      describe_command 'variable:expire --in PT1M foo' do
-        let (:duration) { 'PT60S' }
-        it_behaves_like 'it sets variable expiration'
-      end
-
     end
 
     describe_command 'variable:expire --now --days 1 foo' do
@@ -100,11 +95,6 @@ describe Conjur::Command::Variables, :logged_in => true do
 
       describe_command 'variable:expirations --months 1' do
         let (:expected_params) { { :duration => 'PT2592000S' } }
-        it_behaves_like 'it writes expiration list' 
-      end
-
-      describe_command 'variable:expirations --in P1D' do
-        let (:expected_params) { { :duration => 'PT86400S' } }
         it_behaves_like 'it writes expiration list' 
       end
 

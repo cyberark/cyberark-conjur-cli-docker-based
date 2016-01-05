@@ -18,9 +18,6 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-$use_iso8601 = RUBY_VERSION > '1.9'
-require 'iso8601' if $use_iso8601
-
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
@@ -171,12 +168,6 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Set variable to expire after the given number of months'
       c.flag [:m, :'months']
 
-      if $use_iso8601
-        c.arg_name "DURATION"
-        c.desc 'Set variable to expire after the given ISO8601 duration'
-        c.flag [:i, :'in']
-      end
-
       c.action do |global_options, options, args|
         id = require_arg(args, 'VARIABLE')
 
@@ -194,9 +185,6 @@ class Conjur::Command::Variables < Conjur::Command
           duration = days.to_i.days
         when months.present?
           duration = months.to_i.months
-        else
-          # options[:i] only present if $use_iso8601 is true
-          duration = options[:i].try { |d| ISO8601::Duration.new(d).to_seconds }
         end
 
         display api.variable(id).expire(duration)
@@ -214,17 +202,10 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Display variables that expire within the given number of months'
       c.flag [:m, :'months']
 
-      if $use_iso8601
-        c.arg_name 'IN'
-        c.desc 'Display variables that expire within the given ISO8601 interval'
-        c.flag [:i, :'in']
-      end
-
       c.action do | global_options, options, args|
 
         days = options[:d]
         months = options[:m]
-        duration = options[:i]
 
         exit_now! 'Specify only one duration' if durations(options) > 1
 
@@ -234,8 +215,6 @@ class Conjur::Command::Variables < Conjur::Command
         when months.present?
           duration = months.to_i.months
         end
-
-        duration = ISO8601::Duration.new(duration).to_seconds if duration && $use_iso8601
 
         display api.variable_expirations(duration)
       end
@@ -264,7 +243,7 @@ class Conjur::Command::Variables < Conjur::Command
     end
     
     def durations(options)
-      [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
+      [options[:n],options[:d],options[:m]].count {|o| o.present?}
     end
   end
 
