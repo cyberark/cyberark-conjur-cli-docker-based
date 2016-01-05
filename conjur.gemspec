@@ -24,8 +24,9 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'methadone'
   gem.add_dependency 'deep_merge'
   gem.add_dependency 'xdg'
-  gem.add_dependency 'iso8601'
-
+  if RUBY_VERSION > '1.9'
+    gem.add_dependency 'iso8601'
+  end
   gem.add_runtime_dependency 'cas_rest_client'
 
   gem.add_development_dependency 'rspec', '~> 3.0'

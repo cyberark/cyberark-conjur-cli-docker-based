@@ -17,7 +17,9 @@
 # COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-require 'iso8601'
+
+$use_iso8601 = RUBY_VERSION > '1.9'
+require 'iso8601' if $use_iso8601
 
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
@@ -169,9 +171,11 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Set variable to expire after the given number of months'
       c.flag [:m, :'months']
 
-      c.arg_name "DURATION"
-      c.desc 'Set variable to expire after the given ISO8601 duration'
-      c.flag [:i, :'in']
+      if $use_iso8601
+        c.arg_name "DURATION"
+        c.desc 'Set variable to expire after the given ISO8601 duration'
+        c.flag [:i, :'in']
+      end
 
       c.action do |global_options, options, args|
         id = require_arg(args, 'VARIABLE')
@@ -185,16 +189,17 @@ class Conjur::Command::Variables < Conjur::Command
 
         case
         when now.present?
-          duration = 'P0Y'
+          duration = 0
         when days.present?
-          duration = "P#{days.to_i}D"
+          duration = days.to_i.days
         when months.present?
-          duration = "P#{months.to_i}M"
+          duration = months.to_i.months
         else
-          duration = options[:i]
+          # options[:i] only present if $use_iso8601 is true
+          duration = options[:i].try { |d| ISO8601::Duration.new(d).to_seconds }
         end
 
-        display api.variable(id).expire(ISO8601::Duration.new(duration).to_seconds)
+        display api.variable(id).expire(duration)
       end
     end
 
@@ -209,9 +214,11 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Display variables that expire within the given number of months'
       c.flag [:m, :'months']
 
-      c.arg_name 'IN'
-      c.desc 'Display variables that expire within the given ISO8601 interval'
-      c.flag [:i, :'in']
+      if $use_iso8601
+        c.arg_name 'IN'
+        c.desc 'Display variables that expire within the given ISO8601 interval'
+        c.flag [:i, :'in']
+      end
 
       c.action do | global_options, options, args|
 
@@ -223,12 +230,14 @@ class Conjur::Command::Variables < Conjur::Command
 
         case
         when days.present?
-          duration = "P#{days.to_i}D"
+          duration = days.to_i.days
         when months.present?
-          duration = "P#{months.to_i}M"
+          duration = months.to_i.months
         end
 
-        display api.variable_expirations(duration.try {|d| ISO8601::Duration.new(d).to_seconds})
+        duration = ISO8601::Duration.new(duration).to_seconds if duration && $use_iso8601
+
+        display api.variable_expirations(duration)
       end
     end
 

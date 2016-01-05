@@ -45,7 +45,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
       
       describe_command 'variable:expire --months 1 foo' do
-        let (:duration) { 'PT2628000S' }
+        let (:duration) { 'PT2592000S' }
         it_behaves_like 'it sets variable expiration'
       end
 
@@ -99,7 +99,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
 
       describe_command 'variable:expirations --months 1' do
-        let (:expected_params) { { :duration => 'PT2628000S' } }
+        let (:expected_params) { { :duration => 'PT2592000S' } }
         it_behaves_like 'it writes expiration list' 
       end
 
