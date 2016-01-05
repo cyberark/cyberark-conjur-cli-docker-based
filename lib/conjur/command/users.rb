@@ -136,7 +136,7 @@ class Conjur::Command::Users < Conjur::Command
       c.flag [:p,:password]
 
       c.action do |global_options,options,args|
-        username, password = Conjur::Authn.read_credentials
+        username, password = Conjur::Authn.get_credentials
         new_password = options[:password] || prompt_for_password
 
         Conjur::API.update_password username, password, new_password
