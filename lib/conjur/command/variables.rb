@@ -168,10 +168,6 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Set variable to expire after the given number of months'
       c.flag [:m, :'months']
 
-      c.arg_name "DURATION"
-      c.desc 'Set variable to expire after the given ISO8601 duration'
-      c.flag [:i, :'in']
-
       c.action do |global_options, options, args|
         id = require_arg(args, 'VARIABLE')
 
@@ -184,13 +180,11 @@ class Conjur::Command::Variables < Conjur::Command
 
         case
         when now.present?
-          duration = 'P0Y'
+          duration = 0
         when days.present?
-          duration = "P#{days.to_i}D"
+          duration = days.to_i.days.from_now - Time.now
         when months.present?
-          duration = "P#{months.to_i}M"
-        else
-          duration = options[:i]
+          duration = months.to_i.months.from_now - Time.now
         end
 
         display api.variable(id).expire(duration)
@@ -208,23 +202,18 @@ class Conjur::Command::Variables < Conjur::Command
       c.desc 'Display variables that expire within the given number of months'
       c.flag [:m, :'months']
 
-      c.arg_name 'IN'
-      c.desc 'Display variables that expire within the given ISO8601 interval'
-      c.flag [:i, :'in']
-
       c.action do | global_options, options, args|
 
         days = options[:d]
         months = options[:m]
-        duration = options[:i]
 
         exit_now! 'Specify only one duration' if durations(options) > 1
 
         case
         when days.present?
-          duration = "P#{days.to_i}D"
+          duration = days.to_i.days.from_now - Time.now
         when months.present?
-          duration = "P#{months.to_i}M"
+          duration = months.to_i.months.from_now - Time.now
         end
 
         display api.variable_expirations(duration)
@@ -254,7 +243,7 @@ class Conjur::Command::Variables < Conjur::Command
     end
     
     def durations(options)
-      [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
+      [options[:n],options[:d],options[:m]].count {|o| o.present?}
     end
   end
 

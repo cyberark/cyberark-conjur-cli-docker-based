@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'conjur/command/variables'
+require 'timecop'
 
 describe Conjur::Command::Variables, :logged_in => true do
   def invoke_silently
@@ -10,6 +11,10 @@ describe Conjur::Command::Variables, :logged_in => true do
     ensure
       $stderr = real_stderr
     end
+  end
+
+  before do
+    Timecop.freeze(Time.utc('2016-01-01'))
   end
 
   let (:variable) { double(:name => 'foo') }
@@ -35,22 +40,17 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
       
       describe_command 'variable:expire --now foo' do
-        let (:duration) { 'P0Y' }
+        let (:duration) { 'PT0S' }
         it_behaves_like 'it sets variable expiration'
       end
       
       describe_command 'variable:expire --days 1 foo' do
-        let (:duration) { 'P1D' }
+        let (:duration) { 'PT86400S' }
         it_behaves_like 'it sets variable expiration'
       end
       
       describe_command 'variable:expire --months 1 foo' do
-        let (:duration) { 'P1M' }
-        it_behaves_like 'it sets variable expiration'
-      end
-
-      describe_command 'variable:expire --in PT1M foo' do
-        let (:duration) { 'PT1M' }
+        let (:duration) { 'PT2678400S' }
         it_behaves_like 'it sets variable expiration'
       end
 
@@ -94,17 +94,12 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
 
       describe_command 'variable:expirations --days 1' do
-        let (:expected_params) { { :duration => 'P1D' } }
+        let (:expected_params) { { :duration => 'PT86400S' } }
         it_behaves_like 'it writes expiration list' 
       end
 
       describe_command 'variable:expirations --months 1' do
-        let (:expected_params) { { :duration => 'P1M' } }
-        it_behaves_like 'it writes expiration list' 
-      end
-
-      describe_command 'variable:expirations --in P1D' do
-        let (:expected_params) { { :duration => 'P1D' } }
+        let (:expected_params) { { :duration => 'PT2678400S' } }
         it_behaves_like 'it writes expiration list' 
       end
 

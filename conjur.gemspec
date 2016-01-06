@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
 
 
   gem.add_dependency 'activesupport'
-  gem.add_dependency 'conjur-api', '~> 4.19'
+  gem.add_dependency 'conjur-api', '~> 4.20'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc', '~> 0.10.2'
@@ -35,4 +35,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake', '~> 10.0'
   gem.add_development_dependency 'io-grab', '~> 0.0.1'
   gem.add_development_dependency 'json_spec'
+  gem.add_development_dependency 'timecop'
 end
