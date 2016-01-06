@@ -182,9 +182,9 @@ class Conjur::Command::Variables < Conjur::Command
         when now.present?
           duration = 0
         when days.present?
-          duration = days.to_i.days
+          duration = days.to_i.days.from_now - Time.now
         when months.present?
-          duration = months.to_i.months
+          duration = months.to_i.months.from_now - Time.now
         end
 
         display api.variable(id).expire(duration)
@@ -211,9 +211,9 @@ class Conjur::Command::Variables < Conjur::Command
 
         case
         when days.present?
-          duration = days.to_i.days
+          duration = days.to_i.days.from_now - Time.now
         when months.present?
-          duration = months.to_i.months
+          duration = months.to_i.months.from_now - Time.now
         end
 
         display api.variable_expirations(duration)

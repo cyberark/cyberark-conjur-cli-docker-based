@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'conjur/command/variables'
+require 'timecop'
 
 describe Conjur::Command::Variables, :logged_in => true do
   def invoke_silently
@@ -10,6 +11,10 @@ describe Conjur::Command::Variables, :logged_in => true do
     ensure
       $stderr = real_stderr
     end
+  end
+
+  before do
+    Timecop.freeze(Time.utc('2016-01-01'))
   end
 
   let (:variable) { double(:name => 'foo') }
@@ -45,7 +50,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
       
       describe_command 'variable:expire --months 1 foo' do
-        let (:duration) { 'PT2592000S' }
+        let (:duration) { 'PT2678400S' }
         it_behaves_like 'it sets variable expiration'
       end
 
@@ -94,7 +99,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
 
       describe_command 'variable:expirations --months 1' do
-        let (:expected_params) { { :duration => 'PT2592000S' } }
+        let (:expected_params) { { :duration => 'PT2678400S' } }
         it_behaves_like 'it writes expiration list' 
       end
 
