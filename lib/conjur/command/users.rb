@@ -140,7 +140,13 @@ class Conjur::Command::Users < Conjur::Command
     user.command :rotate_api_key do |c|
       c.action do |_global, _options, _args|
         username, password = Conjur::Authn.read_credentials
-        Conjur::API.rotate_api_key username, password
+        new_api_key = Conjur::API.rotate_api_key(username, password)
+
+        # Print the new api key first, otherwise an exception
+        # in save credentials could render it impossible to log in!
+        puts new_api_key
+        Conjur::Authn.save_credentials username: username,
+            password: new_api_key
       end
     end
 
