@@ -136,6 +136,14 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
+    user.desc 'Rotate the API key of the logged-in user'
+    user.command :rotate_api_key do |c|
+      c.action do |_global, _options, _args|
+        username, password = Conjur::Authn.read_credentials
+        Conjur::API.rotate_api_key username, password
+      end
+    end
+
     user.desc "Update user's attributes (only uidnumber supported now)"
     user.arg_name "login" 
     user.command :update do |c|
