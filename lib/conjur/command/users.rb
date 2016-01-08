@@ -145,8 +145,7 @@ class Conjur::Command::Users < Conjur::Command
         # Print the new api key first, otherwise an exception
         # in save credentials could render it impossible to log in!
         puts new_api_key
-        Conjur::Authn.save_credentials username: username,
-            password: new_api_key
+        Conjur::Authn.save_credentials username: username, password: new_api_key
       end
     end
 
