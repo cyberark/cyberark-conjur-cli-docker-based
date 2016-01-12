@@ -136,16 +136,24 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
-    user.desc 'Rotate the API key of the logged-in user'
+    user.desc 'Rotate a user or host API key'
     user.command :rotate_api_key do |c|
-      c.action do |_global, _options, _args|
-        username, password = Conjur::Authn.read_credentials
-        new_api_key = Conjur::API.rotate_api_key(username, password)
-
-        # Print the new api key first, otherwise an exception
-        # in save credentials could render it impossible to log in!
-        puts new_api_key
-        Conjur::Authn.save_credentials username: username, password: new_api_key
+      c.desc "Login of user who's API key we want to rotate (default: logged in user)"
+      c.flag [:user, :u]
+      c.action do |_global, options, _args|
+        if options.include?(:user)
+          # Make sure we're not trying to rotate our own key with the user flag.
+          if api.username == options[:user]
+            exit_now! 'To rotate your own API key, use this command without the --user flag'
+          end
+          puts api.user(options[:user]).rotate_api_key
+        else
+          username, password = Conjur::Authn.read_credentials
+          new_api_key = Conjur::API.rotate_api_key username, password
+          # Show the new one before saving credentials so we don't lose it on failure.
+          puts new_api_key
+          Conjur::Authn.save_credentials username: username, password: new_api_key
+        end
       end
     end
 
