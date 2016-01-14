@@ -1,14 +1,8 @@
-# 4.30.0
-
-* Add `hostfactory` subcommands (moved from conjur-asset-host-factory plugin).
-* Add `audit send` subcommands (moved from conjur-asset-audit-send pluing).
-* Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
- 
- # 4.29.0
+# 4.29.0
 
 * Add `cidr` commands to user and host
-* Add variable expiration
 * Move `audit send` and `host factory` commands from plugins into the core CLI
+* Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
 
 # 4.28.2
 * `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
