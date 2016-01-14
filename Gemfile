@@ -15,5 +15,5 @@ group :test, :development do
 end
 
 group :debify do
-  gem 'conjur-debify', github: 'conjurinc/cli-ruby', branch: 'master'
+  gem 'conjur-debify', git: 'https://github.com/conjurinc/debify.git', branch: 'master'
 end
