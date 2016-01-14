@@ -9,8 +9,11 @@ gemspec
 gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'master'
 
 group :test, :development do
-  gem 'conjur-debify', github: 'conjurinc/cli-ruby', branch: 'master'
   gem 'pry'
   gem 'pry-doc'
   gem 'ruby-prof'
+end
+
+group :debify do
+  gem 'conjur-debify', github: 'conjurinc/cli-ruby', branch: 'master'
 end
