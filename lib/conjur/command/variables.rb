@@ -193,7 +193,7 @@ class Conjur::Command::Variables < Conjur::Command
           duration = options[:i]
         end
 
-        display api.variable(id).expire(duration)
+        display api.variable(id).expires_in(duration)
       end
     end
 
