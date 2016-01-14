@@ -1,6 +1,8 @@
 # 4.29.0
 
 * Add `cidr` commands to user and host
+* Add variable expiration
+* Move `audit send` and `host factory` commands from plugins into the core CLI
 
 # 4.28.2
 * `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
