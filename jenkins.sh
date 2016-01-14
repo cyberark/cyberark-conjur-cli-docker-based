@@ -31,8 +31,3 @@ bundle update
 bundle exec rake jenkins
 bundle exec rake build
 '''
-
-if [ "$RUBY_VERSION" == "$RUBY_VERSION_DEFAULT" ]; then
-	./package.sh
-	./publish.sh
-fi
