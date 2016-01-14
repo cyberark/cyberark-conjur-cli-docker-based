@@ -11,5 +11,3 @@ debify package \
 	cli \
 	-- \
 	--depends ruby2.0
-
-debify publish 4.6 cli
