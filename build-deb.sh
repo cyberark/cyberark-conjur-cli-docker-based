@@ -4,6 +4,7 @@ export DEBUG=true
 export GLI_DEBUG=true 
 
 # Make sure Gemfile.lock exists
+gem install -N bundler
 bundle
 
 debify clean
