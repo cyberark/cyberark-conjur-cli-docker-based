@@ -1,5 +1,4 @@
 *.deb
-Dockerfile.*
 .gems
 .rbenv*
 *.policy
