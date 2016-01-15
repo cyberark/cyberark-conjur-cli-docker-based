@@ -13,3 +13,6 @@ debify package \
 	cli \
 	-- \
 	--depends ruby2.0
+
+debify test -t 4.6-stable cli ci/test.sh
+

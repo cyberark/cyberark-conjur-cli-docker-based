@@ -124,5 +124,4 @@ end
 Before('@real-api') do
   Conjur::Config.load
   Conjur::Config.apply
-  @aruba_timeout_seconds = 15
 end
