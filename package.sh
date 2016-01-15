@@ -6,6 +6,8 @@ export GLI_DEBUG=true
 # Make sure Gemfile.lock exists
 bundle
 
+debify clean
+
 debify package \
 	--dockerfile ci/Dockerfile.fpm \
 	cli \

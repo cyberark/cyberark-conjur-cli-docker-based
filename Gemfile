@@ -12,8 +12,5 @@ group :test, :development do
   gem 'pry'
   gem 'pry-doc'
   gem 'ruby-prof'
-end
-
-group :debify do
-  gem 'conjur-debify', git: 'https://github.com/conjurinc/debify.git', branch: 'master'
+  gem 'conjur-debify', '>= 0.7.0'
 end
