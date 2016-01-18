@@ -28,9 +28,9 @@ class Conjur::Command::HostFactories < Conjur::Command
     hf.command :create do |c|
       acting_as_option(c)
 
-      #c.arg_name "layer"
-      #c.desc "A space-delimited list of layers to which new hosts will belong"
-      #c.flag [:l, :layer]
+      c.arg_name "layer"
+      c.desc "A space-delimited list of layers to which new hosts will belong"
+      c.flag [:l, :layer]
 
       c.action do |global_options,options,args|
         id = require_arg(args, 'hostfactory')
