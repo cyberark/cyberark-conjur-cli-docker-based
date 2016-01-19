@@ -32,7 +32,7 @@ class Conjur::Command::Hosts < Conjur::Command
       c.arg_name "password"
       c.flag [:p,:password]
 
-      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional)"
+      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional)"
       c.flag [:cidr]
 
       acting_as_option(c)

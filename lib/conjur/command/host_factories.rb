@@ -27,6 +27,8 @@ class Conjur::Command::HostFactories < Conjur::Command
     hf.arg_name "id"
     hf.command :create do |c|
       acting_as_option(c)
+      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional)"
+      c.flag [:cidr]
 
       #c.arg_name "layer"
       #c.desc "A space-delimited list of layers to which new hosts will belong"
@@ -47,6 +49,9 @@ class Conjur::Command::HostFactories < Conjur::Command
         command_options = options.dup
         command_options[:layers] = layers
         command_options[:roleid] = options[:ownerid]
+
+        cidr = format_cidr(options.delete(:cidr))
+        command_options[:cidr] = cidr unless cidr.nil?
           
         host_factory = api.create_host_factory id, command_options
         display host_factory
@@ -156,6 +161,17 @@ By default, this command creates one token. Optionally, it can be used to create
           display host
         end
       end
+    end
+  end
+
+  def self.format_cidr(cidr)
+    case cidr
+    when 'all'
+      []
+    when nil
+      nil
+    else
+      cidr.split(',').each {|x| x.strip!}
     end
   end
 end
