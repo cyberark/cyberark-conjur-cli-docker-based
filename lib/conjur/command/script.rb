@@ -18,6 +18,7 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
+require 'conjur/command/dsl_command'
 
 class Conjur::Command::Script < Conjur::DSLCommand
   desc "Execute Conjur DSL scripts"
@@ -26,13 +27,21 @@ class Conjur::Command::Script < Conjur::DSLCommand
     script.arg_name "script"
     script.command :execute do |c|
       acting_as_option(c)
+      collection_option(c)
+      context_option(c)
 
-      c.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
-      c.arg_name "context"
-      c.flag [:c, :context]
+      c.action do |_, options, args|
+        collection = options[:collection]
 
-      c.action do |global_options,options,args|
-        run_script args, options
+        if collection.nil?
+          run_script args, options
+        else
+          run_script args, options do |runner, &block|
+            runner.scope collection do
+              block.call
+            end
+          end
+        end
       end
     end
   end

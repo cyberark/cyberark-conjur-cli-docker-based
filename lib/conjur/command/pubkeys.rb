@@ -26,19 +26,19 @@ class Conjur::Command::Pubkeys < Conjur::Command
   command :pubkeys do |pubkeys|
 
     pubkeys.desc "List public keys for the given user"
-    pubkeys.arg_name "username"
+    pubkeys.arg_name "USER"
     pubkeys.command :show do |c|
       c.action do |global_options, options, args|
-        username = require_arg args, "username"
+        username = require_arg args, "USER"
         puts api.public_keys(username)
       end
     end
 
     pubkeys.desc "List the names of a user's public keys"
-    pubkeys.arg_name "username"
+    pubkeys.arg_name "USER"
     pubkeys.command :names do |c|
       c.action do |global_options, options, args|
-        username = require_arg args, "username"
+        username = require_arg args, "USER"
         api.public_keys(username)
         .split("\n")
         .map{|k| k.split(' ').last}
@@ -65,7 +65,7 @@ The public key itself may be provided in several ways.
       
       c.action do |global_options, options, args|
         options[:interactive] = $stdin.isatty if options[:interactive].nil?
-        username = require_arg args, "username"
+        username = require_arg args, "USER"
         if key = args.shift
           if /^@(.+)$/ =~ key
             key = File.read(File.expand_path($1))
@@ -86,11 +86,11 @@ The public key itself may be provided in several ways.
     end
 
     pubkeys.desc "Removes a public key for a user"
-    pubkeys.arg_name "username keyname"
+    pubkeys.arg_name "USER KEY"
     pubkeys.command :delete do |c|
       c.action do |global_options, options, args|
-        username = require_arg args, "username"
-        keyname = require_arg args, "keyname"
+        username = require_arg args, "USER"
+        keyname = require_arg args, "KEY"
         api.delete_public_key username, keyname
         puts "Public key '#{keyname}' deleted"
       end

@@ -1,0 +1,19 @@
+FROM @@image@@
+
+RUN mkdir -p /src/opt/conjur/project
+
+WORKDIR /src/opt/conjur/project
+
+COPY Gemfile ./
+COPY Gemfile.lock ./
+COPY *.gemspec ./
+COPY lib/conjur/version.rb ./lib/conjur/
+
+RUN bundle --deployment --without "test development"
+RUN mkdir -p .bundle
+RUN cp /usr/local/bundle/config .bundle/config
+
+COPY . .
+ADD debify.sh /
+
+WORKDIR /src

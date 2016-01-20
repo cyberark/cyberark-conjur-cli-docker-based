@@ -22,7 +22,8 @@ class Conjur::Command
           message_part = e[:audit_message] ? "; message: #{e[:audit_message]}" : ""
           statement = [ action_part, actor_part, resource_part, allowed_part ].compact.join(" ")
           "reported #{statement}"+ message_part
-        }
+        },
+        'conjur:use_extra_privilege' => lambda{|e| "requested extra privilege #{e[:privilege]}"}
       }
 
       def ssh_sudo_message(e)
@@ -70,13 +71,26 @@ class Conjur::Command
       end
       
       def show_audit_events events, options
+        @count ||= 0
+        
         events = [events] unless events.kind_of?(Array)
         # offset and limit options seem to be broken. this is a temporary workaround (should be applied on server-side eventually)
         events = events.drop(options[:offset]) if options[:offset]
         events = events.take(options[:limit]) if options[:limit]
 
         if options[:short]
-          events.each{|e| puts short_event_format(e)}
+          events.each do |e|
+            puts short_event_format(e)
+            
+            # Undocumented, but for the sake of testing.... Allow
+            # --limit with --follow. When we hit the limit, bail out
+            # immediately: don't raise any exceptions, don't print any
+            # messages, just exit with status 0.
+            @count += 1
+            if options[:follow] && @count == options[:limit]
+              exit_now! 0
+            end
+          end
         else
           events.each{|e| puts JSON.pretty_generate(e) }
         end
@@ -124,6 +138,18 @@ class Conjur::Command
         id = full_resource_id(require_arg args, "resource")
         api.audit_resource(id, options){|es| show_audit_events es, options}
       end 
+
+      audit.desc "Send custom event(s) to audit system"
+      audit.long_desc "Send custom event(s) to audit system. Events should be provided in JSON format, describing either single hash or array of hashes."
+      audit.arg_name "( json_string | STDIN )"
+      audit.command :send do |c| 
+        c.action do |global_options, options, args|
+          json = ( args.shift || STDIN.read )
+          api.audit_send json 
+          puts "Events sent successfully"
+        end
+      end
+
     end
   end
 end

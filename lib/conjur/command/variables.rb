@@ -22,15 +22,15 @@ class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
     var.desc "Create and store a variable"
-    var.arg_name "id [value]"
+    var.arg_name "NAME VALUE"
     var.command :create do |c|
-      c.arg_name "mime_type"
+      c.arg_name "MIME-TYPE"
       c.flag [:m, :"mime-type"], default_value: 'text/plain'
 
-      c.arg_name "kind"
+      c.arg_name "KIND"
       c.flag [:k, :"kind"], default_value: 'secret'
 
-      c.arg_name "value"
+      c.arg_name "VALUE"
       c.desc "Initial value, which may also be specified as the second command argument after the variable id"
       c.flag [:v, :"value"]
 
@@ -91,21 +91,21 @@ class Conjur::Command::Variables < Conjur::Command
     end
 
     var.desc "Show a variable"
-    var.arg_name "id"
+    var.arg_name "VARIABLE"
     var.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'VARIABLE')
         display(api.variable(id), options)
       end
     end
 
     var.desc "Decommission a variable"
-    var.arg_name "id"
+    var.arg_name "VARIABLE"
     var.command :retire do |c|
       retire_options c
       
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'VARIABLE')
         
         variable = api.variable(id)
 
@@ -130,10 +130,10 @@ class Conjur::Command::Variables < Conjur::Command
     var.desc "Access variable values"
     var.command :values do |values|
       values.desc "Add a value"
-      values.arg_name "variable ( value | STDIN )"
+      values.arg_name "VARIABLE VALUE"
       values.command :add do |c|
         c.action do |global_options,options,args|
-          id = require_arg(args, 'variable')
+          id = require_arg(args, 'VARIABLE')
           value = args.shift || STDIN.read
 
           api.variable(id).add_value(value)
@@ -143,34 +143,119 @@ class Conjur::Command::Variables < Conjur::Command
     end
 
     var.desc "Get a value"
-    var.arg_name "variable"
+    var.arg_name "VARIABLE"
     var.command :value do |c|
       c.desc "Version number"
       c.flag [:v, :version]
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'variable')
+        id = require_arg(args, 'VARIABLE')
         $stdout.write api.variable(id).value(options[:version])
       end
     end
-  end
-  
-  def self.prompt_for_kind
-    highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
+
+    var.desc 'Set the expiration for a variable'
+    var.command :expire do |c|
+      c.arg_name "NOW"
+      c.desc 'Set variable to expire immediately'
+      c.switch [:n, :'now'], :negatable => false
+
+      c.arg_name "DAYS"
+      c.desc 'Set variable to expire after the given number of days'
+      c.flag [:d, :'days']
+
+      c.arg_name "MONTHS"
+      c.desc 'Set variable to expire after the given number of months'
+      c.flag [:m, :'months']
+
+      c.arg_name "DURATION"
+      c.desc 'Set variable to expire after the given ISO8601 duration'
+      c.flag [:i, :'in']
+
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'VARIABLE')
+
+        exit_now! 'Specify only one duration' if durations(options) > 1
+        exit_now! 'Specify at least one duration' if durations(options) == 0
+
+        now = options[:n]
+        days = options[:d]
+        months = options[:m]
+
+        case
+        when now.present?
+          duration = 'P0Y'
+        when days.present?
+          duration = "P#{days.to_i}D"
+        when months.present?
+          duration = "P#{months.to_i}M"
+        else
+          duration = options[:i]
+        end
+
+        display api.variable(id).expires_in(duration)
+      end
+    end
+
+    var.desc 'Display expiring variables'
+    var.long_desc 'Only variables that expire within the given duration are displayed. If no duration is provided, show all visible variables that are set to expire.'
+    var.command :expirations do |c|
+      c.arg_name 'DAYS'
+      c.desc 'Display variables that expire within the given number of days'
+      c.flag [:d, :'days']
+
+      c.arg_name 'MONTHS'
+      c.desc 'Display variables that expire within the given number of months'
+      c.flag [:m, :'months']
+
+      c.arg_name 'IN'
+      c.desc 'Display variables that expire within the given ISO8601 interval'
+      c.flag [:i, :'in']
+
+      c.action do | global_options, options, args|
+
+        days = options[:d]
+        months = options[:m]
+        duration = options[:i]
+
+        exit_now! 'Specify only one duration' if durations(options) > 1
+
+        case
+        when days.present?
+          duration = "P#{days.to_i}D"
+        when months.present?
+          duration = "P#{months.to_i}M"
+        end
+
+        display api.variable_expirations(duration)
+      end
+    end
+
   end
 
-  def self.prompt_for_mime_type
-    highline.choose do |menu|
-      menu.prompt = 'Enter the MIME type: '
-      menu.choice  @default_mime_type 
-      menu.choices *%w(application/json application/xml application/x-yaml application/x-pem-file)
-      menu.choice "other", nil do |c|
-        @highline.ask('Enter a custom mime type: ')
+  class << self
+    def prompt_for_kind
+      highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
+    end
+    
+    def prompt_for_mime_type
+      highline.choose do |menu|
+        menu.prompt = 'Enter the MIME type: '
+        menu.choice  @default_mime_type 
+        menu.choices *%w(application/json application/xml application/x-yaml application/x-pem-file)
+        menu.choice "other", nil do |c|
+          @highline.ask('Enter a custom mime type: ')
+        end
       end
+    end
+    
+    def prompt_for_value
+      read_till_eof('Enter the secret value (^D on its own line to finish):')
+    end
+    
+    def durations(options)
+      [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
     end
   end
 
-  def self.prompt_for_value
-    read_till_eof('Enter the secret value (^D on its own line to finish):')
-  end
 end

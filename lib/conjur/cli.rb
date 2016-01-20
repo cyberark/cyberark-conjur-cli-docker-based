@@ -63,14 +63,13 @@ module Conjur
       # do too much effort, and GLIs support for aliasing doesn't work out so well with
       # subcommands.
       def run args
-       args = args.shift.split(':') + args unless args.empty?
+        args = args.shift.split(':') + args unless args.empty?
         super args
       end
 
       def load_plugins
         # These used to be plugins but now they are in the core CLI
-        plugins = Conjur::Config.plugins - %w(layer pubkeys)
-        
+        plugins = Conjur::Config.plugins - %w(audit-send host-factory layer pubkeys)
         plugins.each do |plugin|
           begin
             filename = "conjur-asset-#{plugin}"

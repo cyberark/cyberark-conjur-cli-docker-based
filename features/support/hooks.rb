@@ -122,11 +122,6 @@ Before("@dsl") do
 end
 
 Before('@real-api') do
-  require 'conjur/config'
-  cfg = File.absolute_path("#{File.dirname __FILE__}/../../.conjurrc")
-  puts "cfg_path = #{cfg}"
-  puts "contents = #{File.read(cfg)}"
-  Conjur::Config.load([cfg])
+  Conjur::Config.load
   Conjur::Config.apply
-  @aruba_timeout_seconds = 15
 end

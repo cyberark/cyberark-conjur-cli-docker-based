@@ -194,6 +194,13 @@ module Conjur
 
         unless (obj = api.send(find_method, id)) && obj.exists?
           options = expand_options(options)
+
+          # create_resource and create_role expect :acting_as to
+          # specify the "owning" role.
+          if create_method == :create_resource || create_method == :create_role
+            options[:acting_as] = options.delete(:ownerid) if options[:ownerid]
+          end
+
           obj = if create_method == :create_variable
             #NOTE: it duplicates logic of "create_variable" method above
             #   https://basecamp.com/1949725/projects/4268938-api-version-4-x/todos/84972543-low-variable

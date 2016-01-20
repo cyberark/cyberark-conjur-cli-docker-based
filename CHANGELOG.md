@@ -1,3 +1,29 @@
+# 4.29.0
+
+* Add `cidr` commands to user and host
+* Move `audit send` and `host factory` commands from plugins into the core CLI
+* Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
+
+# 4.28.2
+* `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
+
+# 4.28.1
+* Add `--collection` option for `conjur script execute`. Scripts are now portable across environments, like policies.
+
+# 4.28.0
+* Add `conjur policy retire` to allow retiring a policy.
+* Fix `--as-group` and `--as-role` options for `conjur policy load`. Either can now be used to specify ownership of the policy.
+* Fix `--follow` option for `conjur audit`.
+* Remove support for per-project `.conjurrc` files.
+
+# 4.27.0
+
+* New commands `elevate` and `reveal` for execution of privileged commands on Conjur 4.5+.
+
+# 4.26.0
+
+* New implementation of bash completions.
+
 # 4.25.2
 * Fixes a conflict with RVM: Sets `GEM_HOME` and `GEM_PATH to nil.
 

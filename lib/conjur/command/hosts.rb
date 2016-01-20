@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2013-2015 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -27,41 +27,47 @@ class Conjur::Command::Hosts < Conjur::Command
   desc "Manage hosts"
   command :host do |hosts|
     hosts.desc "Create a new host"
-    hosts.arg_name "id"
+    hosts.arg_name "NAME"
     hosts.command :create do |c|
       c.arg_name "password"
       c.flag [:p,:password]
+
+      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional)"
+      c.flag [:cidr]
 
       acting_as_option(c)
 
       c.action do |global_options,options,args|
         id = args.shift
-        options[:id] = id if id
 
         unless id
           ActiveSupport::Deprecation.warn "id argument will be required in future releases"
         end
 
+        cidr = format_cidr(options.delete(:cidr))
+        options[:id] = id if id
+        options[:cidr] = cidr unless cidr.nil?
+          
         display api.create_host(options), options
       end
     end
 
     hosts.desc "Show a host"
-    hosts.arg_name "id"
+    hosts.arg_name "HOST"
     hosts.command :show do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'HOST')
         display(api.host(id), options)
       end
     end
 
     hosts.desc "Decommission a host"
-    hosts.arg_name "id"
+    hosts.arg_name "HOST"
     hosts.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'HOST')
         
         host = api.host(id)
 
@@ -88,12 +94,33 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
+    hosts.desc "Update a hosts's attributes"
+    hosts.arg_name "HOST"
+    hosts.command :update do |c|
+      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional). Use 'all' to reset"
+      c.flag [:cidr]
+
+      c.action do |global_options, options, args|
+        id = require_arg(args, 'HOST')
+
+        host = api.host(id)
+
+        cidr = format_cidr(options[:cidr])
+
+        host_options = { }
+        host_options[:cidr] = cidr unless cidr.nil?
+
+        host.update(host_options)
+        puts "Host updated"
+      end
+    end
+
     hosts.desc "[Deprecated] Enroll a new host into conjur"
-    hosts.arg_name "host"
+    hosts.arg_name "HOST"
     hosts.command :enroll do |c|
       hide_docs(c)
       c.action do |global_options, options, args|
-        id = require_arg(args, 'host')
+        id = require_arg(args, 'HOST')
         enrollment_url = api.host(id).enrollment_url
         puts enrollment_url
         $stderr.puts "On the target host, please execute the following command:"
@@ -102,13 +129,24 @@ class Conjur::Command::Hosts < Conjur::Command
     end
 
     hosts.desc "List the layers to which the host belongs"
-    hosts.arg_name "id"
+    hosts.arg_name "HOST"
     hosts.command :layers do |c|
       c.action do |global_options, options, args|
-        id = require_arg(args, 'id')
+        id = require_arg(args, 'HOST')
         host = api.host(id)
         display host_layer_roles(host).map(&:identifier), options
       end
+    end
+  end
+
+  def self.format_cidr(cidr)
+    case cidr
+    when 'all'
+      []
+    when nil
+      nil
+    else
+      cidr.split(',').each {|x| x.strip!}
     end
   end
 end

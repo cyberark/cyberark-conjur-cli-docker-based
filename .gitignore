@@ -1,3 +1,4 @@
+*.deb
 .gems
 .rbenv*
 *.policy
