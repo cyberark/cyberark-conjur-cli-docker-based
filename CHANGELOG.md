@@ -1,10 +1,7 @@
-# 4.29.1
-
- * Add `conjur version` (as well as `conjur server version`) command to show server version info.
- * Add `conjur server health` and `conjur server info` to display server health and info.
-
 # 4.29.0
 
+* Add `conjur version` (as well as `conjur server version`) command to show server version info.
+* Add `conjur server health` and `conjur server info` to display server health and info.
 * Add `cidr` commands to user and host
 * Move `audit send` and `host factory` commands from plugins into the core CLI
 * Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
