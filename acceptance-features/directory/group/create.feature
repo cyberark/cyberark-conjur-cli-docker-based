@@ -15,6 +15,5 @@ Feature: Create a group
     And I successfully run `conjur group members add $ns/ops user:bob@$ns`
     When I successfully run `conjur group members list $ns/ops`
     Then the JSON response should have 2 entries
-    And the JSON response at "0" should include "admin@"
+    And the JSON response at "0" should include "admin"
     And the JSON response at "1" should include "bob@"
-      

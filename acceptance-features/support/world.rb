@@ -5,7 +5,7 @@ module ConjurCLIWorld
   include Aruba::Api
   
   def last_json
-    stdout_from(@last_cmd)
+    process_cmd(last_command_started.stdout)
   end
   
   def find_or_create_password(username)
@@ -24,20 +24,7 @@ module ConjurCLIWorld
   def run(cmd, *args)
     # it's a thunk now so it should be returned. puts can be added back as block if we want to
     super process_cmd(cmd), *args
-
-    #puts stderr_from(cmd)
-    #puts stdout_from(cmd)
   end 
-
-  def stderr_from(cmd)
-    super process_cmd(cmd)
-  end
-  def stdout_from(cmd)
-    super process_cmd(cmd)
-  end 
-  def output_from(cmd)
-    super process_cmd(cmd)
-  end
   
   # Substitute the namespace for marker $ns
   def unescape(string)

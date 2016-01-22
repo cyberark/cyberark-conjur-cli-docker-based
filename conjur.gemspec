@@ -17,7 +17,7 @@ Gem::Specification.new do |gem|
 
 
   gem.add_dependency 'activesupport'
-  gem.add_dependency 'conjur-api', '~> 4.20', '>= 4.20.1'
+  gem.add_dependency 'conjur-api', '~> 4.21'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline'
   gem.add_dependency 'netrc', '~> 0.10.2'
@@ -29,7 +29,7 @@ Gem::Specification.new do |gem|
 
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov'
-  gem.add_development_dependency 'aruba', '~> 0.12.0'
+  gem.add_development_dependency 'aruba', '~> 0.12'
   gem.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
   gem.add_development_dependency 'ci_reporter_cucumber', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 10.0'
