@@ -100,7 +100,8 @@ By default, this command creates one token. Optionally, it can be used to create
         c.desc "Number of identical tokens to create"
         c.flag [:c, :count]
 
-        c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional)"
+        c.arg_name "cidr"
+        c.desc "A comma-delimited list of CIDR addresses to restrict token to (optional)"
         c.flag [:cidr]
 
         c.action do |global_options,options,args|
