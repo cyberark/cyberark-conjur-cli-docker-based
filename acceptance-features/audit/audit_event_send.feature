@@ -32,9 +32,11 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
         And I login as a new host
         And I run `conjur audit send` interactively
         And I pipe in the file "audit_event.json"
-        And the exit status should be 0
+        Then the exit status should be 0
         And I login as "observer@$ns"
+        And I reset the command list
 
+		@announce-stdout
     Scenario: Default fields are included in audit event
         When I run `conjur audit role -l 1 -o 3 host:$ns/monitoring/server`
         Then the JSON response should have the following:
@@ -52,6 +54,7 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
             | request               |
             | conjur                |
 
+		@announce-stdout
     Scenario: Default fields are filled properly
         When I run `conjur audit role -l 1 -o 3 host:$ns/monitoring/server`
         Then the JSON response at "timestamp" should include "2014-06-30T03:25:00"
@@ -92,13 +95,12 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
 
     Scenario: Custom event is indexed per resource
         When I run `conjur audit resource -s host:$ns/monitoring/server`
-        Then the output should match /monitoring.server reported custom:sudo by .*:user:eve@(.*) on .*:host:(.*).monitoring.server \(allowed: false\); message: eve tried to run .* as root \(failed with user NOT in sudoers\)/
-           
+        Then the output should match /reported custom:sudo by cucumber:user:eve/
+        And  the output should match /allowed: false/
+        And  the output should match /eve tried to run/
 
-    Scenario: Custom event is indexed per submitter role
-        When I run `conjur audit role -s host:$ns/monitoring/server`
-        Then the output should match /monitoring.server reported custom:sudo by .*:user:eve@(.*) on .*:host:(.*).monitoring.server \(allowed: false\); message: eve tried to run .* as root \(failed with user NOT in sudoers\)/
-    
     Scenario: Custom event is indexed per other roles
         When I run `conjur audit role -s user:eve@$ns`
-        Then the output should match /monitoring.server reported custom:sudo by .*:user:eve@(.*) on .*:host:(.*).monitoring.server \(allowed: false\); message: eve tried to run .* as root \(failed with user NOT in sudoers\)/
+        Then the output should match /reported custom:sudo by cucumber:user:eve/
+        And  the output should match /allowed: false/
+        And  the output should match /eve tried to run/

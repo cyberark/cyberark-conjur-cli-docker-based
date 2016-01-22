@@ -13,6 +13,7 @@ Feature: Check an environment
     And I run `conjur authn login -u alice@$ns` interactively
     And I type "foobar"
     And the exit status should be 0
+    And I reset the command list
 
   Scenario: Check against permitted variables
     When I run `conjur env check --yaml '{ aws_access_key: !var $ns/access_key , aws_secret_key: !var $ns/secret_key }'`

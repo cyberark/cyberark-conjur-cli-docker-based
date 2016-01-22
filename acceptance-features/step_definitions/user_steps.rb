@@ -37,7 +37,8 @@ Given(/^I login as "(.*?)"$/) do |username|
   username_ns = username.gsub('$ns',@namespace)
   password = find_password(username_ns)
   
-  Conjur::Authn.save_credentials username: username_ns, password: password
+  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{username_ns}")
+  step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{password}")
 end
 
 Then(/^I(?: can)? type and confirm a new password/) do

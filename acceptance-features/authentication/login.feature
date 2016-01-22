@@ -9,6 +9,4 @@ Feature: Login a new user
     And I run `conjur authn login alice@$ns` interactively
     And I type "foobar"
     And the exit status should be 0
-    And I successfully run `conjur authn whoami`
-    Then the JSON at "username" should be %{LOGIN}
     
