@@ -14,9 +14,7 @@ Feature: Check an environment
     And I type "foobar"
     And the exit status should be 0
 
-
   Scenario: Check against permitted variables
-
     When I run `conjur env check --yaml '{ aws_access_key: !var $ns/access_key , aws_secret_key: !var $ns/secret_key }'`
     Then the exit status should be 0
     And the stdout should contain "aws_access_key: available\naws_secret_key: available\n"

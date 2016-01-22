@@ -1,5 +1,5 @@
-Then /^I show the output$/ do
-  puts all_output
+Then /^I reset the command list/ do
+  aruba.command_monitor.clear
 end
 
 # this is step copypasted from https://github.com/cucumber/aruba/blob/master/lib/aruba/cucumber.rb#L24 

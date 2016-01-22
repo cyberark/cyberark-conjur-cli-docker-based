@@ -9,12 +9,11 @@ end
 
 Given(/^I create a new user named "(.*?)"$/) do |username|
   username_ns = username.gsub('$ns',@namespace)
-  password = find_or_create_password(username_ns)
  
-  step "I run `conjur user create --as-role user:admin@#{@namespace} -p #{username_ns}` interactively"
-  step %Q(I type "#{password}")
-  step %Q(I type "#{password}")
-  step "the exit status should be 0"
+  step "I successfully run `conjur user create --as-role user:admin@#{@namespace} #{username_ns}`"
+  
+  user_info = JSON.parse(last_command_started.stdout)
+  save_password username_ns, user_info['api_key']
 end
 
 Given(/^I create a new host with id "(.*?)"$/) do |hostid|
@@ -36,7 +35,7 @@ end
 
 Given(/^I login as "(.*?)"$/) do |username|
   username_ns = username.gsub('$ns',@namespace)
-  password = find_or_create_password(username_ns)
+  password = find_password(username_ns)
   
   Conjur::Authn.save_credentials username: username_ns, password: password
 end

@@ -8,10 +8,22 @@ module ConjurCLIWorld
     stdout_from(@last_cmd)
   end
   
-  def find_or_create_password(username)
+  def passwords
     @passwords ||= {}
-    unless password = @passwords[username] 
-      password = @passwords[username] = SecureRandom.hex(12)
+  end
+  
+  def save_password username, password
+    raise "Found existing password for user '#{username}'" if passwords[username]
+    passwords[username] = password
+  end
+  
+  def find_password username
+    passwords[username] or raise "No password for user '#{username}'"
+  end 
+  
+  def find_or_create_password(username)
+    unless password = passwords[username] 
+      password = passwords[username] = SecureRandom.hex(12)
     end
     password
   end
