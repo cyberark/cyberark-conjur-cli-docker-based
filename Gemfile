@@ -12,4 +12,5 @@ group :test, :development do
   gem 'pry'
   gem 'pry-doc'
   gem 'ruby-prof'
+  gem 'conjur-debify', '>= 0.7.0'
 end

@@ -106,4 +106,29 @@ describe Conjur::Command::Users, logged_in: true do
       end
     end
   end
+
+  context 'rotating api key' do
+
+
+    describe_command 'user rotate_api_key' do
+      before do
+        expect(RestClient::Request).to receive(:execute).with({
+                    method: :put,
+                    url: 'https://authn.example.com/users/api_key',
+                    user: username,
+                    password: api_key,
+                    headers: {},
+                    payload: ''
+                }).and_return double(:response, body: 'new api key')
+        expect(Conjur::Authn).to receive(:save_credentials).with({
+                    username: username,
+                    password: 'new api key'
+                })
+      end
+
+      it 'puts with basic auth' do
+        invoke
+      end
+    end
+  end
 end
