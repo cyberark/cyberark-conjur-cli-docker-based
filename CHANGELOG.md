@@ -1,3 +1,7 @@
+# 4.29.1
+
+* Add --cidr option to hostfactory tokens create
+
 # 4.29.0
 
 * Add `cidr` commands to user and host
