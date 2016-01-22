@@ -1,6 +1,6 @@
 # 4.29.0
 
-* Add `cidr` commands to user and host
+* Add `cidr` commands to `user`, `host`, and `hostfactory token`
 * Move `audit send` and `host factory` commands from plugins into the core CLI
 * Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
 

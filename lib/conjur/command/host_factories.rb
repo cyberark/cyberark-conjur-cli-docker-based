@@ -99,7 +99,11 @@ By default, this command creates one token. Optionally, it can be used to create
         c.arg_name "count"
         c.desc "Number of identical tokens to create"
         c.flag [:c, :count]
-          
+
+        c.arg_name "cidr"
+        c.desc "A comma-delimited list of CIDR addresses to restrict token to (optional)"
+        c.flag [:cidr]
+
         c.action do |global_options,options,args|
           id = require_arg(args, 'hostfactory')
 
@@ -116,6 +120,9 @@ By default, this command creates one token. Optionally, it can be used to create
           count = (options[:count] || 1).to_i
           command_options = {}
           
+          cidr = format_cidr(options.delete(:cidr))
+          command_options[:cidr] = cidr unless cidr.nil?
+
           tokens = api.host_factory(id).create_tokens expiration, count, command_options
           display tokens.map(&:to_json)
         end
@@ -156,6 +163,17 @@ By default, this command creates one token. Optionally, it can be used to create
           display host
         end
       end
+    end
+  end
+
+  def self.format_cidr(cidr)
+    case cidr
+    when 'all'
+      []
+    when nil
+      nil
+    else
+      cidr.split(',').each {|x| x.strip!}
     end
   end
 end
