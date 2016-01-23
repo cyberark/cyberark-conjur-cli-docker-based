@@ -30,7 +30,12 @@ DESC
 
     def self.generate host
       config = configuration host
-      Script.generate config, options
+
+      if options[:json]
+        JSON.dump config
+      else
+        Script.generate config, options
+      end
     end
 
     def self.apply_client_config
@@ -59,5 +64,8 @@ DESC
     on("--sudo", "Indicates that all commands should be run via 'sudo'.")
     on("--conjur-cookbook-url NAME", "Overrides the default Chef cookbook URL for Conjur SSH.")
     on("--conjur-run-list RUNLIST", "Overrides the default Chef run list for Conjur SSH.")
+    on \
+      "--json",
+      "Don't generate the script, instead just dump the configuration as JSON"
   end
 end

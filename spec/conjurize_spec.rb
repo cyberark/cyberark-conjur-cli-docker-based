@@ -36,6 +36,23 @@ describe Conjur::Conjurize do
       script = Conjur::Conjurize.generate "id" => host_id, "api_key" => api_key
       expect(script).to include host_id, api_key, account, certificate.to_pem
     end
+
+    it "dumps JSON if required" do
+      allow(Conjur::Conjurize).to receive_messages options: { json: true }
+      expect(
+        JSON.load(
+          Conjur::Conjurize.generate(
+            "id" => host_id,
+            "api_key" => api_key
+          )
+        )
+      ).to eq \
+        "id" => host_id,
+        "api_key" => api_key,
+        "account" => account,
+        "certificate" => certificate.to_pem.strip,
+        "appliance_url" => appliance_url
+    end
   end
 
   describe ".configuration" do
