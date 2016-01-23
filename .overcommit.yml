@@ -1,0 +1,10 @@
+PreCommit:
+  HardTabs:
+    enabled: true
+    problem_on_unmodified_line: warn
+  RuboCop:
+    enabled: true
+    problem_on_unmodified_line: warn
+PostCheckout:
+  BundleInstall:
+   enabled: true
