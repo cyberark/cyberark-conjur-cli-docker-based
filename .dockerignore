@@ -1,3 +1,6 @@
+*.deb
+coverage
+*/reports
 .git
 vendor
 .idea
