@@ -9,9 +9,10 @@ raise "Not logged in to Conjur" unless username && password
 puts "Performing acceptance tests as root-ish user '#{username}'"
 
 # Future Aruba
-#Aruba.configure do |config|
-#  config.exit_timeout = 15
-#end
+Aruba.configure do |config|
+  config.exit_timeout = 15
+  config.io_wait_timeout = 2
+end
 
 Before('@conjurapi-log') do
   set_env 'CONJURAPI_LOG', 'stderr'
@@ -40,8 +41,6 @@ Before do
 
   step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{user.login}")
   step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{user.api_key}")
-  
-  @aruba_timeout_seconds = 30
 end
 
 After do

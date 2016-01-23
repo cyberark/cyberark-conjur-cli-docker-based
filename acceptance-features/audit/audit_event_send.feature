@@ -7,38 +7,52 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
         And I run `conjur resource permit host:$ns/monitoring/server user:observer@$ns read`
         And I run `conjur role grant_to user:eve@$ns user:observer@$ns`
         And I run `conjur role grant_to host:$ns/monitoring/server user:observer@$ns`
-        And a file named "audit_event.json" with namespace substitution:
-            """
-              {
-                "facility": "custom",
-                "action": "sudo",
-                "system_user": "eve",
-                "allowed": false,
-                "role": "user:eve@$ns",
-                "resource_id": "host:$ns/monitoring/server",
-                "error": "user NOT in sudoers",
-                "audit_message": "eve tried to run '/bin/cat /etc/shadow' as root",   
-                "command": "/bin/cat /etc/shadow",
-                "target_user": "root",
-                "sudo": {
-                  "TTY": "pts/0",
-                  "PWD": "/home/eve",
-                  "USER": "root",
-                  "COMMAND": "/bin/cat /etc/shadow"
-                },
-                "timestamp": "2014-06-30T03:25:00.542768+00:00"
-              }
-            """   
-        And I login as a new host
-        And I run `conjur audit send` interactively
-        And I pipe in the file "audit_event.json"
-        Then the exit status should be 0
+        And I login as the new host
+        And I send the audit event:
+        """
+        {
+          "facility": "custom",
+          "action": "sudo",
+          "system_user": "eve",
+          "allowed": false,
+          "role": "user:eve@$ns",
+          "resource_id": "host:$ns/monitoring/server",
+          "error": "user NOT in sudoers",
+          "audit_message": "eve tried to run '/bin/cat /etc/shadow' as root",   
+          "command": "/bin/cat /etc/shadow",
+          "target_user": "root",
+          "sudo": {
+            "TTY": "pts/0",
+            "PWD": "/home/eve",
+            "USER": "root",
+            "COMMAND": "/bin/cat /etc/shadow"
+          },
+          "timestamp": "2014-06-30T03:25:00.542768+00:00"
+        }
+        """   
         And I login as "observer@$ns"
         And I reset the command list
 
-		@announce-stdout
+    Scenario: Custom event is indexed by explictly submitted resources
+        When I run `conjur audit resource -s host:$ns/monitoring/server`
+        Then the stdout should contain "reported custom:sudo by cucumber:user:eve"
+        And  the stdout should contain "allowed: false"
+        And  the stdout should contain "eve tried to run"
+
+    Scenario: Custom event is indexed by the role which submitted it
+        When I run `conjur audit role -s host:$ns/monitoring/server`
+        Then the stdout should contain "reported custom:sudo by cucumber:user:eve"
+        And  the stdout should contain "allowed: false"
+        And  the stdout should contain "eve tried to run"
+
+    Scenario: Custom event is indexed by explicitly submitted roles
+        When I run `conjur audit role -s user:eve@$ns`
+        Then the stdout should contain "reported custom:sudo by cucumber:user:eve"
+        And  the stdout should contain "allowed: false"
+        And  the stdout should contain "eve tried to run"
+
     Scenario: Default fields are included in audit event
-        When I run `conjur audit role -l 1 -o 3 host:$ns/monitoring/server`
+        When I run `conjur audit resource -l 1 -o 3 host:$ns/monitoring/server`
         Then the JSON response should have the following:
             | id                    |
             | event_id              |
@@ -54,9 +68,8 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
             | request               |
             | conjur                |
 
-		@announce-stdout
     Scenario: Default fields are filled properly
-        When I run `conjur audit role -l 1 -o 3 host:$ns/monitoring/server`
+        When I run `conjur audit resource -l 1 -o 3 host:$ns/monitoring/server`
         Then the JSON response at "timestamp" should include "2014-06-30T03:25:00"
         And the JSON response at "kind" should be "audit"
         And the JSON response at "action" should be "sudo"
@@ -68,7 +81,7 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
         And the JSON response at "conjur/user" should include "/monitoring/server"
         
     Scenario: All custom fields are exposed
-        When I run `conjur audit role -l 1 -o 3 host:$ns/monitoring/server`
+        When I run `conjur audit resource -l 1 -o 3 host:$ns/monitoring/server`
         Then the JSON response should have the following:
             | facility              |
             | system_user           |   
@@ -82,7 +95,7 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
             | sudo                  |
     
     Scenario: Custom fields are filled properly
-        When I run `conjur audit role -l 1 -o 3 host:$ns/monitoring/server`
+        When I run `conjur audit resource -l 1 -o 3 host:$ns/monitoring/server`
         And the JSON response at "facility" should be "custom"
         And the JSON response at "system_user" should include "eve"
         And the JSON response at "allowed" should be false
@@ -92,15 +105,3 @@ Feature: Write and read custom audit events (full-stack test, not for publicatio
         And the JSON response at "command" should be "/bin/cat /etc/shadow"
         And the JSON response at "target_user" should be "root"
         And the JSON response at "sudo/PWD" should be "/home/eve"
-
-    Scenario: Custom event is indexed per resource
-        When I run `conjur audit resource -s host:$ns/monitoring/server`
-        Then the output should match /reported custom:sudo by cucumber:user:eve/
-        And  the output should match /allowed: false/
-        And  the output should match /eve tried to run/
-
-    Scenario: Custom event is indexed per other roles
-        When I run `conjur audit role -s user:eve@$ns`
-        Then the output should match /reported custom:sudo by cucumber:user:eve/
-        And  the output should match /allowed: false/
-        And  the output should match /eve tried to run/
