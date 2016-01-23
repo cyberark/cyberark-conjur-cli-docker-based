@@ -2,14 +2,7 @@ require 'methadone'
 require 'json'
 require 'open-uri'
 require 'conjur/version.rb'
-
-def latest_conjur_release
-  url = 'https://api.github.com/repos/conjur-cookbooks/conjur/releases'
-  resp = open(url)
-  json = JSON.parse(resp.read)
-  latest = json[0]['assets'].select {|asset| asset['name'] =~ /conjur-v\d.\d.\d.tar.gz/}[0]
-  latest['browser_download_url']
-end
+require "conjur/conjurize/script"
 
 module Conjur
   class Conjurize
@@ -31,77 +24,32 @@ DESC
       else
         STDIN.read
       end
-      host = JSON.parse input
 
-      login = host['id'] or raise "No 'id' field in host JSON"
-      api_key = host['api_key'] or raise "No 'api_key' field in host JSON"
+      puts generate JSON.parse input
+    end
 
-      require 'conjur/cli'
+    def self.generate host
+      config = configuration host
+      Script.generate config, options
+    end
+
+    def self.apply_client_config
+      require "conjur/cli"
       if conjur_config = options[:c]
         Conjur::Config.load [ conjur_config ]
       else
         Conjur::Config.load
       end
       Conjur::Config.apply
+    end
 
-      conjur_cookbook_url = conjur_run_list = nil
+    def self.configuration host
+      apply_client_config
 
-      conjur_run_list = options[:"conjur-run-list"]
-      conjur_cookbook_url = options[:"conjur-cookbook-url"]
-      chef_executable = options[:"chef-executable"]
-
-      if options[:ssh]
-        conjur_run_list ||= "conjur"
-        conjur_cookbook_url ||= latest_conjur_release()
-      end
-
-      sudo = lambda{|str|
-        [ options[:sudo] ? "sudo -n" : nil, str ].compact.join(" ")
-      }
-
-      header = <<-HEADER
-#!/bin/sh
-set -e
-
-# Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
-      HEADER
-
-      configure_conjur = <<-CONFIGURE
-#{sudo.call 'tee'} /etc/conjur.conf > /dev/null << CONJUR_CONF
-account: #{Conjur.configuration.account}
-appliance_url: #{Conjur.configuration.appliance_url}
-cert_file: /etc/conjur-#{Conjur.configuration.account}.pem
-netrc_path: /etc/conjur.identity
-plugins: []
-CONJUR_CONF
-
-#{sudo.call 'tee'} /etc/conjur-#{Conjur.configuration.account}.pem > /dev/null << CONJUR_CERT
-#{File.read(Conjur.configuration.cert_file).strip}
-CONJUR_CERT
-
-#{sudo.call 'tee'} /etc/conjur.identity > /dev/null << CONJUR_IDENTITY
-machine #{Conjur.configuration.appliance_url}/authn
-  login host/#{login}
-  password #{api_key}
-CONJUR_IDENTITY
-#{sudo.call 'chmod'} 0600 /etc/conjur.identity
-      CONFIGURE
-
-      install_chef = if conjur_cookbook_url && !chef_executable
-        %Q(curl -L https://www.opscode.com/chef/install.sh | #{sudo.call 'bash'})
-      else
-        nil
-      end
-
-      chef_executable ||= "chef-solo"
-
-      run_chef = if conjur_cookbook_url
-        %Q(#{sudo.call "#{chef_executable} -r #{conjur_cookbook_url} -o #{conjur_run_list}"})
-      else
-        nil
-      end
-
-      puts [ header, configure_conjur, install_chef, run_chef ].compact.join("\n")
+      host.merge \
+        "account" => Conjur.configuration.account,
+        "appliance_url" => Conjur.configuration.appliance_url,
+        "certificate" => File.read(Conjur.configuration.cert_file).strip
     end
 
     on("-c CONJUR_CONFIG_FILE", "Overrides defaults (CONJURRC env var, ~/.conjurrc, /etc/conjur.conf).")
