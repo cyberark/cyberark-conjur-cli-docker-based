@@ -145,7 +145,7 @@ class Conjur::Command
       audit.command :send do |c| 
         c.action do |global_options, options, args|
           json = ( args.shift || STDIN.read )
-          api.audit_send json 
+          api.audit_send json
           puts "Events sent successfully"
         end
       end

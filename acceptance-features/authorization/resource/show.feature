@@ -2,6 +2,7 @@ Feature: Show a resource
 
   Background:
     Given I successfully run `conjur resource create food:$ns/bacon`
+    And I reset the command list
   
   Scenario: Showing a resource displays all its fields
     When I successfully run `conjur resource show food:$ns/bacon`
@@ -12,9 +13,10 @@ Feature: Show a resource
 
   Scenario: You can't show a resource on which you have no privileges
     Given I login as a new user
+    And I reset the command list
     When I run `conjur resource show food:$ns/bacon`
     Then the exit status should be 1
-    And the output from "conjur resource show food:$ns/bacon" should contain "Forbidden"
+    And the output should contain "Forbidden"
     
   Scenario: You can show any resource if you have a privilege on it
     Once alice has a permission to fry bacon, she can show everything

@@ -7,7 +7,6 @@ Feature: Update the password of the logged-in user
     And I run `conjur user update_password` interactively
     Then I can type and confirm a new password
 
-  @announce
   Scenario: The new password can be used to login
     And I run `conjur user update_password` interactively
     And I type and confirm a new password
