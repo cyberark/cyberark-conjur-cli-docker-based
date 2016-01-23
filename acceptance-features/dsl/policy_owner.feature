@@ -13,23 +13,33 @@ end
   Scenario: --as-group works
     When I run `conjur policy load --as-group $ns/admin --collection $ns` interactively
     And I pipe in the file "policy.rb"
-    And the exit status should be 0
+    And the command completes successfully
     And I reset the command list
     When I run `conjur role members policy:$ns/test-policy-1.0`
-    Then the stdout should match /group:.*$ns.admin/
+    Then the JSON should be:
+    """
+    [
+	    "cucumber:group:%{NAMESPACE}/admin"
+	  ]
+	  """
 
   Scenario: --as-role works
     When I run `conjur policy load --as-role group:$ns/admin --collection $ns` interactively
     And I pipe in the file "policy.rb"
-    And the exit status should be 0
+    And the command completes successfully
     And I reset the command list
     When I run `conjur role members policy:$ns/test-policy-1.0`
-    Then the stdout should match /group:.*$ns.admin/
+    Then the JSON should be:
+    """
+    [
+	    "cucumber:group:%{NAMESPACE}/admin"
+	  ]
+	  """
 
   Scenario: --as-group doesn't interfere with policy ownership of other resources
     When I run `conjur policy load --as-group $ns/admin --collection $ns` interactively
     And I pipe in the file "policy.rb"
-    And the exit status should be 0
+    And the command completes successfully
     And I reset the command list
-    When I run `conjur resource show user:test_user@$ns-test-policy-1-0 | jsonfield owner`
-    Then the stdout should match /policy:$ns.test-policy-1.0/
+    When I run `conjur resource show user:test_user@$ns-test-policy-1-0`
+    Then the JSON at "owner" should be "cucumber:policy:%{NAMESPACE}/test-policy-1.0"

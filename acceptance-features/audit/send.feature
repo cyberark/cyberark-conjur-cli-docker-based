@@ -39,25 +39,6 @@ Feature: Create custom audit events
         And I run `conjur audit all -s`
         Then the output should match /user:joe@.* reported login \(failed with password mismatch\)/
 
-    Scenario: Fully described audit event (sent from file)
-        When a file named "audit_event.json" with:
-            """
-            { 
-                "action": "login",
-                "facility": "ssh",
-                "role": "user:bob",
-                "resource_id": "host:server",
-                "allowed": false,
-                "audit_message": "Client IP is 1.2.3.4",
-                "error": "password mismatch"
-            }
-            """ 
-        And I run `conjur audit send` interactively
-        And I pipe in the file "audit_event.json"
-        And the exit status should be 0
-        And I run `conjur audit all -s`
-        Then the output should match /user:joe@.* reported ssh:login by .*:user:bob on .*:host:server \(allowed: false\); message: Client IP is 1.2.3.4 \(failed with password mismatch\)/
-
     Scenario: Specify timestamp as IS08601 with timezone
         When I successfully run `conjur audit send '{"action":"login", "timestamp": "2014-07-01T01:02:03Z"}'`
         And I run `conjur audit all -s`

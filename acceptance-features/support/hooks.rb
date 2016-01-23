@@ -32,6 +32,7 @@ Before do
   @security_admin.add_member user, admin_option: true
   
   JsonSpec.memorize "MY_ROLEID", %Q("#{user.roleid}")
+  JsonSpec.memorize "NAMESPACE", @namespace
   
   @admin_api.group("pubkeys-1.0/key-managers").add_member @security_admin
   @admin_api.resource('!:!:conjur').permit 'elevate', user, grant_option: true
