@@ -3,7 +3,7 @@
 * Add `cidr` commands to user and host
 * Move `audit send` and `host factory` commands from plugins into the core CLI
 * Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
-* Add '--json' option for conjurize to dump the configuration as JSON file
+* Add `--json` option to `conjurize` to print the Conjur configuration and host identity as a JSON file
 
 # 4.28.2
 * `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
