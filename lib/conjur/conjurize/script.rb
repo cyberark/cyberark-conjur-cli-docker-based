@@ -29,11 +29,28 @@ set -e
     attr_reader :options
 
     def sudo
-      @sudo ||= options["sudo"] ? ->(x) { "sudo #{x}" } : ->(x) { x }
+      @sudo ||= options["sudo"] ? ->(x) { "sudo -n #{x}" } : ->(x) { x }
     end
 
-    def write_file path, content
-      "cat << EOF | #{sudo['tee']} #{path}\n" + content.strip + "\nEOF\n"
+    # Generate a piece of shell to write to a file
+    # @param path [String] absolute path to write to
+    # @param content [String] contents to write
+    # @option options [String, Fixnum] :mode mode to apply to the file
+    def write_file path, content, options = {}
+      [
+        ((mode = options[:mode]) && set_mode(path, mode)),
+        [sudo["tee"], path, "> /dev/null << EOF"].join(" "),
+        content.strip,
+        "EOF\n"
+      ].compact.join("\n")
+    end
+
+    def set_mode path, mode
+      mode = mode.to_s(8) if mode.respond_to? :to_int
+      [
+        [sudo["touch"], path].join(" "),
+        [sudo["chmod"], mode, path].join(" ")
+      ].join("\n")
     end
 
     def self.generate configuration, options
@@ -76,7 +93,7 @@ set -e
         cert_file: "/etc/conjur-#{configuration['account']}.pem",
         netrc_path: "/etc/conjur.identity",
         plugins: []
-      }
+      }.stringify_keys
     end
 
     def self.identity configuration
@@ -94,8 +111,12 @@ set -e
           "/etc/conjur-#{configuration['account']}.pem",
           configuration["certificate"]
         ),
-        write_file("/etc/conjur.identity", Script.identity(configuration))
-      ].join
+        write_file(
+          "/etc/conjur.identity",
+          Script.identity(configuration),
+          mode: 0600
+        )
+      ].join "\n"
     end
 
     def generate configuration
