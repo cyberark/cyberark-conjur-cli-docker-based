@@ -19,11 +19,10 @@ set -e
 # Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
 
 tee /etc/conjur.conf > /dev/null << EOF
----
 account: test
 appliance_url: https://conjur/api
-cert_file: "/etc/conjur-test.pem"
-netrc_path: "/etc/conjur.identity"
+cert_file: /etc/conjur-test.pem
+netrc_path: /etc/conjur.identity
 plugins: []
 EOF
 
@@ -70,11 +69,10 @@ set -e
 # Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
 
 tee /etc/conjur.conf > /dev/null << EOF
----
 account: test
 appliance_url: https://conjur/api
-cert_file: "/etc/conjur-test.pem"
-netrc_path: "/etc/conjur.identity"
+cert_file: /etc/conjur-test.pem
+netrc_path: /etc/conjur.identity
 plugins: []
 EOF
 

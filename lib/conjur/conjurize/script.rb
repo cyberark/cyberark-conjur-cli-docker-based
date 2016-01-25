@@ -87,13 +87,13 @@ set -e
     end
 
     def self.rc configuration
-      {
-        account: configuration["account"],
-        appliance_url: configuration["appliance_url"],
-        cert_file: "/etc/conjur-#{configuration['account']}.pem",
-        netrc_path: "/etc/conjur.identity",
-        plugins: []
-      }.stringify_keys
+      [
+        "account: #{configuration['account']}",
+        "appliance_url: #{configuration['appliance_url']}",
+        "cert_file: /etc/conjur-#{configuration['account']}.pem",
+        "netrc_path: /etc/conjur.identity",
+        "plugins: []"
+      ].join "\n"
     end
 
     def self.identity configuration
@@ -106,7 +106,7 @@ set -e
 
     def configure_conjur configuration
       [
-        write_file("/etc/conjur.conf", YAML.dump(Script.rc(configuration))),
+        write_file("/etc/conjur.conf", Script.rc(configuration)),
         write_file(
           "/etc/conjur-#{configuration['account']}.pem",
           configuration["certificate"]
