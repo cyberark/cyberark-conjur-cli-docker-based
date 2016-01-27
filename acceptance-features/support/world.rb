@@ -5,13 +5,25 @@ module ConjurCLIWorld
   include Aruba::Api
   
   def last_json
-    stdout_from(@last_cmd)
+    process_cmd last_command_started.stdout
   end
   
-  def find_or_create_password(username)
+  def passwords
     @passwords ||= {}
-    unless password = @passwords[username] 
-      password = @passwords[username] = SecureRandom.hex(12)
+  end
+  
+  def save_password username, password
+    raise "Found existing password for user '#{username}'" if passwords[username]
+    passwords[username] = password
+  end
+  
+  def find_password username
+    passwords[username] or raise "No password for user '#{username}'"
+  end 
+  
+  def find_or_create_password(username)
+    unless password = passwords[username] 
+      password = passwords[username] = SecureRandom.hex(12)
     end
     password
   end
@@ -24,21 +36,8 @@ module ConjurCLIWorld
   def run(cmd, *args)
     # it's a thunk now so it should be returned. puts can be added back as block if we want to
     super process_cmd(cmd), *args
-
-    #puts stderr_from(cmd)
-    #puts stdout_from(cmd)
   end 
 
-  def stderr_from(cmd)
-    super process_cmd(cmd)
-  end
-  def stdout_from(cmd)
-    super process_cmd(cmd)
-  end 
-  def output_from(cmd)
-    super process_cmd(cmd)
-  end
-  
   # Substitute the namespace for marker $ns
   def unescape(string)
     string = super
@@ -60,7 +59,6 @@ module ConjurCLIWorld
     cmd.gsub!("$ns", namespace)
     cmd.gsub!("$pubkeys_url", Conjur.configuration.pubkeys_url)
     
-    @last_cmd = cmd
     JsonSpec.memory.each do |k,v|
       cmd.gsub!("%{#{k}}", v)
     end

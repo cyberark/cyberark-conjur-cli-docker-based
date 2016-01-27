@@ -6,41 +6,42 @@ require 'conjur/authn'
 netrc = Conjur::Authn.netrc
 username, password = Conjur::Authn.get_credentials
 raise "Not logged in to Conjur" unless username && password
-puts "Logging in as #{username}"
+puts "Performing acceptance tests as root-ish user '#{username}'"
 
 # Future Aruba
-#Aruba.configure do |config|
-#  config.exit_timeout = 15
-#end
+Aruba.configure do |config|
+  config.exit_timeout = 15
+  config.io_wait_timeout = 2
+end
 
 Before('@conjurapi-log') do
   set_env 'CONJURAPI_LOG', 'stderr'
 end
 
 Before do
-  Conjur::Authn.save_credentials username: username, password: password
+  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{username}")
+  step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{password}")
   
   @admin_api = conjur_api = Conjur::Authn.connect
   
   @namespace = conjur_api.create_variable("text/plain", "id").id
   user = conjur_api.create_user "admin@#{@namespace}", ownerid: "#{Conjur.configuration.account}:user:#{username}"
 
-  netrc[Conjur::Authn.host] = [ "admin@#{@namespace}", user.api_key ]
-  netrc.save
-
   conjur_api = Conjur::Authn.connect
   @security_admin = conjur_api.create_group [ @namespace, "security_admin" ].join('/')
   @security_admin.add_member user, admin_option: true
   
   JsonSpec.memorize "MY_ROLEID", %Q("#{user.roleid}")
+  JsonSpec.memorize "NAMESPACE", @namespace
   
   @admin_api.group("pubkeys-1.0/key-managers").add_member @security_admin
   @admin_api.resource('!:!:conjur').permit 'elevate', user, grant_option: true
   @admin_api.resource('!:!:conjur').permit 'reveal',  user, grant_option: true
   
   conjur_api.create_user "attic@#{@namespace}"
-  
-  @aruba_timeout_seconds = 30
+
+  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{user.login}")
+  step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{user.api_key}")
 end
 
 After do
@@ -48,10 +49,6 @@ After do
     @admin_api.group("pubkeys-1.0/key-managers").remove_member @security_admin
   end
   tempfiles.each { |tempfile| File.unlink(tempfile) unless tempfile.nil? }
-end
-
-at_exit do
-  Conjur::Authn.save_credentials username: username, password: password
 end
 
 require 'ostruct'

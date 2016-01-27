@@ -11,22 +11,22 @@ Feature: conjurize program generates install scripts
 
   Scenario: Minimal conjurize script
     When I conjurize ""
-    Then the stdout should contain exactly:
+    Then the stdout should contain:
 """
 #!/bin/sh
 set -e
 
 # Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
 
-tee /etc/conjur.conf > /dev/null << CONJUR_CONF
+tee /etc/conjur.conf > /dev/null << EOF
 account: test
 appliance_url: https://conjur/api
 cert_file: /etc/conjur-test.pem
 netrc_path: /etc/conjur.identity
 plugins: []
-CONJUR_CONF
+EOF
 
-tee /etc/conjur-test.pem > /dev/null << CONJUR_CERT
+tee /etc/conjur-test.pem > /dev/null << EOF
 -----BEGIN CERTIFICATE-----
 MIIDZTCCAk2gAwIBAgIJAMzfPBZBq82XMA0GCSqGSIb3DQEBBQUAMDMxMTAvBgNV
 BAMTKGVjMi01NC04My05OS0xMzUuY29tcHV0ZS0xLmFtYXpvbmF3cy5jb20wHhcN
@@ -48,15 +48,15 @@ yvml0YdVSiMdTdIk58qG84pkmteSX9VYE1IF7xfWb3ji8292fm5q6cgqFLNYx2MI
 MVs0y+HobWbOKKhyfxpMT59dJxGu21QPbWfQLkHCCOlo2P4z9oku23sbvQQ7CbvS
 VoykXurdaZo9
 -----END CERTIFICATE-----
-CONJUR_CERT
+EOF
 
-tee /etc/conjur.identity > /dev/null << CONJUR_IDENTITY
+touch /etc/conjur.identity
+chmod 600 /etc/conjur.identity
+tee /etc/conjur.identity > /dev/null << EOF
 machine https://conjur/api/authn
-  login host/ec2/i-eaa5f700
-  password 3a4rb19rpjejr89h6r29kd2fb3808cpy
-CONJUR_IDENTITY
-chmod 0600 /etc/conjur.identity
-
+        login host/ec2/i-eaa5f700
+        password 3a4rb19rpjejr89h6r29kd2fb3808cpy
+EOF
 """
 
   Scenario: conjurize with SSH installation
@@ -68,15 +68,15 @@ set -e
 
 # Implementation note: 'tee' is used as a sudo-friendly 'cat' to populate a file with the contents provided below.
 
-tee /etc/conjur.conf > /dev/null << CONJUR_CONF
+tee /etc/conjur.conf > /dev/null << EOF
 account: test
 appliance_url: https://conjur/api
 cert_file: /etc/conjur-test.pem
 netrc_path: /etc/conjur.identity
 plugins: []
-CONJUR_CONF
+EOF
 
-tee /etc/conjur-test.pem > /dev/null << CONJUR_CERT
+tee /etc/conjur-test.pem > /dev/null << EOF
 -----BEGIN CERTIFICATE-----
 MIIDZTCCAk2gAwIBAgIJAMzfPBZBq82XMA0GCSqGSIb3DQEBBQUAMDMxMTAvBgNV
 BAMTKGVjMi01NC04My05OS0xMzUuY29tcHV0ZS0xLmFtYXpvbmF3cy5jb20wHhcN
@@ -98,17 +98,17 @@ yvml0YdVSiMdTdIk58qG84pkmteSX9VYE1IF7xfWb3ji8292fm5q6cgqFLNYx2MI
 MVs0y+HobWbOKKhyfxpMT59dJxGu21QPbWfQLkHCCOlo2P4z9oku23sbvQQ7CbvS
 VoykXurdaZo9
 -----END CERTIFICATE-----
-CONJUR_CERT
+EOF
 
-tee /etc/conjur.identity > /dev/null << CONJUR_IDENTITY
+touch /etc/conjur.identity
+chmod 600 /etc/conjur.identity
+tee /etc/conjur.identity > /dev/null << EOF
 machine https://conjur/api/authn
-  login host/ec2/i-eaa5f700
-  password 3a4rb19rpjejr89h6r29kd2fb3808cpy
-CONJUR_IDENTITY
-chmod 0600 /etc/conjur.identity
+        login host/ec2/i-eaa5f700
+        password 3a4rb19rpjejr89h6r29kd2fb3808cpy
+EOF
 
 curl -L https://www.opscode.com/chef/install.sh | bash
-
 """
     And the output should match:
     """
@@ -126,9 +126,9 @@ curl -L https://www.opscode.com/chef/install.sh | bash
 
   Scenario: conjurize with sudo-ized commands
     When I conjurize "--sudo --ssh"
-    Then the stdout should contain "sudo -n tee /etc/conjur.conf > /dev/null << CONJUR_CONF"
-    And the stdout should contain "sudo -n tee /etc/conjur-test.pem > /dev/null << CONJUR_CERT"
-    And the stdout should contain "sudo -n tee /etc/conjur.identity > /dev/null << CONJUR_IDENTITY"
-    And the stdout should contain "sudo -n chmod 0600 /etc/conjur.identity"
+    Then the stdout should contain "sudo -n tee /etc/conjur.conf > /dev/null << EOF"
+    And the stdout should contain "sudo -n tee /etc/conjur-test.pem > /dev/null << EOF"
+    And the stdout should contain "sudo -n tee /etc/conjur.identity > /dev/null << EOF"
+    And the stdout should contain "sudo -n chmod 600 /etc/conjur.identity"
     And the stdout should contain "curl -L https://www.opscode.com/chef/install.sh | sudo -n bash"
 

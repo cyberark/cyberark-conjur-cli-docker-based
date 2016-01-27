@@ -3,10 +3,11 @@ Feature: Show public keys for a user
   Background:
     Given I successfully run `conjur user create alice@$ns`
     And I successfully run `ssh-keygen -t rsa -C "laptop" -N "" -f ./id_alice_$ns`
+    And I reset the command list
 
   Scenario: Initial key list is empty
     When I run `conjur pubkeys show alice@$ns`
-    Then the stdout from "conjur pubkeys show alice@$ns" should contain exactly "\n"
+    Then the stdout should contain exactly "\n"
 
   Scenario: After adding a key, the key is shown
     Given I successfully run `conjur pubkeys add alice@$ns @id_alice_$ns.pub`
@@ -16,8 +17,9 @@ Feature: Show public keys for a user
   Scenario: After deleting the key, the key list is empty again
     Given I successfully run `conjur pubkeys add alice@$ns @id_alice_$ns.pub`
     And I successfully run `conjur pubkeys delete alice@$ns laptop`
+    And I reset the command list
     And I run `conjur pubkeys show alice@$ns`
-    Then the stdout from "conjur pubkeys show alice@$ns" should contain exactly "\n"
+    Then the stdout should contain exactly "\n"
 
   Scenario: Public keys can be listed using cURL, without authentication
     Given I successfully run `conjur pubkeys add alice@$ns @id_alice_$ns.pub`
