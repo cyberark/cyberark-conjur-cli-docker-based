@@ -33,3 +33,4 @@ update_ci.sh
 .ruby-version
 .ruby-gemset
 vendor/bundle
+Dockerfile.*
