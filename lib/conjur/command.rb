@@ -420,6 +420,14 @@ an alternative destination role.)
         
         password
       end
+      
+      def has_admin?(role, other_role)
+        memberships = role.memberships.map(&:roleid)
+        other_role.members.any? { |m| memberships.member?(m.member.roleid) && m.admin_option }
+      rescue RestClient::Forbidden
+        false
+      end
+
     end
   end
 end

@@ -39,9 +39,17 @@ class Conjur::Command::HostFactories < Conjur::Command
           exit_now! "Use --as-group or --as-role to indicate the host factory role"
         end
         
+        owner_role = api.role(options[:ownerid])
+
         layers = (options[:layer] || "").split(/\s/)
-        layers.each do |layer|
-          exit_now! "Layer '#{layer}' does not exist" unless api.layer(layer).exists?
+        exit_now! "Provide at least one layer" unless layers.count > 0
+
+        layers.each do |layerid|
+          layer = api.layer(layerid)
+          exit_now! "Layer '#{layerid}' does not exist" unless layer.exists?
+          unless has_admin?(owner_role, layer.role)
+            exit_now! "#{owner_role.id} must be an admin of layer '#{layerid}' to create a host factory for it" 
+          end
         end
         
         command_options = options.dup
