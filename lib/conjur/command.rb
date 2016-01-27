@@ -254,6 +254,22 @@ an alternative destination role.)
           obj.role.revoke_from member
         end
       end
+
+      def retire_internal_role roleObj
+        members = roleObj.members
+        # Move the invoking role to the end of the roles list, so that it doesn't
+        # lose its permissions in the middle of this operation.
+        self_member = members.select{|m| m.member.roleid == current_user.role.roleid}
+        self_member.each do |m|
+          members.delete m
+        end
+        members.concat self_member if self_member
+        members.each do |r|
+          member = api.role(r.member)
+          puts "Revoking from role #{member.roleid}"
+          roleObj.revoke_from member
+        end
+      end
       
       def give_away_resource obj, options
         destination = options[:"destination-role"]

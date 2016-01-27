@@ -104,6 +104,34 @@ class Conjur::Command::Layers < Conjur::Command
       end
     end
 
+    layer.desc "Decommission a layer"
+    layer.arg_name "LAYER"
+    layer.command :retire do |c|
+      retire_options c
+
+      c.action do |global_options,options,args|
+        id = require_arg(args, 'LAYER')
+        
+        layer = api.layer(id)
+        
+        validate_retire_privileges layer, options
+        
+        retire_resource layer
+        retire_role layer
+        # retire internal roles for observe, use_host, admin_host
+        account = Conjur::Core::API.conjur_account
+        ['observe', 'use_host', 'admin_host'].each do |priv|
+          role_name = ['layer', id, priv].join('/')
+          role_id = [ account, '@', role_name].join(':')
+          role_obj = api.role(role_id)
+          retire_internal_role role_obj
+        end
+        give_away_resource layer, options
+        
+        puts "Layer retired"
+      end
+    end
+
     layer.desc "Operations on hosts"
     layer.command :hosts do |hosts|
       hosts.desc "Permit a privilege on hosts in the layer"
