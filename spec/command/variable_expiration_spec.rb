@@ -13,6 +13,7 @@ describe Conjur::Command::Variables, :logged_in => true do
   end
 
   let (:variable) { double(:name => 'foo') }
+  let (:incompatible_server_msg) { /not supported/ }
   
   context "expiring a variable" do
     
@@ -109,15 +110,36 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
 
     end
+  end
 
-    context "with invalid arguments" do
-      describe_command 'variable:expirations --days 1 --months 1' do
-        it 'should fail' do
-          expect { invoke_silently }.to raise_error GLI::CustomExit
+  context 'connecting to incompatible server version while' do
+    context 'setting variable expiration' do
+      describe_command 'variable:expire --days 1 foo' do
+        it 'should display error message' do
+          expect(RestClient::Request).to receive(:execute).with({
+              :method => :post,
+              :url => 'https://core.example.com/variables/foo/expiration',
+              :headers => {},
+              :payload => anything
+          }).and_raise(RestClient::ResourceNotFound)
+          expect { invoke }.to raise_error(RestClient::ResourceNotFound)
+                           .and write(incompatible_server_msg).to(:stderr)
         end
       end
     end
 
+    context 'getting variable expirations' do
+      describe_command 'variable:expirations' do
+        it 'should display error message' do
+          expect(RestClient::Request).to receive(:execute).with({
+              :method => :get,
+              :url => 'https://core.example.com/variables/expirations',
+              :headers => {}
+          }).and_raise(RestClient::ResourceNotFound)
+          expect { invoke }.to raise_error(RestClient::ResourceNotFound)
+                           .and write(incompatible_server_msg).to(:stderr)
+        end
+      end
+    end
   end
-    
 end
