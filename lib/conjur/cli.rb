@@ -24,7 +24,6 @@ require 'active_support'
 require 'active_support/deprecation'
 require 'xdg'
 require 'fileutils'
-require 'semantic'
 
 # this makes mime/types gem load much faster by lazy loading
 # mime types and caching them in binary form
@@ -99,13 +98,14 @@ module Conjur
         version_compatible = true
         if command.instance_variable_defined?(:@conjur_min_version)
           begin
-            appliance_version = Conjur::API.appliance_info["services"]["appliance"]["version"]
+            appliance_version = Conjur::API.service_version 'appliance'
           rescue
             appliance_version = nil
           end
 
-          if appliance_version != nil
-            appliance_version = Semantic::Version.new appliance_version
+          if appliance_version.nil?
+            version_compatible = false
+          else
             min_version = command.instance_variable_get(:@conjur_min_version)
             if appliance_version < min_version
               version_compatible = false
