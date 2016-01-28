@@ -96,7 +96,7 @@ module Conjur
       end
 
       def command_version_compatible? command
-        version_compatible = false
+        version_compatible = true
         if command.instance_variable_defined?(:@conjur_min_version)
           begin
             appliance_version = Conjur::API.appliance_info["services"]["appliance"]["version"]
@@ -107,8 +107,8 @@ module Conjur
           if appliance_version != nil
             appliance_version = Semantic::Version.new appliance_version
             min_version = command.instance_variable_get(:@conjur_min_version)
-            if appliance_version >= min_version
-              version_compatible = true
+            if appliance_version < min_version
+              version_compatible = false
             end
           end
         end
