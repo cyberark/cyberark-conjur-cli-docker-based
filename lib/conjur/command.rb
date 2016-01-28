@@ -19,6 +19,7 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'base64'
+require 'semantic'
 
 module Conjur
   class Command
@@ -102,6 +103,17 @@ module Conjur
         command.arg_name 'annotate'
         command.desc 'Add variable annotations interactively'
         command.switch [:a, :annotate]
+      end
+
+      def min_version command, version
+        version = Semantic::Version.new version
+        if version.pre == nil
+          # Version check doesn't work correctly if one version has
+          # the "-###" suffix and the other does not. Versions
+          # returned by the server have the suffix.
+          version.pre = "0"
+        end
+        command.instance_variable_set(:@conjur_min_version, version)
       end
 
       def prompt_for_annotations

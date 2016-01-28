@@ -24,6 +24,7 @@ require 'active_support'
 require 'active_support/deprecation'
 require 'xdg'
 require 'fileutils'
+require 'semantic'
 
 # this makes mime/types gem load much faster by lazy loading
 # mime types and caching them in binary form
@@ -48,6 +49,8 @@ module Conjur
 
   class CLI
     extend GLI::App
+
+    @current_command = nil
 
     class << self
       def load_config
@@ -91,6 +94,26 @@ module Conjur
         load_plugins
         commands_from 'conjur/command'
       end
+
+      def command_version_compatible? command
+        version_compatible = false
+        if command.instance_variable_defined?(:@conjur_min_version)
+          begin
+            appliance_version = Conjur::API.appliance_info["services"]["appliance"]["version"]
+          rescue
+            appliance_version = nil
+          end
+
+          if appliance_version != nil
+            appliance_version = Semantic::Version.new appliance_version
+            min_version = command.instance_variable_get(:@conjur_min_version)
+            if appliance_version >= min_version
+              version_compatible = true
+            end
+          end
+        end
+        version_compatible
+      end
     end
 
     init!
@@ -122,13 +145,22 @@ module Conjur
       
       true
     end
+
+    around do |global,command,options,args,code|
+      @current_command = command
+      code.call
+      @current_command = nil
+    end
     
     on_error do |exception|
       require 'rest-client'
       require 'patches/conjur/error'
-
+        
       run_default_handler = true
-      if exception.is_a?(RestClient::Exception) && exception.response
+      if @current_command != nil && !command_version_compatible?(@current_command)
+        $stderr.puts "error: this command is not supported by the current Conjur server version"
+        run_default_handler = false
+      elsif exception.is_a?(RestClient::Exception) && exception.response
         err = Conjur::Error.create exception.response.body
         if err
           $stderr.puts "error: " + err.message

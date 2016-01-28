@@ -158,6 +158,7 @@ class Conjur::Command::Variables < Conjur::Command
     var.command :expire do |c|
       c.arg_name "NOW"
       c.desc 'Set variable to expire immediately'
+      min_version c, '4.6.0'
       c.switch [:n, :'now'], :negatable => false
 
       c.arg_name "DAYS"
@@ -193,15 +194,7 @@ class Conjur::Command::Variables < Conjur::Command
           duration = options[:i]
         end
 
-        begin
-          display api.variable(id).expires_in(duration)
-        rescue RestClient::ResourceNotFound
-          if expiration_supported?
-            raise
-          else
-            $stderr.puts "error: Conjur server version does not support variable expirations"
-          end
-        end
+        display api.variable(id).expires_in(duration)
       end
     end
 
@@ -210,6 +203,7 @@ class Conjur::Command::Variables < Conjur::Command
     var.command :expirations do |c|
       c.arg_name 'DAYS'
       c.desc 'Display variables that expire within the given number of days'
+      min_version c, '4.6.0'
       c.flag [:d, :'days']
 
       c.arg_name 'MONTHS'
@@ -235,15 +229,7 @@ class Conjur::Command::Variables < Conjur::Command
           duration = "P#{months.to_i}M"
         end
 
-        begin
-          display api.variable_expirations(duration)
-        rescue RestClient::ResourceNotFound
-          if expiration_supported?
-            raise
-          else
-            $stderr.puts "error: Conjur server version does not support variable expirations"
-          end
-        end
+        display api.variable_expirations(duration)
       end
     end
 
@@ -271,11 +257,6 @@ class Conjur::Command::Variables < Conjur::Command
     
     def durations(options)
       [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
-    end
-
-    def expiration_supported?
-      app_info = Conjur::API.appliance_info
-      app_info.has_key?("services") && app_info["services"].has_key?("expiration")
     end
   end
 
