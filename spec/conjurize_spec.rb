@@ -25,7 +25,7 @@ describe Conjur::Conjurize do
   let(:appliance_url) { "https://example.com" }
 
   before do
-    Conjur::Config.merge \
+    allow(Conjur.config).to receive_messages \
       account: account,
       cert_file: certfile.path,
       appliance_url: appliance_url
