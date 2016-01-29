@@ -17,7 +17,7 @@ describe Conjur::Command::Elevate do
       
       expect(RestClient::Request).to receive(:execute).with({
         method: :get,
-        url: "https://core.example.com/users/alice",
+        url: "https://core.example.com/api/users/alice",
         username: "dknuth",
         headers: {:authorization=>"Token token=\"eyJsb2dpbiI6ImRrbnV0aCJ9\"", x_conjur_privilege: "elevate"}
       }).and_return(double(:response, body: "[]"))

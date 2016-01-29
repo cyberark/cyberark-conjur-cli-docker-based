@@ -23,7 +23,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       before do
         expect(RestClient::Request).to receive(:execute).with({
             :method => :post,
-            :url => 'https://core.example.com/variables/foo/expiration',
+            :url => 'https://core.example.com/api/variables/foo/expiration',
             :headers => {},
             :payload => {:duration => duration}
           }).and_return(double('response', :body => '{}'))
@@ -79,7 +79,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       before do
         expect(RestClient::Request).to receive(:execute).with({
             :method => :get,
-            :url => 'https://core.example.com/variables/expirations',
+            :url => 'https://core.example.com/api/variables/expirations',
             :headers => expected_headers
           }).and_return(double('response', :body => '[]'))
       end
@@ -112,13 +112,42 @@ describe Conjur::Command::Variables, :logged_in => true do
     end
   end
 
+  let(:certificate) do
+    OpenSSL::X509::Certificate.new.tap do |cert|
+      key = OpenSSL::PKey::RSA.new 512
+      cert.public_key = key.public_key
+      cert.not_before = Time.now
+      cert.not_after = 1.minute.from_now
+      cert.sign key, OpenSSL::Digest::SHA256.new
+    end
+  end
+
+  let(:certfile) do
+    Tempfile.new("cert").tap do |file|
+      file.write certificate.to_pem
+      file.close
+    end
+  end
+
   context 'connecting to incompatible server version while' do
+    before do
+      allow(Conjur.config).to receive_messages \
+                              cert_file: certfile.path,
+                              appliance_url: core_host
+
+      expect(RestClient::Request).to receive(:execute).with({
+          :method => :get,
+          :url => "https://core.example.com/info",
+          :headers => {}
+      }).and_raise(RestClient::ResourceNotFound)
+    end
+
     context 'setting variable expiration' do
       describe_command 'variable:expire --days 1 foo' do
         it 'should display error message' do
           expect(RestClient::Request).to receive(:execute).with({
               :method => :post,
-              :url => 'https://core.example.com/variables/foo/expiration',
+              :url => "https://core.example.com/api/variables/foo/expiration",
               :headers => {},
               :payload => anything
           }).and_raise(RestClient::ResourceNotFound)
@@ -133,7 +162,7 @@ describe Conjur::Command::Variables, :logged_in => true do
         it 'should display error message' do
           expect(RestClient::Request).to receive(:execute).with({
               :method => :get,
-              :url => 'https://core.example.com/variables/expirations',
+              :url => 'https://core.example.com/api/variables/expirations',
               :headers => {}
           }).and_raise(RestClient::ResourceNotFound)
           expect { invoke }.to raise_error(RestClient::ResourceNotFound)

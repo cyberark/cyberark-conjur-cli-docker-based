@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Conjur::Command::Hosts, logged_in: true do
-  let(:collection_url) { "https://core.example.com/hosts" }
+  let(:collection_url) { "https://core.example.com/api/hosts" }
 
   context "creating a host" do
     let(:new_host) { double("new-host") }

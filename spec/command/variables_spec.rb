@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Conjur::Command::Variables, logged_in: true do
-  let(:host) { 'https://core.example.com' }
+  let(:host) { 'https://core.example.com/api' }
   let(:collection_url) { "#{host}/variables" }
   let(:mime_type) { 'text/plain' }
   let(:kind) { 'secret' }

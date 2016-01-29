@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Conjur::Command::Users, logged_in: true do
-  let(:create_user_url) { "https://core.example.com/users" }
+  let(:create_user_url) { "https://core.example.com/api/users" }
   let(:update_password_url) { "https://authn.example.com/users/password" }
   
   context "creating a user" do
