@@ -1,3 +1,8 @@
+# 4.29.1
+
+ * Add `conjur version` (as well as `conjur server version`) command to show server version info.
+ * Add `conjur server health` and `conjur server info` to display server health and info.
+
 # 4.29.0
 
 * Add `cidr` commands to `user`, `host`, and `hostfactory token`
