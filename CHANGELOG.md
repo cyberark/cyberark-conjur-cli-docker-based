@@ -1,7 +1,9 @@
-# 4.29.1
+# Unreleased
+* Add `conjur host rotate_api_key` command.
 
- * Add `conjur version` (as well as `conjur server version`) command to show server version info.
- * Add `conjur server health` and `conjur server info` to display server health and info.
+# 4.29.1
+* Add `conjur version` (as well as `conjur server version`) command to show server version info.
+* Add `conjur server health` and `conjur server info` to display server health and info.
 
 # 4.29.0
 * Add `conjur layer retire` to allow retiring a layer.
