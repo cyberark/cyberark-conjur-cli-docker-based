@@ -75,7 +75,7 @@ describe Conjur::Command::Hosts, logged_in: true do
       before do
         expect(RestClient::Request).to receive(:execute).with({
           method: :head,
-          url: 'https://core.example.com/hosts/redis001',
+          url: 'https://core.example.com/api/hosts/redis001',
           headers: {}
         }).and_return true
         expect(RestClient::Request).to receive(:execute).with({
