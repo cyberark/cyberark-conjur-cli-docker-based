@@ -68,6 +68,7 @@ class Conjur::Command::Resources < Conjur::Command
         id = full_resource_id( require_arg(args, "RESOURCE") )
         role = require_arg(args, "ROLE")
         privilege = require_arg(args, "PRIVILEGE")
+        $stderr.print "Granting #{role} permission to #{privilege} #{id}... "
         unless options[:g]
           api.resource(id).permit privilege, role
         else
