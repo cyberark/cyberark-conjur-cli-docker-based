@@ -1,10 +1,16 @@
-# 4.29.0
+# 4.29.1
 
+ * Add `conjur version` (as well as `conjur server version`) command to show server version info.
+ * Add `conjur server health` and `conjur server info` to display server health and info.
+
+# 4.29.0
+* Add `conjur layer retire` to allow retiring a layer.
 * Add `cidr` commands to `user`, `host`, and `hostfactory token`
 * Move `audit send` and `host factory` commands from plugins into the core CLI
 * Add `variable expire` and `variable expirations` subcommands. Variable expirations is available in version 4.6 of the Conjur server.
 * Add `--json` option to `conjurize` to print the Conjur configuration and host identity as a JSON file
-
+* Require `--layer` argument to `hostfactory create`, ensure that the owner is an admin of the layer.
+	
 # 4.28.2
 * `--collection` is now optional (with no default) for both `conjur script execute` and `conjur policy load`.
 
