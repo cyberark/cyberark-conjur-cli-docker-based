@@ -94,25 +94,17 @@ module Conjur
         commands_from 'conjur/command'
       end
 
-      def command_version_compatible? command
-        version_compatible = true
-        if command.instance_variable_defined?(:@conjur_min_version)
-          begin
-            appliance_version = Conjur::API.service_version 'appliance'
-          rescue
-            appliance_version = nil
-          end
+      def appliance_version
+        Conjur::API.service_version 'appliance'
+      rescue
+        nil
+      end
 
-          if appliance_version.nil?
-            version_compatible = false
-          else
-            min_version = command.instance_variable_get(:@conjur_min_version)
-            if appliance_version < min_version
-              version_compatible = false
-            end
-          end
-        end
-        version_compatible
+      def command_version_compatible? command
+        !command.instance_variable_defined?(:@conjur_min_version) ||
+          (appliance_version &&
+           command.instance_variable_get(:@conjur_min_version) <= appliance_version
+          )
       end
     end
 
