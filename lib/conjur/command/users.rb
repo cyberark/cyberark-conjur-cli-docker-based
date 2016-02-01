@@ -143,9 +143,9 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
-    user.desc 'Rotate a user or host API key'
+    user.desc "Rotate a user's API key"
     user.command :rotate_api_key do |c|
-      c.desc "Login of user who's API key we want to rotate (default: logged in user)"
+      c.desc "Login of user whose API key we want to rotate (default: logged-in user)"
       c.flag [:user, :u]
       c.action do |_global, options, _args|
         if options.include?(:user)

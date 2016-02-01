@@ -108,8 +108,6 @@ describe Conjur::Command::Users, logged_in: true do
   end
 
   context 'rotating api key' do
-
-
     describe_command 'user rotate_api_key' do
       before do
         expect(RestClient::Request).to receive(:execute).with({

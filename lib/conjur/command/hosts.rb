@@ -94,6 +94,44 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
+    hosts.desc "Rotate a host's API key"
+    hosts.command :rotate_api_key do |c|
+      c.desc "Login of host whose API key we want to rotate (default: logged-in host)"
+      c.flag [:host, :h]
+      c.action do |_global, options, _args|
+        if options.include?(:host)
+          host = options[:host]
+
+          unless api.host(host).exists?
+            exit_now! "host '#{host}' not found"
+          end
+
+          # Prepend 'host/' if it wasn't passed in
+          unless is_host_login?(host)
+            host = 'host/' + host
+          end
+
+          # Make sure we're not trying to rotate our own key with the user flag.
+          if api.username == host
+            exit_now! 'To rotate your own API key, use this command without the --host flag'
+          end
+
+          puts api.user(host).rotate_api_key
+        else
+          username, password = Conjur::Authn.read_credentials
+          # Make sure the current identity is a host
+          unless is_host_login?(username)
+            exit_now! "'#{username}' is not a valid host login, specify a host with the --host flag"
+          end
+
+          new_api_key = Conjur::API.rotate_api_key username, password
+          # Show the new one before saving credentials so we don't lose it on failure.
+          puts new_api_key
+          Conjur::Authn.save_credentials username: username, password: new_api_key
+        end
+      end
+    end
+
     hosts.desc "Update a hosts's attributes"
     hosts.arg_name "HOST"
     hosts.command :update do |c|
@@ -148,5 +186,9 @@ class Conjur::Command::Hosts < Conjur::Command
     else
       cidr.split(',').each {|x| x.strip!}
     end
+  end
+
+  def self.is_host_login?(username)
+    username.start_with?('host/')
   end
 end
