@@ -13,6 +13,7 @@ describe Conjur::Command::Variables, :logged_in => true do
   end
 
   let (:variable) { double(:name => 'foo') }
+  let (:incompatible_server_msg) { /not supported/ }
   
   context "expiring a variable" do
     
@@ -22,7 +23,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       before do
         expect(RestClient::Request).to receive(:execute).with({
             :method => :post,
-            :url => 'https://core.example.com/variables/foo/expiration',
+            :url => 'https://core.example.com/api/variables/foo/expiration',
             :headers => {},
             :payload => {:duration => duration}
           }).and_return(double('response', :body => '{}'))
@@ -78,7 +79,7 @@ describe Conjur::Command::Variables, :logged_in => true do
       before do
         expect(RestClient::Request).to receive(:execute).with({
             :method => :get,
-            :url => 'https://core.example.com/variables/expirations',
+            :url => 'https://core.example.com/api/variables/expirations',
             :headers => expected_headers
           }).and_return(double('response', :body => '[]'))
       end
@@ -109,15 +110,65 @@ describe Conjur::Command::Variables, :logged_in => true do
       end
 
     end
+  end
 
-    context "with invalid arguments" do
-      describe_command 'variable:expirations --days 1 --months 1' do
-        it 'should fail' do
-          expect { invoke_silently }.to raise_error GLI::CustomExit
+  let(:certificate) do
+    OpenSSL::X509::Certificate.new.tap do |cert|
+      key = OpenSSL::PKey::RSA.new 512
+      cert.public_key = key.public_key
+      cert.not_before = Time.now
+      cert.not_after = 1.minute.from_now
+      cert.sign key, OpenSSL::Digest::SHA256.new
+    end
+  end
+
+  let(:certfile) do
+    Tempfile.new("cert").tap do |file|
+      file.write certificate.to_pem
+      file.close
+    end
+  end
+
+  context 'connecting to incompatible server version while' do
+    before do
+      allow(Conjur.config).to receive_messages \
+                              cert_file: certfile.path,
+                              appliance_url: core_host
+
+      expect(RestClient::Request).to receive(:execute).with({
+          :method => :get,
+          :url => "https://core.example.com/info",
+          :headers => {}
+      }).and_raise(RestClient::ResourceNotFound)
+    end
+
+    context 'setting variable expiration' do
+      describe_command 'variable:expire --days 1 foo' do
+        it 'should display error message' do
+          expect(RestClient::Request).to receive(:execute).with({
+              :method => :post,
+              :url => "https://core.example.com/api/variables/foo/expiration",
+              :headers => {},
+              :payload => anything
+          }).and_raise(RestClient::ResourceNotFound)
+          expect { invoke }.to raise_error(RestClient::ResourceNotFound)
+                           .and write(incompatible_server_msg).to(:stderr)
         end
       end
     end
 
+    context 'getting variable expirations' do
+      describe_command 'variable:expirations' do
+        it 'should display error message' do
+          expect(RestClient::Request).to receive(:execute).with({
+              :method => :get,
+              :url => 'https://core.example.com/api/variables/expirations',
+              :headers => {}
+          }).and_raise(RestClient::ResourceNotFound)
+          expect { invoke }.to raise_error(RestClient::ResourceNotFound)
+                           .and write(incompatible_server_msg).to(:stderr)
+        end
+      end
+    end
   end
-    
 end

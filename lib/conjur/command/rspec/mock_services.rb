@@ -1,7 +1,7 @@
 shared_context "with fake endpoints and test config" do
   let(:authn_host) { 'https://authn.example.com' }
   let(:authz_host) { 'https://authz.example.com' }
-  let(:core_host) { 'https://core.example.com' }
+  let(:core_host) { 'https://core.example.com/api' }
   before do
     allow(Conjur::Authn::API).to receive(:host) { authn_host }
     allow(Conjur::Authz::API).to receive(:host) { authz_host }

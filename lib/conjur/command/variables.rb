@@ -158,6 +158,7 @@ class Conjur::Command::Variables < Conjur::Command
     var.command :expire do |c|
       c.arg_name "NOW"
       c.desc 'Set variable to expire immediately'
+      min_version c, '4.6.0'
       c.switch [:n, :'now'], :negatable => false
 
       c.arg_name "DAYS"
@@ -202,6 +203,7 @@ class Conjur::Command::Variables < Conjur::Command
     var.command :expirations do |c|
       c.arg_name 'DAYS'
       c.desc 'Display variables that expire within the given number of days'
+      min_version c, '4.6.0'
       c.flag [:d, :'days']
 
       c.arg_name 'MONTHS'
