@@ -7,12 +7,29 @@ class Conjur::Conjurize
     COOKBOOK_RELEASES_URL =
       "https://api.github.com/repos/conjur-cookbooks/conjur/releases".freeze
 
+    def self.tarballs_of_releases releases
+      releases.map do |release|
+        assets = release["assets"].select do |asset|
+          asset["name"] =~ /conjur-v\d.\d.\d.tar.gz/
+        end
+
+        [release["name"], assets.map { |asset| asset["browser_download_url"] }]
+      end
+    end
+
     def self.latest_conjur_cookbook_release
       json = JSON.parse open(COOKBOOK_RELEASES_URL).read
-      tarballs = json[0]["assets"].select do |asset|
-        asset["name"] =~ /conjur-v\d.\d.\d.tar.gz/
+      tarballs = tarballs_of_releases json
+
+      latest = tarballs.first
+      selected = tarballs.find { |release| !release[1].empty? }
+
+      if selected != latest
+        warn "WARNING: Latest cookbook release (#{latest.first}) does not "\
+            "contain a valid package. Falling back to #{selected.first}."
       end
-      tarballs.first["browser_download_url"]
+
+      selected[1].first
     end
 
     HEADER = <<-HEADER.freeze
