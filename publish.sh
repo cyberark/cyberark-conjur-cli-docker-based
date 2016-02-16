@@ -1,6 +1,9 @@
-#!/bin/bash -ex
+#!/bin/bash -exu
 
 export DEBUG=true 
 export GLI_DEBUG=true 
 
-debify publish 4.6 cli
+DISTRIBUTION=$1
+COMPONENT=$(echo $GIT_BRANCH | sed 's/^origin\\///' | tr '/' '.')
+
+debify publish --component $COMPONENT $DISTRIBUTION cli
