@@ -2,6 +2,7 @@
 
 * Implementation of `conjur bootstrap` is moved to the API gem, and made extensible.
 * Added new steps to `conjur bootstrap`, including the creation of service identities, and giving `elevate` and `reveal` to the `security_admin` group.
+* `hostfactory create` verifies that the current role is able to admin the host factory group; otherwise, host factory creation will fail.
 
 # 4.29.0
 * Add `conjur host rotate_api_key` command.
