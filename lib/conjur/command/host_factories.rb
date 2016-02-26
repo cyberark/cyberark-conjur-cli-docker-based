@@ -44,6 +44,9 @@ class Conjur::Command::HostFactories < Conjur::Command
         layers = (options[:layer] || "").split(/\s/)
         exit_now! "Provide at least one layer" unless layers.count > 0
 
+        unless has_admin?(current_role, owner_role)
+          exit_now! "#{owner_role.id} must be an admin of role '#{owner_role.roleid}' to create a host factory for it" 
+        end
         layers.each do |layerid|
           layer = api.layer(layerid)
           exit_now! "Layer '#{layerid}' does not exist" unless layer.exists?

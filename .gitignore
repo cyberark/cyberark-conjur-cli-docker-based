@@ -23,6 +23,7 @@ pkg
 rdoc
 spec/reports
 features/reports
+acceptance-features/reports
 test/tmp
 test/version_tmp
 tmp

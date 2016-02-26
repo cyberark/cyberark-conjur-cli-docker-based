@@ -449,6 +449,15 @@ an alternative destination role.)
         password
       end
       
+      def current_role
+        kind, id = api.username.split('/', 2)
+        if id.nil?
+          id = kind
+          kind = 'user'
+        end
+        api.role([ kind, id ].join(":"))
+      end
+      
       def has_admin?(role, other_role)
         memberships = role.memberships.map(&:roleid)
         other_role.members.any? { |m| memberships.member?(m.member.roleid) && m.admin_option }
