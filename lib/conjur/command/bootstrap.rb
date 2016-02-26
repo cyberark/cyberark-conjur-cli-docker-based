@@ -55,12 +55,6 @@ class Conjur::Command::Bootstrap < Conjur::Command
   end
 
   Conjur::CLI.command :bootstrap do |c|
-    c.desc "Don't perform up-front checks to see if you are sufficiently privileged to run this command."
-    c.long_desc %Q(By default, 'bootstrap' switches to 'elevate' mode before it performs its commands.
-    This switch can be used to disable that behavior.)
-    c.default_value false
-    c.switch [:f, :force]
-        
     c.desc "Print out all the commands to stderr as they run."
     c.default_value true
     c.switch [:v, :verbose]
@@ -82,7 +76,7 @@ class Conjur::Command::Bootstrap < Conjur::Command
       connect_options[:noask] = true if quiet?(options)
       Conjur::Authn.connect nil, connect_options
 
-      unless options[:force] || api.global_privilege_permitted?('elevate')
+      unless api.global_privilege_permitted?('elevate')
         $stderr.puts [
           "You must have 'elevate' privilege to bootstrap Conjur.",
           "If are performing a first-time bootstrap of Conjur, you should login as the 'admin' user",
@@ -97,10 +91,8 @@ class Conjur::Command::Bootstrap < Conjur::Command
       saved_log = Conjur.log
       Conjur.log = $stderr if options[:verbose]
             
-      unless options[:force]
-        api = self.api.with_privilege('elevate')
-        self.api = api
-      end
+      api = self.api.with_privilege('elevate')
+      self.api = api
       
       api.bootstrap BootstrapListener.new
       
