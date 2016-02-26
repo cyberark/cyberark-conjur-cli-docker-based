@@ -20,7 +20,7 @@
 #
 
 class Conjur::Command::Bootstrap < Conjur::Command
-  desc "Create initial users, groups, and permissions"
+  desc "Create initial users, groups, permissions, and service identities."
   long_desc %Q(When you launch a new Conjur master server, it contains only one login: the "admin" user. 
   The bootstrap command will finish the setup of a new Conjur system by creating other essential records.
 
@@ -28,17 +28,18 @@ class Conjur::Command::Bootstrap < Conjur::Command
 
   * Creation of a group called "security_admin".
 
-  * Giving the "security_admin" the power to manage public keys.
+	* Giving the "security_admin" the power to manage public keys.
 
-  * Creation of a user called "attic", which will be the owner of retired records.
-  
-  * Create some system identities, for use by system services.
+	* Creation of a user called "attic", which will be the owner of retired records.
 
-  * Storing the "attic" user's API key in a variable called "conjur/users/attic/api-key".
+	* Create system identities for use services such as pubkeys, rotator, and ldap-sync.
 
-  * (optional) Create a new user who will be made a member and admin of the "security_admin" group.
+	* (optional) Create a new user who will be made a member and admin of the "security_admin" group.
 
-  * (optional) If a new user was created, login as that user.
+	* (optional) If a new user was created, login as that user.
+
+  The Bootstrap command can be extended to perform additional actions by CLI plugins. The plugin just 
+  needs to define a new class in Conjur::Bootstrap::Command. Its "perform" method will be run automatically.
   )
   
   class BootstrapListener
@@ -46,16 +47,30 @@ class Conjur::Command::Bootstrap < Conjur::Command
       $stderr.puts msg
     end
   end
+  
+  class << self
+    def quiet? options
+      !$stdin.tty? || options[:quiet]
+    end
+  end
 
   Conjur::CLI.command :bootstrap do |c|
     c.desc "Don't perform up-front checks to see if you are sufficiently privileged to run this command."
+    c.long_desc %Q(By default, 'bootstrap' switches to 'elevate' mode before it performs its commands.
+    This switch can be used to disable that behavior.)
+    c.default_value false
     c.switch [:f, :force]
         
-    c.desc "Print out all the commands to stderr as they run"
+    c.desc "Print out all the commands to stderr as they run."
     c.default_value true
     c.switch [:v, :verbose]
       
-    c.desc "Don't prompt for any user input"
+    c.desc "Don't prompt for any user input, even if there's a TTY."
+    c.long_desc %Q(By default, 'bootstrap' may issue prompts on the TTY. For example, it will prompt you
+    to login if you aren't currently logged in as any user. It will also ask you if you want to create a new
+    'security_admin' user. This switch can be used to disable all such prompts, making it safe to run
+    'bootstrap' even when requests for user input cannot be handled. Prompts are also disabled if STDIN
+    is not a tty.)
     c.default_value false
     c.switch [:q, :quiet]
       
@@ -63,7 +78,9 @@ class Conjur::Command::Bootstrap < Conjur::Command
       require 'highline/import'
       
       # Ensure there's a logged in user
-      Conjur::Authn.connect
+      connect_options = {}
+      connect_options[:noask] = true if quiet?(options)
+      Conjur::Authn.connect nil, connect_options
 
       unless options[:force] || api.global_privilege_permitted?('elevate')
         $stderr.puts [
@@ -87,7 +104,7 @@ class Conjur::Command::Bootstrap < Conjur::Command
       
       api.bootstrap BootstrapListener.new
       
-      unless options[:quiet]
+      unless quiet?(options)
         security_admin = api.group('security_admin')
         security_administrators = security_admin.role.members.select{|m| m.member.roleid.split(':')[1..-1] != [ 'user', 'admin'] }
         $stderr.puts "Current 'security_admin' members are : #{security_administrators.map{|m| m.member.roleid.split(':', 3)[1..-1].join(':')}.sort.join(', ')}" unless security_administrators.blank?
