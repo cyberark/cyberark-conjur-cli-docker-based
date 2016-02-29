@@ -15,5 +15,10 @@ debify package \
 	-- \
 	--depends ruby2.0
 
-debify test -t 4.6-stable cli ci/test.sh
+debify package \
+	--dockerfile ci/Dockerfile-dev.fpm \
+	cli-dev \
+	-- \
+	--depends ruby2.0
 
+debify test -t 4.6-stable cli ci/test.sh
