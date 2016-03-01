@@ -23,7 +23,17 @@ Steps to publish a new version of the CLI:
 Publishing the experimental deb:
 
 1. `./build-deb.sh`
-2 `summon -f ci/secrets/publish.yml ./publish.sh <component> <distribution>`
+2. `summon -f ci/secrets/publish.yml ./publish.sh <component> <distribution>`
+
+Installing from experimental deb:
+
+```sh-session
+# apt-get install -y wget apt-transport-https
+# echo 'deb https://conjurinc.artifactoryonline.com/conjurinc/debian-public v4 master' >> /etc/apt/sources.list
+# wget -qO - https://conjurinc.artifactoryonline.com/conjurinc/api/gpg/key/public | apt-key add -
+# apt-get update
+# apt-get install conjur-cli
+```
 
 ---
 
