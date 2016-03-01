@@ -4,21 +4,16 @@ export DEBUG=true
 export GLI_DEBUG=true 
 
 # Make sure Gemfile.lock exists
-gem install -N bundler
-bundle
+#gem install -N bundler
+#bundle
 
 debify clean
 
-debify package \
-	--dockerfile ci/Dockerfile.fpm \
-	cli \
-	-- \
-	--depends ruby2.0
+docker build -t conjur-cli-fpm -f Dockerfile.fpm .
 
-debify package \
-	--dockerfile ci/Dockerfile-dev.fpm \
-	cli-dev \
-	-- \
-	--depends ruby2.0
+rm -rf tmp/deb
+mkdir -p tmp/deb
 
-debify test -t 4.6-stable cli ci/test.sh
+docker run -v $PWD/tmp/deb:/share --rm conjur-cli-fpm
+
+# debify test -t 4.6-stable cli ci/test.sh

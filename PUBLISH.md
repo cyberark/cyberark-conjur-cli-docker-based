@@ -1,6 +1,9 @@
 # Publishing the CLI
 
-We distribute the Conjur CLI as a package for Ubuntu, Centos, OSX and also as a rubygem.
+We distribute the Conjur CLI as an Omnibus package for Ubuntu, Centos, OSX and also as a rubygem.
+
+Experimentally, the CLI is also avaliable as a non-Omnibus deb package called 'rubygems-conjur-cli'
+which depends on ruby2.0.
 
 Steps to publish a new version of the CLI:
 
@@ -16,6 +19,11 @@ Steps to publish a new version of the CLI:
 10. In the `omnibus-conjur` project, upload each file to S3 with `./publish pkg/<filename>`.
 11. Update the links on the [CLI page](https://github.com/conjurinc/developer-www/blob/master/app/views/pages/cli/index.html.haml) for the devsite.
 12. Promote the devsite to production [in Jenkins](https://jenkins.conjur.net/job/developer-www/) [2](#ref2).
+
+Publishing the experimental deb:
+
+1. `./build-deb.sh`
+2 `summon -f ci/secrets/publish.yml ./publish.sh <component> <distribution>`
 
 ---
 
