@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 
 mkdir -p /tmp/gems
+rm -f /share/*
 
 rake build
 version=$(ruby -Ilib -rconjur/version -e "puts Conjur::VERSION")

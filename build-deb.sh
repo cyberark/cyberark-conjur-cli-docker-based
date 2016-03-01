@@ -7,7 +7,6 @@ debify clean
 
 docker build -t conjur-cli-fpm -f Dockerfile.fpm .
 
-rm -rf tmp/deb
 mkdir -p tmp/deb
 
 docker run -v $PWD/tmp/deb:/share --rm conjur-cli-fpm
