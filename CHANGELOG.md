@@ -1,4 +1,8 @@
-# Unreleased (4.30.0)
+# 4.31.1
+
+* Fix the `conjur-api` gem dependency version
+
+# 4.30.0
 
 * Implementation of `conjur bootstrap` is moved to the API gem, and made extensible.
 * Added new steps to `conjur bootstrap`, including the creation of service identities, and giving `elevate` and `reveal` to the `security_admin` group.

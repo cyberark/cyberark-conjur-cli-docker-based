@@ -459,6 +459,7 @@ an alternative destination role.)
       end
       
       def has_admin?(role, other_role)
+        return true if role.roleid == other_role.roleid
         memberships = role.memberships.map(&:roleid)
         other_role.members.any? { |m| memberships.member?(m.member.roleid) && m.admin_option }
       rescue RestClient::Forbidden
