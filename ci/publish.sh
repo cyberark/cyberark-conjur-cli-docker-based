@@ -25,7 +25,6 @@ for package in *.deb; do
     --rm \
     -v $PWD/tmp/deb:/src \
     conjur-cli-publish \
-    art \
     upload \
     --url https://conjurinc.artifactoryonline.com/conjurinc \
     --user $ART_USERNAME \

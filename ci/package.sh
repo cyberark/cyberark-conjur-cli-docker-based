@@ -1,6 +1,8 @@
 #!/bin/bash -ex
 
 mkdir -p /tmp/gems
+mkdir -p /tmp/src
+
 rm -f /share/*
 
 rake build
@@ -12,10 +14,7 @@ find /tmp/gems/cache -name '*.gem' | xargs -rn1 fpm -d ruby2.0 --prefix $(gem en
 
 cp -a *.deb /share
 
-rm -rf /src
-mkdir /src
-mkdir -p /src/opt/conjur/cli
-cd /src
+cd /tmp/src
 
 fpm -a all \
   -s dir \
@@ -24,6 +23,7 @@ fpm -a all \
   -v $version \
   -C . \
   -d "rubygem-conjur-cli = $version" \
+  --description "Conjur command-line tools" \
   --maintainer "Conjur Inc." \
   --vendor "Conjur Inc." \
   --url "https://www.conjur.net"
