@@ -1,4 +1,4 @@
-# 4.31.1
+# 4.30.1
 
 * Fix the `conjur-api` gem dependency version
 
