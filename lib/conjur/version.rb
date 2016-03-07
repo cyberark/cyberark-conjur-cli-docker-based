@@ -19,6 +19,47 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 module Conjur
-  VERSION = "4.30.1"
+  VERSION = "4.31.0"
   ::Version=VERSION
+  
+  class << self
+    # http://www.rubydoc.info/github/rubygems/rubygems/Gem/Version
+    def rubygems_semantic_version
+      git_version, match = parse_git_version
+      major, minor, build = VERSION.split('.')
+      pre = match[4]
+      if pre == "0"
+        [ major, minor, build ].join('.')
+      else
+        # This is about the best we can do.
+        # In branched development, we don't know which version is the "latest". So 
+        # when installing from an apt repository, it's essential to publish 
+        # different branches to different apt components, and the downstream 
+        # apt 'clients' need to know which component to install from.
+        [ major, minor, build, pre ].join('.')
+      end
+    end
+
+    def semver_semantic_version
+      git_version, match = parse_git_version
+      major, minor, build = VERSION.split('.')
+      pre = match[4]
+      revision = match[5]
+      if pre == "0"
+        [ major, minor, build ].join('.')
+      else
+        [ major, minor, "#{build}-pre.#{pre}+revision.#{revision}" ].join('.')
+      end
+    end
+    
+    def parse_git_branch
+      ENV['GIT_BRANCH'] || `git rev-parse --abbrev-ref HEAD`.strip
+    end
+    
+    def parse_git_version
+      git_version = `git describe --long --tags --abbrev=7 --match 'v*.*'`.strip
+      raise "Can't detect git version from #{version}" unless match = git_version.match(/^v(\d+)\.(\d+)\.(\d+)-(\d+)-g([0-9a-f]+)$/)
+      [ git_version, match ]
+    end
+  end
 end
