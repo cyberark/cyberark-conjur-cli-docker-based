@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "conjur-cli"
   gem.require_paths = ["lib"]
-  gem.version       = Conjur.rubygems_semantic_version
+  gem.version       = Conjur::VERSION
 
   gem.add_dependency 'activesupport', '~> 4.2'
   gem.add_dependency 'conjur-api', '~> 4.21'
