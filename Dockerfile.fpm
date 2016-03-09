@@ -4,7 +4,7 @@ RUN apt-get update -y && apt-get install -y software-properties-common git build
 
 RUN apt-add-repository ppa:brightbox/ruby-ng
 
-RUN apt-get update -y && apt-get install -y ruby2.0 ruby2.0-dev
+RUN apt-get update -y && apt-get install -y ruby2.2 ruby2.2-dev
 
 RUN gem install --no-rdoc --no-ri bundler fpm
 

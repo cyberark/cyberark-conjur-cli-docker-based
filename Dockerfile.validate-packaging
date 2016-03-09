@@ -2,7 +2,7 @@ FROM ubuntu:14.04
 
 RUN apt-get update && apt-get install -y software-properties-common
 RUN apt-add-repository ppa:brightbox/ruby-ng && apt-get update
-RUN apt-get install -y ruby2.0 dpkg-dev
+RUN apt-get install -y ruby2.2 dpkg-dev
 
 ADD ci/install.sh /
 

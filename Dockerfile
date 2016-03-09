@@ -1,4 +1,4 @@
-FROM ruby:2.1.5
+FROM ruby:2.2.4
 
 RUN mkdir /src
 WORKDIR /src
