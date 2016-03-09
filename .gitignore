@@ -1,3 +1,5 @@
+.DS_Store
+*.swp
 *.deb
 .gems
 .rbenv*
@@ -34,4 +36,3 @@ update_ci.sh
 .ruby-version
 .ruby-gemset
 vendor/bundle
-Dockerfile.*

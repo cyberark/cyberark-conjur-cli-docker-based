@@ -1,0 +1,18 @@
+FROM ubuntu:14.04
+
+RUN apt-get update -y && apt-get install -y software-properties-common git build-essential
+
+RUN apt-add-repository ppa:brightbox/ruby-ng
+
+RUN apt-get update -y && apt-get install -y ruby2.2 ruby2.2-dev
+
+RUN gem install --no-rdoc --no-ri bundler fpm
+
+RUN mkdir /conjur-cli
+
+WORKDIR /conjur-cli
+
+COPY . .
+
+ENTRYPOINT [ "./ci/package.sh" ]
+

@@ -1,3 +1,7 @@
+# (Unreleased) 4.31.0
+
+* Create a new non-Omnibus Debian packaging of the Ruby gems.
+
 # 4.30.1
 
 * Fix the `conjur-api` gem dependency version

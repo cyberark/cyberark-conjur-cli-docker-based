@@ -1,8 +1,7 @@
+tmp
 *.deb
 coverage
 */reports
-.git
 vendor
 .idea
 pkg
-Gemfile.lock
