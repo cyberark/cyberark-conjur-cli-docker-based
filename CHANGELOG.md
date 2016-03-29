@@ -1,6 +1,10 @@
-# (Unreleased) 4.31.0
+# 5.0.0
 
-* Create a new non-Omnibus Debian packaging of the Ruby gems.
+* **Breaking change** Ruby Policy DSL is now deprecated in favor of 
+[new YML policy markup](https://developer.conjur.net/reference/policy-markup.html).
+The existing `policy` subcommand has been moved to the `rubydsl` subcommand. 
+The new `policy` command operates on YML policies.
+* Created a new non-Omnibus Debian packaging of the Ruby gems.
 
 # 4.30.1
 
