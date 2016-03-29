@@ -20,12 +20,12 @@
 #
 require 'conjur/command/dsl_command'
 
-class Conjur::Command::Policy < Conjur::DSLCommand
-  desc "Manage Ruby DSL policies"
+class Conjur::Command::RubyDSL < Conjur::DSLCommand
+  desc "Manage Ruby DSL policies (deprecated)"
   long_desc 'DEPRECATED. Declarative YML policy supercedes Ruby policy DSL.'
-  command :rubydsl do |policy|
-    policy.desc "Load a policy from Conjur DSL"
-    policy.long_desc <<-DESC
+  command :rubydsl do |rubydsl|
+    rubydsl.desc "Load a policy from Conjur DSL"
+    rubydsl.long_desc <<-DESC
 Loads a Conjur policy from Ruby DSL, applying particular conventions to the role and resource
 ids.
 
@@ -41,8 +41,8 @@ annotations on the policy. The policy role becomes the owner of the owned policy
 --as-group and --as-role options can be used to set the owner of the policy role. The default
 owner of the policy role is the logged-in user (you), as always.
     DESC
-    policy.arg_name "FILE"
-    policy.command :load do |c|
+    rubydsl.arg_name "FILE"
+    rubydsl.command :load do |c|
       acting_as_option(c)
       collection_option(c)
       context_option(c)
@@ -62,9 +62,9 @@ owner of the policy role is the logged-in user (you), as always.
       end
     end
 
-    policy.desc 'Decommision a policy'
-    policy.arg_name 'POLICY'
-    policy.command :retire do |c|
+    rubydsl.desc 'Decommision a policy'
+    rubydsl.arg_name 'POLICY'
+    rubydsl.command :retire do |c|
       retire_options c
 
       c.action do |global_options, options, args |
@@ -72,18 +72,18 @@ owner of the policy role is the logged-in user (you), as always.
 
         # policy isn't a rolsource (yet), but we can pretend
         Policy = Struct.new(:role, :resource)
-        policy = Policy.new(api.role(id), api.resource(id))
+        rubydsl = Policy.new(api.role(id), api.resource(id))
 
-        validate_retire_privileges(policy, options)
+        validate_retire_privileges(rubydsl, options)
 
-        retire_resource(policy)
+        retire_resource(rubydsl)
 
         # The policy resource is owned by the policy role. Having the
         # policy role is what allows us to administer it. So, we have
         # to give the resource away before we can revoke the role.
-        give_away_resource(policy, options)
+        give_away_resource(rubydsl, options)
 
-        retire_role(policy)
+        retire_role(rubydsl)
 
         puts 'Policy retired'
       end
