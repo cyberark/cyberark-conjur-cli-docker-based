@@ -110,6 +110,7 @@ module Conjur
 
     init!
 
+    program_desc 'Command-line toolkit for managing roles, resources and privileges'
     version Conjur::VERSION
 
     pre do |global,command,options,args|
@@ -134,7 +135,7 @@ module Conjur
         exit_now!("Role '#{as_role}' does not exist, or you don't have permission to use it") unless role.exists?
         options[:ownerid] = role.roleid
       end
-      
+
       true
     end
 
@@ -143,11 +144,11 @@ module Conjur
       code.call
       @current_command = nil
     end
-    
+
     on_error do |exception|
       require 'rest-client'
       require 'patches/conjur/error'
-        
+
       run_default_handler = true
       if @current_command != nil && !command_version_compatible?(@current_command)
         $stderr.puts "error: this command is not supported by the current Conjur server version"

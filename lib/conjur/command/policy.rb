@@ -21,11 +21,12 @@
 require 'conjur/command/dsl_command'
 
 class Conjur::Command::Policy < Conjur::DSLCommand
-  desc "Manage policies"
-  command :policy do |policy|
+  desc "Manage Ruby DSL policies"
+  long_desc 'DEPRECATED. Declarative YML policy supercedes Ruby policy DSL.'
+  command :rubydsl do |policy|
     policy.desc "Load a policy from Conjur DSL"
     policy.long_desc <<-DESC
-Loads a Conjur policy from DSL, applying particular conventions to the role and resource
+Loads a Conjur policy from Ruby DSL, applying particular conventions to the role and resource
 ids.
 
 The first path element of each id is the collection. Policies can be separated into collections
@@ -74,19 +75,19 @@ owner of the policy role is the logged-in user (you), as always.
         policy = Policy.new(api.role(id), api.resource(id))
 
         validate_retire_privileges(policy, options)
-        
+
         retire_resource(policy)
-        
+
         # The policy resource is owned by the policy role. Having the
         # policy role is what allows us to administer it. So, we have
         # to give the resource away before we can revoke the role.
         give_away_resource(policy, options)
-        
+
         retire_role(policy)
 
         puts 'Policy retired'
       end
     end
-    
+
   end
 end

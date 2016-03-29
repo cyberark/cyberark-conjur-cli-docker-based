@@ -21,7 +21,7 @@
 require 'conjur/command/dsl_command'
 
 class Conjur::Command::Script < Conjur::DSLCommand
-  desc "Execute Conjur DSL scripts"
+  desc "Execute Ruby DSL scripts"
   command :script do |script|
     script.desc "Run a Conjur DSL script"
     script.arg_name "script"
