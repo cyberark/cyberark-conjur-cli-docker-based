@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'conjur/dsl/runner'
 
-describe Conjur::Command::Policy do
+describe Conjur::Command::RubyDSL do
   context "when logged in", logged_in: true do
     let(:role) do
       double("role", exists?: true, api_key: "the-api-key", roleid: "the-role")
@@ -22,8 +22,8 @@ describe Conjur::Command::Policy do
       allow(api).to receive(:role).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return role
       allow(api).to receive(:resource).with("the-account:policy:#{collection}/the-policy-1.0.0").and_return resource
     }
-    
-    describe_command 'policy:load --collection the-collection http://example.com/policy.rb' do
+
+    describe_command 'rubydsl:load --collection the-collection http://example.com/policy.rb' do
       let(:collection) { "the-collection" }
       before {
         allow(File).to receive(:exists?).with("http://example.com/policy.rb").and_return false
@@ -33,7 +33,7 @@ describe Conjur::Command::Policy do
         expect(invoke).to eq(0)
       end
     end
-    describe_command 'policy:load --collection the-collection policy.rb' do
+    describe_command 'rubydsl:load --collection the-collection policy.rb' do
       let(:collection) { "the-collection" }
       it "creates the policy" do
         expect(invoke).to eq(0)
@@ -44,16 +44,16 @@ describe Conjur::Command::Policy do
       before {
         stub_const("ENV", "USER" => "alice", "HOSTNAME" => "localhost")
       }
-      describe_command 'policy:load --as-group the-group policy.rb' do
+      describe_command 'rubydsl:load --as-group the-group policy.rb' do
         let(:group) { double(:group, exists?: true) }
         it "creates the policy" do
           allow(Conjur::Command.api).to receive(:role).with("the-account:group:the-group").and_return group
           expect_any_instance_of(Conjur::DSL::Runner).to receive(:owner=).with("the-account:group:the-group")
-          
+
           expect(invoke).to eq(0)
         end
       end
-      describe_command 'policy:load policy.rb' do
+      describe_command 'rubydsl:load policy.rb' do
         it "creates the policy with default collection" do
           expect(invoke).to eq(0)
         end
