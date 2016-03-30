@@ -4,6 +4,7 @@
 [new YML policy markup](https://developer.conjur.net/reference/policy-markup.html).
 The existing `policy` subcommand has been moved to the `rubydsl` subcommand. 
 The new `policy` command operates on YML policies.
+* CLI plugin config is now stored in `~/.conjur-plugins.yml`.
 * Created a new non-Omnibus Debian packaging of the Ruby gems.
 
 # 4.30.1
