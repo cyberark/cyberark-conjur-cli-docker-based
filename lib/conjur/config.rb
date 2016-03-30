@@ -30,6 +30,10 @@ module Conjur
         @@attributes = {}
       end
 
+      def plugin_config_files
+        [ File.expand_path("~/.conjur-plugins.yml") ]
+      end
+
       def user_config_files
         if ENV['CONJURRC']
           return ENV['CONJURRC']
@@ -46,7 +50,7 @@ module Conjur
       end
 
       def default_config_files
-        ['/etc/conjur.conf', user_config_files].flatten.uniq
+        ['/etc/conjur.conf', user_config_files, plugin_config_files].flatten.uniq
       end
 
       def load(config_files = default_config_files)

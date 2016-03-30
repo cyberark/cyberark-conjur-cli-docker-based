@@ -23,6 +23,7 @@ require 'rubygems'
 require 'rubygems/commands/install_command'
 require 'rubygems/commands/uninstall_command'
 require 'yaml'
+require 'fileutils'
 
 require 'conjur/command'
 
@@ -121,18 +122,17 @@ end
 
 def modify_plugin_list(op, plugin_name)
   config_exists = false
-  Conjur::Config.default_config_files.each do |f|
-    if File.file?(f)
-      config_exists = true
-      config = YAML.load(IO.read(f)).stringify_keys rescue {}
-
-      config['plugins'] ||= []
-      config['plugins'] += [plugin_name] if op == 'add'
-      config['plugins'] -= [plugin_name] if op == 'remove'
-      config['plugins'].uniq!
-
-      File.write(f, YAML.dump(config))
+  Conjur::Config.plugin_config_files.each do |f|
+    if !File.file?(f)
+      FileUtils.touch(f)
     end
+
+    config = YAML.load(IO.read(f)).stringify_keys rescue {}
+    config['plugins'] ||= []
+    config['plugins'] += [plugin_name] if op == 'add'
+    config['plugins'] -= [plugin_name] if op == 'remove'
+    config['plugins'].uniq!
+
+    File.write(f, YAML.dump(config))
   end
-  exit_now! 'No Conjur config file found, run "conjur init"' unless config_exists
 end
