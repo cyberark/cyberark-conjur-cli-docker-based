@@ -1,6 +1,6 @@
-# 5.1.0
+# 5.1.1
 
-* CLI plugin config is now stored in `~/.conjur-plugins.yml`.
+* Global CLI plugin config is now stored in `/opt/conjur/etc/plugins.yml`.
 
 # 5.0.0
 
