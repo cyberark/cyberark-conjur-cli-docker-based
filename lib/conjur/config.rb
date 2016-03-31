@@ -31,7 +31,7 @@ module Conjur
       end
 
       def plugin_config_files
-        [ File.expand_path("~/.conjur-plugins.yml") ]
+        [ '/opt/conjur/etc/plugins.yml' ]
       end
 
       def user_config_files
