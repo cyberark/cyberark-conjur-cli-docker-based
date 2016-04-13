@@ -134,6 +134,6 @@ def modify_plugin_list(op, plugin_name)
 
       File.write(f, YAML.dump(config))
     end
-    exit_now! 'No Conjur config file found for plugin installation' unless config_found
   end
+  exit_now! 'No Conjur config file found for plugin installation' unless config_found
 end

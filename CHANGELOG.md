@@ -1,3 +1,7 @@
+# 5.1.2
+
+* Fix problem finding config files for plugin installation
+
 # 5.1.1
 
 * Global CLI plugin config is now stored in `/opt/conjur/etc/plugins.yml`.
