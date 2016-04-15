@@ -11,7 +11,7 @@ end
     And I reset the command list
 
   Scenario: --as-group works
-    When I run `conjur policy load --as-group $ns/admin --collection $ns` interactively
+    When I run `conjur rubydsl load --as-group $ns/admin --collection $ns` interactively
     And I pipe in the file "policy.rb"
     And the command completes successfully
     And I reset the command list
@@ -24,7 +24,7 @@ end
 	  """
 
   Scenario: --as-role works
-    When I run `conjur policy load --as-role group:$ns/admin --collection $ns` interactively
+    When I run `conjur rubydsl load --as-role group:$ns/admin --collection $ns` interactively
     And I pipe in the file "policy.rb"
     And the command completes successfully
     And I reset the command list
@@ -37,7 +37,7 @@ end
 	  """
 
   Scenario: --as-group doesn't interfere with policy ownership of other resources
-    When I run `conjur policy load --as-group $ns/admin --collection $ns` interactively
+    When I run `conjur rubydsl load --as-group $ns/admin --collection $ns` interactively
     And I pipe in the file "policy.rb"
     And the command completes successfully
     And I reset the command list

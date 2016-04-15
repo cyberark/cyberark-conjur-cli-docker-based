@@ -9,7 +9,7 @@ end
     """
 
   Scenario: resource is create with correct ownership
-    When I run `conjur policy load --collection $ns` interactively
+    When I run `conjur rubydsl load --collection $ns` interactively
     And I pipe in the file "policy.rb"
     And the command completes successfully
     And I reset the command list
