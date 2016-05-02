@@ -31,5 +31,5 @@ for package in *.deb; do
     --password $ART_PASSWORD \
     --deb "$distribution"/"$component"/amd64 \
     $package \
-    debian-public
+    debian-local
 done
