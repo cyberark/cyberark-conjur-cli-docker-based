@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'highline', '~> 1.7'
   gem.add_dependency 'netrc', '~> 0.10.2'
   gem.add_dependency 'methadone', '~> 1.9'
+  gem.add_dependency 'bundler', '~> 1.11.2'
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'xdg', '~> 2.2'
 
