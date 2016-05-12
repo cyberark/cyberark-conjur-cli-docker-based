@@ -1,3 +1,4 @@
+* `conjurize` will ignore `conjur` cookbook releases that don't have an associated tarball
 * Pass `--recipe-url` argument to Chef, which is now required
 
 # 5.1.2
