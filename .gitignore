@@ -1,3 +1,6 @@
+Dockerfile.*
+.DS_Store
+*.swp
 *.deb
 .gems
 .rbenv*
@@ -23,6 +26,7 @@ pkg
 rdoc
 spec/reports
 features/reports
+acceptance-features/reports
 test/tmp
 test/version_tmp
 tmp
@@ -33,4 +37,3 @@ update_ci.sh
 .ruby-version
 .ruby-gemset
 vendor/bundle
-Dockerfile.*

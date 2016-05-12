@@ -1,13 +1,29 @@
 Feature: Create a Host Factory
+
   Background:
-    Given I successfully run `conjur layer create --as-group $ns/security_admin $ns/layer`
 
   Scenario: Create a host factory successfully
-    When I successfully run `conjur hostfactory create --as-group $ns/security_admin --layer $ns/layer $ns/hostfactory`
-    Then the JSON should have "deputy_api_key"
+    Given I successfully run `conjur layer create --as-group $ns/security_admin $ns/layer`
+    Then I successfully run `conjur hostfactory create --as-group $ns/security_admin --layer $ns/layer $ns/hostfactory`
+    And the JSON should have "deputy_api_key"
 
-  Scenario: Host factory owner must have admin on layer
+	Scenario: The client role can use itself as the hostfactory role
     Given I successfully run `conjur user create unprivileged@$ns`
+    And I successfully run `conjur layer create $ns/layer`
     When I run `conjur hostfactory create --as-role user:unprivileged@$ns --layer $ns/layer $ns/hostfactory`
-    Then the stderr should contain "must be an admin of layer"
-    And the stdout should not contain anything
+
+	Scenario: If current role cannot admin the layer, the error is reported
+		Given I successfully run `conjur layer create $ns/the-layer`
+		And I login as a new user
+		Given I successfully run `conjur group create $ns/the-group`
+		And I run `conjur hostfactory create --as-group $ns/the-group -l $ns/the-layer $ns/the-factory`
+		Then the exit status should not be 0
+		And the output should contain "must be an admin of layer"
+	
+	Scenario: If current role cannot admin the HF role, the error is reported
+		Given I successfully run `conjur group create $ns/the-group`
+		And I login as a new user
+		Given I successfully run `conjur layer create $ns/the-layer`
+		And I run `conjur hostfactory create --as-group $ns/the-group -l $ns/the-layer $ns/the-factory`
+		Then the exit status should not be 0
+		And the output should contain "must be an admin of role"

@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014-2015 Conjur Inc.
+# Copyright (C) 2014-2016 Conjur Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -19,6 +19,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 module Conjur
-  VERSION = "4.29.0"
+  VERSION = '5.1.2'
   ::Version=VERSION
 end

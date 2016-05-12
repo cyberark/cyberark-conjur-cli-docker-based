@@ -21,9 +21,7 @@ describe Conjur::CLI::Complete do
       end
 
       context 'with "conjur p"' do
-        it { expects_completions_for('p').to include 'plugin',
-                                                     'policy',
-                                                     'pubkeys' }
+        it { expects_completions_for('p').to include 'plugin', 'pubkeys' }
       end
 
       context 'with "conjur host l"' do
@@ -31,8 +29,8 @@ describe Conjur::CLI::Complete do
                                                           'list' }
       end
 
-      context 'with "conjur policy"' do
-        it { expects_completions_for('policy ').to include 'load' }
+      context 'with "conjur rubydsl"' do
+        it { expects_completions_for('rubydsl ').to include 'load' }
       end
     end
 

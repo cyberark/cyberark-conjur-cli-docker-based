@@ -1,6 +1,6 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
-export DEBUG=true 
-export GLI_DEBUG=true 
+distribution=$1
+component=${2:-`echo $GIT_BRANCH | sed 's/^origin\///' | tr '/' '.'`}
 
-debify publish 4.6 cli
+exec summon -f ci/secrets/publish.yml ./ci/publish.sh $distribution $component

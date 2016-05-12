@@ -15,13 +15,13 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
 
-
   gem.add_dependency 'activesupport', '~> 4.2'
-  gem.add_dependency 'conjur-api', '~> 4.20'
+  gem.add_dependency 'conjur-api', '~> 4.21'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline', '~> 1.7'
   gem.add_dependency 'netrc', '~> 0.10.2'
   gem.add_dependency 'methadone', '~> 1.9'
+  gem.add_dependency 'bundler', '~> 1.11.2'
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'xdg', '~> 2.2'
 

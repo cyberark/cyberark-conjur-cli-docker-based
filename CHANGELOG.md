@@ -1,4 +1,30 @@
-# Unreleased
+* Pass `--recipe-url` argument to Chef, which is now required
+
+# 5.1.2
+
+* Fix problem finding config files for plugin installation
+
+# 5.1.1
+
+* Global CLI plugin config is now stored in `/opt/conjur/etc/plugins.yml`.
+
+# 5.0.0
+
+* **Breaking change** Ruby Policy DSL is now deprecated in favor of 
+[new YML policy markup](https://developer.conjur.net/reference/policy-markup.html).
+The existing `policy` subcommand has been moved to the `rubydsl` subcommand. 
+The new `policy` command operates on YML policies.
+* Created a new non-Omnibus Debian packaging of the Ruby gems.
+
+# 4.30.1
+
+* Fix the `conjur-api` gem dependency version
+
+# 4.30.0
+
+* Implementation of `conjur bootstrap` is moved to the API gem, and made extensible.
+* Added new steps to `conjur bootstrap`, including the creation of service identities, and giving `elevate` and `reveal` to the `security_admin` group.
+* `hostfactory create` verifies that the current role is able to admin the host factory group; otherwise, host factory creation will fail.
 
 # 4.29.0
 * Add `conjur host rotate_api_key` command.

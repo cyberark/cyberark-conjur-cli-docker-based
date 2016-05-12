@@ -23,6 +23,7 @@ require 'rubygems'
 require 'rubygems/commands/install_command'
 require 'rubygems/commands/uninstall_command'
 require 'yaml'
+require 'fileutils'
 
 require 'conjur/command'
 
@@ -40,7 +41,7 @@ class Conjur::Command::Plugin < Conjur::Command
         Conjur::Config.plugins.each do |p|
           begin
             gem = Gem::Specification.find_by_name "conjur-asset-#{p}"
-            puts "#{p} (#{gem.version})"
+            puts "#{p} (#{gem.version}) - #{gem.summary}"
           rescue Gem::LoadError
             nil
           end
@@ -120,12 +121,12 @@ def uninstall_plugin(name)
 end
 
 def modify_plugin_list(op, plugin_name)
-  config_exists = false
-  Conjur::Config.default_config_files.each do |f|
-    if File.file?(f)
-      config_exists = true
+  config_found = false
+  # Check the dedicated plugin config file first
+  (Conjur::Config.plugin_config_files + Conjur::Config.default_config_files).uniq!.each do |f|
+    if File.exists?(f) and not config_found  # only write to the first file found
+      config_found = true
       config = YAML.load(IO.read(f)).stringify_keys rescue {}
-
       config['plugins'] ||= []
       config['plugins'] += [plugin_name] if op == 'add'
       config['plugins'] -= [plugin_name] if op == 'remove'
@@ -134,5 +135,5 @@ def modify_plugin_list(op, plugin_name)
       File.write(f, YAML.dump(config))
     end
   end
-  exit_now! 'No Conjur config file found, run "conjur init"' unless config_exists
+  exit_now! 'No Conjur config file found for plugin installation' unless config_found
 end
