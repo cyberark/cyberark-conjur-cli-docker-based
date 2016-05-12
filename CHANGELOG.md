@@ -1,3 +1,5 @@
+* Pass `--recipe-url` argument to Chef, which is now required
+
 # 5.1.2
 
 * Fix problem finding config files for plugin installation
