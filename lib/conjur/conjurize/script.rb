@@ -81,7 +81,7 @@ set -e
       @chef_script ||= [
         ("curl -L https://www.opscode.com/chef/install.sh | " + sudo["bash"] \
           if install_chef?),
-        (sudo["#{chef_executable} -r #{conjur_cookbook_url} " \
+        (sudo["#{chef_executable} --recipe-url #{conjur_cookbook_url} " \
             "-o #{conjur_run_list}"] if run_chef?)
       ].join "\n"
     end
