@@ -112,16 +112,16 @@ curl -L https://www.opscode.com/chef/install.sh | bash
 """
     And the output should match:
     """
-    chef-solo -r https:\/\/github.com\/conjur-cookbooks\/conjur\/releases\/download/v\d\.\d\.\d/conjur-v\d\.\d\.\d.tar.gz -o conjur
+    chef-solo --recipe-url https:\/\/github.com\/conjur-cookbooks\/conjur\/releases\/download/v\d\.\d\.\d/conjur-v\d\.\d\.\d.tar.gz -o conjur
     """
 
   Scenario: conjurize with arbitrary cookbook
     When I conjurize "--conjur-cookbook-url https://example.com --conjur-run-list fry"
-    Then the stdout should contain "chef-solo -r https://example.com -o fry"
+    Then the stdout should contain "chef-solo --recipe-url https://example.com -o fry"
 
   Scenario: conjurize with path to chef-solo
     When I conjurize "--chef-executable /path/to/chef-solo --conjur-cookbook-url https://example.com --conjur-run-list fry"
-    Then the stdout should contain "/path/to/chef-solo -r https://example.com -o fry"
+    Then the stdout should contain "/path/to/chef-solo --recipe-url https://example.com -o fry"
     And the stdout should not contain "curl -L https://www.opscode.com/chef/install.sh"
 
   Scenario: conjurize with sudo-ized commands
