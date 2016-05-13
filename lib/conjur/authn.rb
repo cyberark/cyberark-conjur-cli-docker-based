@@ -126,7 +126,11 @@ module Conjur::Authn
         require 'conjur/base'
         cls = Conjur::API
       end
-      cls.new_from_key(*get_credentials(options))
+      if token = token_from_environment
+        cls.new_from_token token
+      else
+        cls.new_from_key(*get_credentials(options))
+      end
     end
     
     protected
@@ -140,6 +144,14 @@ module Conjur::Authn
     # see http://stackoverflow.com/questions/4871309/what-is-the-correct-way-to-detect-if-ruby-is-running-on-windows
     def windows?
       RbConfig::CONFIG["host_os"] =~ /mswin|mingw|cygwin/
+    end
+    
+    def token_from_environment
+      return nil unless token = ENV['CONJUR_AUTHN_TOKEN']
+      
+      require 'json'
+      require 'base64'
+      JSON.parse(Base64.decode64(token))
     end
   end
 end

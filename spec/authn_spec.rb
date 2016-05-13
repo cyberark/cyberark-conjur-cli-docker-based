@@ -8,23 +8,53 @@ describe Conjur::Authn do
   end
 
   describe "credentials from environment" do
+    shared_examples_for "is_not_written_to_netrc" do
+      it "are not written to netrc" do
+        expect(Conjur::Authn).not_to receive(:write_credentials)
+        Conjur::Authn.get_credentials
+      end
+    end
+
+    let(:api) { Conjur::Authn.connect }
+    
     before do
       Conjur::Authn.instance_variable_set("@credentials", nil)
-      expect(ENV).to receive(:[]).with("CONJUR_AUTHN_LOGIN").and_return "the-login"
-      expect(ENV).to receive(:[]).with("CONJUR_AUTHN_API_KEY").and_return "the-api-key"
     end
 
     after do
       Conjur::Authn.instance_variable_set("@credentials", nil)
     end
 
-    it "are used to authn" do
-      expect(Conjur::Authn.get_credentials).to eq([ "the-login", "the-api-key" ])
-    end
+    let(:encoded_token) { nil }
 
-    it "are not written to netrc" do
-      expect(Conjur::Authn).not_to receive(:write_credentials)
-      Conjur::Authn.get_credentials
+    before do
+      allow(ENV).to receive(:[]).and_call_original
+      allow(ENV).to receive(:[]).with("CONJUR_AUTHN_TOKEN").and_return encoded_token
+      allow(ENV).to receive(:[]).with("CONJUR_AUTHN_LOGIN").and_return "the-login"
+      allow(ENV).to receive(:[]).with("CONJUR_AUTHN_API_KEY").and_return "the-api-key"
+    end
+    
+    context "login and API key" do
+      it "are used to authn" do
+        expect(Conjur::Authn.get_credentials).to eq([ "the-login", "the-api-key" ])
+          
+        expect(api.username).to eq('the-login')
+        expect(api.api_key).to eq('the-api-key')
+      end
+      it_should_behave_like "is_not_written_to_netrc"
+    end
+    context "token" do
+      let(:token) { { "data" => "the-token-login" } }
+      let(:encoded_token) { Base64.strict_encode64(token.to_json) }
+      before {
+        allow_any_instance_of(Conjur::API).to receive(:validate_token)
+      }
+      it "is used to authn" do
+        expect(api.username).to eq('the-token-login')
+        expect(api.api_key).to_not be
+        expect(api.token).to eq(token)
+      end
+      it_should_behave_like "is_not_written_to_netrc"
     end
   end
   
