@@ -1,9 +1,11 @@
-* `conjurize` will ignore `conjur` cookbook releases that don't have an associated tarball
-* Pass `--recipe-url` argument to Chef, which is now required
+
+* Use `CONJUR_AUTHN_TOKEN` as the Conjur access token, if it's available in the environment.
+* `conjurize` will ignore `conjur` cookbook releases that don't have an associated tarball.
+* Pass `--recipe-url` argument to Chef, which is now required.
 
 # 5.1.2
 
-* Fix problem finding config files for plugin installation
+* Fix problem finding config files for plugin installation.
 
 # 5.1.1
 
