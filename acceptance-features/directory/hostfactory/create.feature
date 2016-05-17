@@ -5,7 +5,6 @@ Feature: Create a Host Factory
   Scenario: Create a host factory successfully
     Given I successfully run `conjur layer create --as-group $ns/security_admin $ns/layer`
     Then I successfully run `conjur hostfactory create --as-group $ns/security_admin --layer $ns/layer $ns/hostfactory`
-    And the JSON should have "deputy_api_key"
 
 	Scenario: The client role can use itself as the hostfactory role
     Given I successfully run `conjur user create unprivileged@$ns`
