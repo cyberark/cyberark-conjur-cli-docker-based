@@ -1,4 +1,6 @@
+# 5.2.0
 
+* Add `ldap-sync` management commands (requires Conjur 4.7 or later).
 * Use `CONJUR_AUTHN_TOKEN` as the Conjur access token, if it's available in the environment.
 * `conjurize` will ignore `conjur` cookbook releases that don't have an associated tarball.
 * Pass `--recipe-url` argument to Chef, which is now required.
