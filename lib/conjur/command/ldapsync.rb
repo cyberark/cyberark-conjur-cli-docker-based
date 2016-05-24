@@ -1,32 +1,45 @@
 require 'conjur/command'
 
 class Conjur::Command::LDAPSync < Conjur::Command
-  desc 'Trigger a sync of users/groups from LDAP to Conjur'
-  command :'ldap-sync' do |cmd|
-    cmd.desc 'LDAP Sync profile to use (defined in UI)'
-    cmd.default_value 'default'
-    cmd.flag ['p', 'profile']
+  desc 'LDAP sync management commands'
+  command :'ldap-sync' do |cgrp|
 
-    cmd.desc 'Print the actions that would be performed'
-    cmd.default_value false
-    cmd.switch ['dry-run']
-
-    cmd.desc 'Output format of sync operation (text, yaml)'
-    cmd.default_value 'text'
-    cmd.flag ['f', 'format'], :must_match => ['text', 'yaml']
-
-    cmd.action do |_ ,options, _|
-      format = options[:format] == 'text' ? 'application/json' : 'text/yaml'
-      puts options
-
-      response = api.ldap_sync_now(options[:profile], format, options[:'dry-run'])
-
-      if options[:format] == 'text'
-        response['result']['actions'].each do |action|
-          puts action
+    cgrp.desc 'Trigger a sync of users/groups from LDAP to Conjur'
+    cgrp.command :now do |cmd|
+      cmd.desc 'LDAP Sync profile to use (defined in UI)'
+      cmd.default_value 'default'
+      cmd.arg_name 'profile'
+      cmd.flag ['p', 'profile']
+  
+      cmd.desc 'Print the actions that would be performed'
+      cmd.default_value false
+      cmd.switch ['dry-run']
+  
+      cmd.desc 'Output format of sync operation (text, yaml)'
+      cmd.default_value 'text'
+      cmd.arg_name 'format'
+      cmd.flag ['f', 'format'], :must_match => ['text', 'yaml']
+  
+      cmd.action do |_ ,options, args|
+        assert_empty args
+        
+        format = options[:format] == 'text' ? 'application/json' : 'text/yaml'
+        dry_run = options[:'dry-run']
+          
+        $stderr.puts "Performing #{dry_run ? 'dry run ' : ''}LDAP sync"
+  
+        response = api.ldap_sync_now(options[:profile], format, dry_run)
+  
+        if options[:format] == 'text'
+          response['events'].each do |event|
+            puts [ event['timestamp'], event['severity'], event['message'] ].join("\t")
+          end
+          response['result']['actions'].each do |action|
+            puts action
+          end
+        else
+          puts response
         end
-      else
-        puts YAML.dump(response)
       end
     end
   end
