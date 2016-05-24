@@ -31,9 +31,12 @@ class Conjur::Command::LDAPSync < Conjur::Command
         response = api.ldap_sync_now(options[:profile], format, dry_run)
   
         if options[:format] == 'text'
+          puts "Messages:"
           response['events'].each do |event|
             puts [ event['timestamp'], event['severity'], event['message'] ].join("\t")
           end
+          puts
+          puts "Actions:"
           response['result']['actions'].each do |action|
             puts action
           end
