@@ -42,12 +42,9 @@ describe Conjur::Command::LDAPSync, logged_in: true do
   end
 
   context 'when testing dry-run' do
-    let(:config_name) { 'default' }
-    let(:format) { 'application/json' }
-
     before do
       expect_any_instance_of(Conjur::API).to receive(:ldap_sync_now)
-                                              .with(config_name, format, dry_run)
+                                              .with('default', 'application/json', dry_run)
                                               .and_return json_response
     end
 
