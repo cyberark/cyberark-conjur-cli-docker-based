@@ -1,3 +1,7 @@
+# 5.2.1
+
+* Fix handling of `ldap-sync` dry-run argument.
+
 # 5.2.0
 
 * Add `ldap-sync` management commands (requires Conjur 4.7 or later).
