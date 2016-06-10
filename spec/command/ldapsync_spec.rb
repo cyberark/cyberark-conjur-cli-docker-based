@@ -40,4 +40,33 @@ describe Conjur::Command::LDAPSync, logged_in: true do
       expect { invoke }.to write(yaml_response)
     end
   end
+
+  context 'when testing dry-run' do
+    before do
+      expect_any_instance_of(Conjur::API).to receive(:ldap_sync_now)
+                                              .with('default', 'application/json', dry_run)
+                                              .and_return json_response
+    end
+
+    describe_command 'ldap-sync now' do
+      let(:dry_run) { false }
+      it 'passes falsey dry-run value' do
+        invoke
+      end
+    end
+
+    describe_command 'ldap-sync now --no-dry-run' do
+      let(:dry_run) { false }
+      it 'passes falsey dry-run value' do
+        invoke
+      end
+    end
+
+    describe_command 'ldap-sync now --dry-run' do
+      let(:dry_run) { true }
+      it 'passes truthy dry-run value' do
+        invoke
+      end
+    end
+  end
 end

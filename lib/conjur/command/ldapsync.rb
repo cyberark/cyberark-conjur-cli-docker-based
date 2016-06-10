@@ -24,8 +24,12 @@ class Conjur::Command::LDAPSync < Conjur::Command
         assert_empty args
         
         format = options[:format] == 'text' ? 'application/json' : 'text/yaml'
+
+        # options[:'dry-run'] is nil when dry_run should be disabled (either --no-dry-run
+        # or no option given at all). It is true when --dry-run is given.
         dry_run = options[:'dry-run']
-          
+        dry_run = false if dry_run.nil?
+
         $stderr.puts "Performing #{dry_run ? 'dry run ' : ''}LDAP sync"
   
         response = api.ldap_sync_now(options[:profile], format, dry_run)
