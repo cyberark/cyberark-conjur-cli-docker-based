@@ -1,3 +1,7 @@
+# 5.2.2
+
+* Bump api-ruby, fixes 404 core bug
+
 # 5.2.1
 
 * Fix handling of `ldap-sync` dry-run argument.
