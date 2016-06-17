@@ -1,3 +1,5 @@
+* Disable prompts in bootstrap when there's no tty
+
 # 5.2.2
 
 * Bump api-ruby, fixes 404 core bug
