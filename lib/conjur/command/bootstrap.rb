@@ -96,7 +96,7 @@ class Conjur::Command::Bootstrap < Conjur::Command
       
       api.bootstrap BootstrapListener.new
       
-      unless quiet?(options) || !stdin.tty?
+      unless quiet?(options)
         security_admin = api.group('security_admin')
         security_administrators = security_admin.role.members.select{|m| m.member.roleid.split(':')[1..-1] != [ 'user', 'admin'] }
         $stderr.puts "Current 'security_admin' members are : #{security_administrators.map{|m| m.member.roleid.split(':', 3)[1..-1].join(':')}.sort.join(', ')}" unless security_administrators.blank?
