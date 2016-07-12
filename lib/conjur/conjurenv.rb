@@ -25,7 +25,7 @@ module Conjur
   class Env
 
     class CustomTag
-      def initialize id 
+      def initialize id
         raise "#{self.class.name.split('::').last} requires a parameter" if id.to_s.empty?
         @id=id
       end
@@ -49,9 +49,9 @@ module Conjur
 
     class ConjurTempfile < CustomTag
       def evaluate value
-        @tempfile = if File.directory?("/dev/shm") and File.writable?("/dev/shm") 
+        @tempfile = if File.directory?("/dev/shm") and File.writable?("/dev/shm")
                       Tempfile.new("conjur","/dev/shm")
-                    else  
+                    else
                       Tempfile.new("conjur")
                     end
         @tempfile.write(value)
@@ -63,7 +63,7 @@ module Conjur
     def initialize(options={})
       raise ":file and :yaml options can not be provided together" if ( options.has_key?(:file) and options.has_key?(:yaml) )
 
-      yaml = if options.has_key?(:yaml) 
+      yaml = if options.has_key?(:yaml)
         raise ":yaml option should be non-empty string" unless options[:yaml].kind_of?(String)
         raise ":yaml option should be non-empty string" if options[:yaml].empty?
         options[:yaml]
@@ -88,7 +88,7 @@ module Conjur
       definition.keys.select { |k| definition[k].kind_of? Fixnum }.each { |k| definition[k]="#{definition[k]}" }
       bad_types = definition.values.select { |v| not (v.kind_of?(String) or v.kind_of?(CustomTag)) }.map {|v| v.class}.uniq
       raise "Definition can not include values of types: #{bad_types}" unless bad_types.empty?
-      definition.inject({}) do |memo,e| 
+      definition.inject({}) do |memo,e|
         key, value = e
         substitutions.each do |k,v|
           value.gsub! k, v
@@ -103,32 +103,30 @@ module Conjur
       runtime_environment={}
       variable_ids= @definition.values.map { |v| v.conjur_id rescue nil }.compact
       conjur_values=api.variable_values(variable_ids)
-      @definition.each { |environment_name, reference| 
-        runtime_environment[environment_name]= if reference.respond_to?(:evaluate)
-                                                  reference.evaluate( conjur_values[reference.conjur_id] )
-                                               else
-                                                  reference # is a literal value
-                                               end
-      }
+      @definition.each do |environment_name, reference|
+        if reference.respond_to?(:evaluate)
+          runtime_environment[environment_name] = reference.evaluate( conjur_values[reference.conjur_id] )
+        else
+          runtime_environment[environment_name] = reference # is a literal value
+        end
+      end
       return runtime_environment
     end
 
     def check(api)
-      Hash[ 
-        @definition.map { |k,v| 
-
-          status = if v.respond_to? :conjur_id
-                     if api.resource("variable:"+v.conjur_id).permitted?(:execute)
-                       :available   
-                     else
-                       :unavailable
-                     end
-                   else
-                     :literal
-                   end
- 
+      Hash[
+        @definition.map.each do |k,v|
+          if v.respond_to? :conjur_id
+            if api.resource("variable:"+v.conjur_id).permitted?(:execute)
+              status = :available
+            else
+              status = :unavailable
+            end
+          else
+            status = :literal
+          end
           [ k, status ]
-        }
+        end
       ]
     end
 
