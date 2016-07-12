@@ -1,3 +1,7 @@
+# 5.2.4
+
+* Fix behavior of `conjur env`, when detecting variables vs literals
+
 # 5.2.3
 
 * Disable prompts in bootstrap when there's no tty
