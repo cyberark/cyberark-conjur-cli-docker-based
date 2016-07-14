@@ -1,3 +1,7 @@
+# 5.2.5
+
+* Fix behavior of `conjur env` when [policy plugin](https://github.com/conjurinc/conjur-asset-policy) is installed.
+
 # 5.2.4
 
 * Fix behavior of `conjur env`, when detecting variables vs literals
