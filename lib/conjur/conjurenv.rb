@@ -21,6 +21,7 @@
 require 'conjur/api'
 require 'yaml'
 
+
 module Conjur
   class Env
 
@@ -82,6 +83,9 @@ module Conjur
     def parse(yaml, substitutions = {})
       YAML.add_tag("!var", ConjurVariable)
       YAML.add_tag("!tmp", ConjurTempfile)
+
+      fix_safeyaml! %w(!tmp !var)
+
       definition = YAML.load(yaml)
       raise "Definition should be a Hash" unless definition.kind_of?(Hash)
       # convert fixnums to literals -- to make definitions of e.g. ports more convenient
@@ -130,5 +134,15 @@ module Conjur
       ]
     end
 
+
+    private
+    def fix_safeyaml! tags
+      # Including `conjur-asset-policy` adds the safe_yaml gem, which patches
+      # YAML.load to do so without deserializing objects with custom tags.
+      if defined?(SafeYAML)
+        SafeYAML::OPTIONS[:whitelisted_tags] =
+            SafeYAML::OPTIONS[:whitelisted_tags].concat(tags).uniq
+      end
+    end
   end
 end
