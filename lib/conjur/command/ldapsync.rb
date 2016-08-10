@@ -37,7 +37,7 @@ class Conjur::Command::LDAPSync < Conjur::Command
             require 'table_print'
             fields = [{id: {width: 38}}]
 
-            fields.concat(%i(type state exclusive)) unless options[:'ids-only']
+            fields.concat([:type, :state, :exclusive]) unless options[:'ids-only']
 
             tp jobs, *fields
           else
