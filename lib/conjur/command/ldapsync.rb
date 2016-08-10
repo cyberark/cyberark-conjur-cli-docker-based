@@ -1,6 +1,9 @@
 require 'conjur/command'
 
 class Conjur::Command::LDAPSync < Conjur::Command
+
+  LIST_FORMATS = %w(pretty json)
+
   def self.find_job_by_id args
     job_id = require_arg args, 'JOB-ID'
 
@@ -20,16 +23,29 @@ class Conjur::Command::LDAPSync < Conjur::Command
       jobs.desc 'List detached jobs'
       jobs.command :list do |cmd|
 
-        cmd.desc 'Display only job ids'
-        cmd.default_value false
-        cmd.switch ['i', 'ids-only']
+        cmd.desc "Specify output format (#{LIST_FORMATS.join(',')})"
+        cmd.flag %w(f format), default_value: 'json', must_match: LIST_FORMATS
+
+        cmd.desc 'Show only JOB ids'
+        cmd.switch %w(i ids-only), default_value: false
 
         cmd.action do |_,options,_|
-          jobs = api.ldap_sync_jobs
+          jobs = api.ldap_sync_jobs.map(&:to_h)
 
-          jobs = jobs.map(&:id) if options[:'ids-only']
 
-          display(jobs)
+          if options[:format] == 'pretty'
+            require 'table_print'
+            fields = [{id: {width: 38}}]
+
+            fields.concat(%i(type state exclusive)) unless options[:'ids-only']
+
+            tp jobs, *fields
+          else
+            jobs = jobs.map{|j| j[:id]} if options[:'ids-only']
+
+            display(jobs)
+          end
+
         end
       end
 
