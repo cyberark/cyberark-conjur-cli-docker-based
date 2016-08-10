@@ -1,8 +1,73 @@
 require 'conjur/command'
 
 class Conjur::Command::LDAPSync < Conjur::Command
+
+  LIST_FORMATS = %w(pretty json)
+
+  def self.find_job_by_id args
+    job_id = require_arg args, 'JOB-ID'
+
+    if (job = api.ldap_sync_jobs.find{|j| j.id == job_id})
+      job
+    else
+      exit_now! "No job found with ID '#{job_id}'"
+    end
+  end
+
   desc 'LDAP sync management commands'
   command :'ldap-sync' do |cgrp|
+
+    cgrp.desc 'Manage detached LDAP sync jobs'
+    cgrp.command :jobs do |jobs|
+
+      jobs.desc 'List detached jobs'
+      jobs.command :list do |cmd|
+
+        cmd.desc "Specify output format (#{LIST_FORMATS.join(',')})"
+        cmd.flag %w(f format), default_value: 'json', must_match: LIST_FORMATS
+
+        cmd.desc 'Show only JOB ids'
+        cmd.switch %w(i ids-only), default_value: false
+
+        cmd.action do |_,options,_|
+          jobs = api.ldap_sync_jobs.map(&:to_h)
+
+
+          if options[:format] == 'pretty'
+            require 'table_print'
+            fields = [{id: {width: 38}}]
+
+            fields.concat([:type, :state, :exclusive]) unless options[:'ids-only']
+
+            tp jobs, *fields
+          else
+            jobs = jobs.map{|j| j[:id]} if options[:'ids-only']
+
+            display(jobs)
+          end
+
+        end
+      end
+
+      jobs.desc 'Delete a detached job'
+      jobs.arg_name 'JOB-ID'
+      jobs.command :delete do |cmd|
+        cmd.action do |_, _, args|
+          find_job_by_id(args).delete
+          puts "Job deleted"
+        end
+      end
+
+      jobs.desc 'Show the output from a detached job'
+      jobs.arg_name 'JOB-ID'
+      jobs.command :output do |cmd|
+        cmd.action do |_,_,args|
+          find_job_by_id(args).output do |event|
+            display(event)
+          end
+        end
+      end
+    end
 
     cgrp.desc 'Trigger a sync of users/groups from LDAP to Conjur'
     cgrp.command :now do |cmd|
