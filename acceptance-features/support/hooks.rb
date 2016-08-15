@@ -8,16 +8,6 @@ username, password = Conjur::Authn.get_credentials
 raise "Not logged in to Conjur" unless username && password
 puts "Performing acceptance tests as root-ish user '#{username}'"
 
-if `evoke proxy list` == ''
-  $added_trusted_proxy ||= begin
-    STDERR.puts "Adding trusted proxy, waiting for Conjur to restart..."
-    system('evoke proxy add 10.0.0.0/24') || raise("proxy add failed")
-    system('/opt/conjur/evoke/bin/wait_for_conjur') || raise("wait_for_conjur failed")
-    STDERR.puts "  done."
-    true 
-  end
-end
-  
 # Future Aruba
 Aruba.configure do |config|
   config.exit_timeout = 15
@@ -26,15 +16,6 @@ end
 
 Before('@conjurapi-log') do
   set_env 'CONJURAPI_LOG', 'stderr'
-end
-
-at_exit do
-  if $added_trusted_proxy
-    STDERR.puts "Unsetting trusted proxies, waiting for Conjur to restart..."
-    system('evoke proxy unset') || raise("proxy unset failed")
-    system('/opt/conjur/evoke/bin/wait_for_conjur') || raise("wait_for_conjur failed")
-    STDERR.puts "  done."
-  end
 end
 
 Before do

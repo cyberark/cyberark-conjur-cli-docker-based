@@ -1,6 +1,6 @@
 When /^I create a hostfactory token for "(.*?)" with CIDR "(.*?)"$/ do |hf, cidr|
-  @hostfactory_token = %x{conjur hostfactory token create --cidr #{cidr} #{hf} | jq -r '.[0].token'}.chomp
-  expect($?).to eq(0)
+  step %Q{I successfully run `conjur hostfactory token create --cidr #{cidr} #{hf}`}
+  @hostfactory_token = JSON.parse(last_command_started.stdout)[0]['token']
 end
 
 When /^I(?: can)? use the hostfactory token from "(.*?)" to create host "(.*?)"$/ do |ip, host|
