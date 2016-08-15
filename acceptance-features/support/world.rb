@@ -4,6 +4,8 @@ require 'conjur/api'
 module ConjurCLIWorld
   include Aruba::Api
   
+  attr_accessor :admin_api, :namespace, :test_user, :headers
+
   def last_json
     process_cmd last_command_started.stdout
   end
@@ -28,8 +30,12 @@ module ConjurCLIWorld
     password
   end
 
+  def admin_role
+    admin_api.current_role.role_id
+  end
+
   def namespace
-    @namespace or raise "@namespace is not initialized"
+    @namespace ||= admin_api.create_variable("text/plain", "id").id
   end
   
   # Aruba's method
@@ -51,6 +57,19 @@ module ConjurCLIWorld
   def tempfiles 
     @tempfiles||=[]
   end       
+
+  def headers
+    @headers ||= {}
+  end
+
+  def add_user_auth_header
+    return if headers['Authorization']
+
+    token = Conjur::API.authenticate(test_user.login, test_user.api_key)
+    headers.merge!(
+      'Authorization' => %Q{Token token="#{Base64.strict_encode64(token.to_json)}"}
+    )
+  end
  
   protected
   

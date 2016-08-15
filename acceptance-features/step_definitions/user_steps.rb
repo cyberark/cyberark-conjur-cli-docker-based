@@ -8,16 +8,14 @@ Given(/^I login as a new user$/) do
 end
 
 Given(/^I create a new user named "(.*?)"$/) do |username|
-  username_ns = username.gsub('$ns',@namespace)
- 
-  step "I successfully run `conjur user create --as-role user:admin@#{@namespace} #{username_ns}`"
+  step "I successfully run `conjur user create --as-role user:admin@#{namespace} #{username}`"
   
   user_info = JSON.parse(last_command_started.stdout)
-  save_password username_ns, user_info['api_key']
+  save_password username, user_info['api_key']
 end
 
 Given(/^I create a new host with id "(.*?)"$/) do |hostid|
-  step "I successfully run `conjur host create #{@namespace}/monitoring/server`"
+  step "I successfully run `conjur host create #{namespace}/monitoring/server`"
   host = JSON.parse(last_json)
   @host_id = host['id']
   @host_api_key = host['api_key']
@@ -29,16 +27,14 @@ Given(/^I login as the new host/) do
 end
 
 Given(/^I login as new user "(.*?)"$/) do |username|
-  username_ns = username.gsub('$ns',@namespace)
-  step %Q(I create a new user named "#{username_ns}")
-  step %Q(I login as "#{username_ns}")
+  step %Q(I create a new user named "#{username}")
+  step %Q(I login as "#{username}")
 end
 
 Given(/^I login as "(.*?)"$/) do |username|
-  username_ns = username.gsub('$ns',@namespace)
-  password = find_password(username_ns)
+  password = find_password(username)
   
-  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{username_ns}")
+  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{username}")
   step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{password}")
 end
 
