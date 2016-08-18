@@ -1,3 +1,7 @@
+# 5.3.0
+
+* Add `jobs` subcommands for `ldap-sync`
+
 # 5.2.5
 
 * Fix behavior of `conjur env` when [policy plugin](https://github.com/conjurinc/conjur-asset-policy) is installed.
