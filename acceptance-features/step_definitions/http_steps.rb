@@ -1,9 +1,9 @@
-When /^I send a (GET|POST|PATCH|PUT|DELETE) request from "(.*?)" to "(.*?)"$/ do |method, ip, url|
+When /^I send a (GET|POST|PATCH|PUT|DELETE) request forwarded from "(.*?)" to "(.*?)"$/ do |method, ip, url|
   headers['X-Forwarded-For'] = ip
   step %Q{I send a #{method} request to "#{url}"}
 end
 
-When /^I send a (GET|POST|PATCH|PUT|DELETE) request from "(.*?)" to "(.*?)" with:$/ do |method, ip, url, params_table|
+When /^I send a (GET|POST|PATCH|PUT|DELETE) request forwarded from "(.*?)" to "(.*?)" with:$/ do |method, ip, url, params_table|
   headers['X-Forwarded-For'] = ip
   step %Q{I send a #{method} request to "#{url}" with:}, params_table
 end

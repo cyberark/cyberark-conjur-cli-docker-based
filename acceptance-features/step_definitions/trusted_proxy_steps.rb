@@ -5,7 +5,7 @@ end
 
 When /^I(?: can)? use the hostfactory token from "(.*?)" to create host "(.*?)"$/ do |ip, host|
   headers['Authorization'] = %Q{Token token="#{@hostfactory_token}"}
-  step %Q{I send a POST request from "#{ip}" to "/api/host_factories/hosts" with:}, table([["id"], [host]]) 
+  step %Q{I send a POST request forwarded from "#{ip}" to "/api/host_factories/hosts" with:}, table([["id"], [host]]) 
   step %Q{the response status should be "201"}
 end
 
@@ -30,7 +30,7 @@ When /^I create a pubkey for "(.*?)" from "(.*?)" with "(.*?)"$/ do |user, ip, k
   steps %Q{
     Given I send "text/plain" and accept JSON
     And I set the request body to "#{key}"
-    When I send a POST request from "#{ip}" to "/api/pubkeys/#{user}"
+    When I send a POST request forwarded from "#{ip}" to "/api/pubkeys/#{user}"
     Then the response status should be "200"
   }
   @pubkey_var = @response.get "resource_identifier"
