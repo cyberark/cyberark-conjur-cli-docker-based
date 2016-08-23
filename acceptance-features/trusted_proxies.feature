@@ -22,11 +22,11 @@ Feature: Conjur services support trusted proxies
     And the response status should be "201"
     Given I send "text/plain" and accept JSON
     And I set the request body to "restricted"
-    When I send a POST request from "192.168.0.1" to "/api/authn/users/restricted@$ns/authenticate"
+    When I send a POST request forwarded from "192.168.0.1" to "/api/authn/users/restricted@$ns/authenticate"
     Then the response status should be "200"
 
   Scenario: authz supports trusted proxies
-    Given I send a PUT request from "192.168.0.1" to "/api/authz/cucumber/resources/test/$ns/resource?acting_as=$user_role" 
+    Given I send a PUT request forwarded from "192.168.0.1" to "/api/authz/cucumber/resources/test/$ns/resource?acting_as=$user_role" 
     And the response status should be "204"
     When I successfully run `conjur audit resource test:$ns/resource`
     Then the JSON response at "request/ip" should be "192.168.0.1"
@@ -40,21 +40,21 @@ Feature: Conjur services support trusted proxies
       "mime_type": "text/plain"
     }    
     """
-    And I send a POST request from "192.168.0.1" to "/api/variables"
+    And I send a POST request forwarded from "192.168.0.1" to "/api/variables"
     And the response status should be "201"
     When I successfully run `conjur audit resource variable:$ns/var`
     Then the JSON response at "request/ip" should be "192.168.0.1"
 
   Scenario: expiration supports trusted proxies
     Given I successfully run `conjur variable create $ns_expiration_var value`
-    And I send a GET request from "192.168.0.1" to "/api/variables/$ns_expiration_var/value"
+    And I send a GET request forwarded from "192.168.0.1" to "/api/variables/$ns_expiration_var/value"
     And the response status should be "200"
     When I get the audit event for the resource "cucumber:variable:$ns_expiration_var" with action "check"
     Then the audit event should show the request from "192.168.0.1"
 
   Scenario: host-factory supports trusted proxies when creating hostfactories
     Given I successfully run `conjur layer create --as-role $user_role $ns/layer`
-    When I send a POST request from "192.168.0.1" to "/api/host_factories" with: 
+    When I send a POST request forwarded from "192.168.0.1" to "/api/host_factories" with: 
       | id     | roleid    | ownerid    | layers[]  |
       | $ns/hf | $user_role | $user_role | $ns/layer |
 
