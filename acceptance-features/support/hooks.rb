@@ -21,32 +21,35 @@ end
 Before do
   step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{username}")
   step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{password}")
-  
-  @admin_api = conjur_api = Conjur::Authn.connect
-  
-  @namespace = conjur_api.create_variable("text/plain", "id").id
-  user = conjur_api.create_user "admin@#{@namespace}", ownerid: "#{Conjur.configuration.account}:user:#{username}"
 
-  conjur_api = Conjur::Authn.connect
-  @security_admin = conjur_api.create_group [ @namespace, "security_admin" ].join('/')
-  @security_admin.add_member user, admin_option: true
-  
-  JsonSpec.memorize "MY_ROLEID", %Q("#{user.roleid}")
-  JsonSpec.memorize "NAMESPACE", @namespace
-  
-  @admin_api.group("pubkeys-1.0/key-managers").add_member @security_admin
-  @admin_api.resource('!:!:conjur').permit 'elevate', user, grant_option: true
-  @admin_api.resource('!:!:conjur').permit 'reveal',  user, grant_option: true
-  
-  conjur_api.create_user "attic@#{@namespace}"
+  @admin_api = Conjur::Authn.connect
+  @test_user = admin_api.create_user "admin@#{namespace}", ownerid: "#{Conjur.configuration.account}:user:#{username}"
 
-  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{user.login}")
-  step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{user.api_key}")
+  @security_admin = admin_api.create_group [ namespace, "security_admin" ].join('/')
+  @security_admin.add_member test_user, admin_option: true
+  
+  JsonSpec.memorize "MY_ROLEID", %Q("#{test_user.roleid}")
+  JsonSpec.memorize "NAMESPACE", namespace
+  
+  admin_api.group("pubkeys-1.0/key-managers").add_member @security_admin
+  admin_api.resource('!:!:conjur').permit 'elevate', test_user, grant_option: true
+  admin_api.resource('!:!:conjur').permit 'reveal',  test_user, grant_option: true
+  
+  admin_api.create_user "attic@#{namespace}"
+
+  # Set up the environment so the CLI will authenticate
+  # correctly. Note that the API caches credentials, so these
+  # variables won't have any effect on future calls to
+  # Conjur::Authn.connect
+  step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{test_user.login}")
+  step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{test_user.api_key}")
 end
 
 After do
-  if @admin_api
-    @admin_api.group("pubkeys-1.0/key-managers").remove_member @security_admin
+  if admin_api
+    admin_api.group("pubkeys-1.0/key-managers").remove_member @security_admin
+    admin_api = nil
+    namespace = nil
   end
   tempfiles.each { |tempfile| File.unlink(tempfile) unless tempfile.nil? }
 end

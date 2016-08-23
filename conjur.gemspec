@@ -36,4 +36,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake', '~> 10.0'
   gem.add_development_dependency 'io-grab', '~> 0.0.1'
   gem.add_development_dependency 'json_spec'
+  gem.add_development_dependency 'cucumber-api'
+  gem.add_development_dependency 'addressable'
 end
