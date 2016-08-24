@@ -60,7 +60,7 @@ class Conjur::Command::LDAPSync < Conjur::Command
 
       jobs.desc 'Show the output from a detached job'
       jobs.arg_name 'JOB-ID'
-      jobs.command :output do |cmd|
+      jobs.command :show do |cmd|
         cmd.action do |_,_,args|
           find_job_by_id(args).output do |event|
             display(event)
@@ -84,33 +84,45 @@ class Conjur::Command::LDAPSync < Conjur::Command
       cmd.default_value 'text'
       cmd.arg_name 'format'
       cmd.flag ['f', 'format'], :must_match => ['text', 'yaml']
-  
+
+      cmd.desc 'Run sync as a detached job'
+      cmd.default_value true
+      cmd.switch ['detach']
+
       cmd.action do |_ ,options, args|
         assert_empty args
         
         format = options[:format] == 'text' ? 'application/json' : 'text/yaml'
 
-        # options[:'dry-run'] is nil when dry_run should be disabled (either --no-dry-run
-        # or no option given at all). It is true when --dry-run is given.
-        dry_run = options[:'dry-run']
-        dry_run = false if dry_run.nil?
+        dry_run = !!options[:'dry-run']
+
+        # Don't ever run dry-run jobs detached
+        options[:detach] = false if dry_run
 
         $stderr.puts "Performing #{dry_run ? 'dry run ' : ''}LDAP sync"
   
-        response = api.ldap_sync_now(options[:profile], format, dry_run)
+        response = api.ldap_sync_now(:config_name => options[:profile], 
+          :format => format, 
+          :dry_run => dry_run,
+          :detach_job => options[:detach]
+        )
   
-        if options[:format] == 'text'
-          puts "Messages:"
-          response['events'].each do |event|
-            puts [ event['timestamp'], event['severity'], event['message'] ].join("\t")
-          end
-          puts
-          puts "Actions:"
-          response['result']['actions'].each do |action|
-            puts action
+        if !options[:detach]
+          if options[:format] == 'text'
+            puts "Messages:"
+            response['events'].each do |event|
+              puts [ event['timestamp'], event['severity'], event['message'] ].join("\t")
+            end
+            puts
+            puts "Actions:"
+            response['result']['actions'].each do |action|
+              puts action
+            end
+          else
+            puts response
           end
         else
-          puts response
+          display response
         end
       end
     end

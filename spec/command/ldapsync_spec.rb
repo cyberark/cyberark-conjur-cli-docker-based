@@ -27,8 +27,8 @@ describe Conjur::Command::LDAPSync, logged_in: true do
   context 'when testing ldap-sync jobs commands' do
     let(:jobs){
       [
-          Conjur::LdapSyncJob.new(api, 'job-1', 'sync', 'running', true),
-          Conjur::LdapSyncJob.new(api, 'job-2', 'connect', 'success', false)
+          Conjur::LdapSyncJob.new(api, :id => 'job-1', :type => 'sync', :state => 'running', :exclusive => true),
+          Conjur::LdapSyncJob.new(api, :id => 'job-2', :type => 'connect', :state => 'success', :exclusive => false)
       ]
     }
 
@@ -72,7 +72,7 @@ job-2\s*|\s*connect\s*|\s*success\s*|\s*false/x
       end
     end
 
-    describe_command 'ldap-sync jobs output job-1' do
+    describe_command 'ldap-sync jobs show job-1' do
       let(:victim){ jobs[0] }
       it 'prints the values passed to output' do
         expect(victim).to receive(:output) do |&block|
@@ -93,7 +93,7 @@ EOS
     end
   end
 
-  describe_command 'ldap-sync now -f text' do
+  describe_command 'ldap-sync now --no-detach -f text' do
     before {
       expect_any_instance_of(Conjur::API).to receive(:ldap_sync_now).and_return json_response
     }
@@ -105,7 +105,7 @@ EOS
     end
   end
 
-  describe_command 'ldap-sync now -f yaml' do
+  describe_command 'ldap-sync now --no-detach -f yaml' do
     it 'prints out actions as unparsed yaml' do
       expect_any_instance_of(Conjur::API).to receive(:ldap_sync_now).and_return yaml_response
       expect { invoke }.to write(yaml_response)
@@ -113,9 +113,10 @@ EOS
   end
 
   context 'when testing dry-run' do
+    let (:detach) { true }
     before do
       expect_any_instance_of(Conjur::API).to receive(:ldap_sync_now)
-                                              .with('default', 'application/json', dry_run)
+                                              .with(:config_name => 'default', :format => 'application/json', :dry_run => dry_run, :detach_job => detach)
                                               .and_return json_response
     end
 
@@ -135,6 +136,7 @@ EOS
 
     describe_command 'ldap-sync now --dry-run' do
       let(:dry_run) { true }
+      let(:detach) { false }
       it 'passes truthy dry-run value' do
         invoke
       end

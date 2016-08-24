@@ -1,6 +1,7 @@
 # 5.3.0
 
-* Add `jobs` subcommands for `ldap-sync`
+* Add `jobs` subcommands for `ldap-sync`.
+* Add `--detach` switch to `now` subcommand.
 
 # 5.2.5
 
