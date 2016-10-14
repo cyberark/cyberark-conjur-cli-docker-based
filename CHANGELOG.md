@@ -2,6 +2,7 @@
 
 * Add `jobs` subcommands for `ldap-sync`.
 * Add `--detach` switch to `now` subcommand.
+* Relax dependency gem versions.
 
 # 5.2.5
 
