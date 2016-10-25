@@ -1,27 +1,43 @@
 Feature: List memberships of a role
 
   Scenario: The role memberships list includes the role itself
-    Given I successfully run `conjur role create job:$ns/chef`
-    When I successfully run `conjur role memberships job:$ns/chef`
+    Given I load the policy:
+    """
+    - !group cooks
+    """
+    When I successfully run `conjur role memberships group:cooks`
     Then the JSON should have 1 entries
 
   Scenario: Memberships can be added to a role by granting it a new role
-    Given I successfully run `conjur role create job:$ns/cook`
-    And I successfully run `conjur role create job:$ns/chef`
-    # Cooks are chefs
-    And I successfully run `conjur role grant_to job:$ns/cook job:$ns/chef`
-    When I successfully run `conjur role memberships job:$ns/chef`
-    # Therefore chefs are cooks and chefs
+    Given I load the policy:
+    """
+    - !group employees
+
+    - !group cooks
+
+    - !grant
+      role: !group employees
+      member: !group cooks
+    """
+    When I successfully run `conjur role memberships group:cooks`
     Then the JSON should have 2 entries
 
   Scenario: Members list is expanded transitively
-    Given I successfully run `conjur role create person:$ns/myself`
-    And I successfully run `conjur role create job:$ns/cook`
-    And I successfully run `conjur role create job:$ns/chef`
-    # I am a chef
-    And I successfully run `conjur role grant_to job:$ns/chef person:$ns/myself`
-    # Chefs are cooks
-    And I successfully run `conjur role grant_to job:$ns/cook job:$ns/chef`
-    When I successfully run `conjur role memberships person:$ns/myself`
-    # Therefore I am me, a cook, and a chef
+    Given I load the policy:
+    """
+    - !user alice
+
+    - !group employees
+
+    - !group cooks
+
+    - !grant
+      role: !group employees
+      member: !group cooks
+
+    - !grant
+      role: !group cooks
+      member: !user alice
+    """
+    When I successfully run `conjur role memberships user:alice`
     Then the JSON should have 3 entries

@@ -22,25 +22,6 @@ class Conjur::Command::Resources < Conjur::Command
 
   desc "Manage resources"
   command :resource do |resource|
-
-    resource.desc "Create a new resource"
-    resource.arg_name "RESOURCE"
-    resource.command :create do |c|
-      acting_as_option(c)
-
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        resource = api.resource(id)
-
-        if ownerid = options.delete(:ownerid)
-          options[:acting_as] = ownerid
-        end
-
-        resource.create(options)
-        display resource.attributes
-      end
-    end
-
     resource.desc "Show a resource"
     resource.arg_name "RESOURCE"
     resource.command :show do |c|
@@ -56,38 +37,6 @@ class Conjur::Command::Resources < Conjur::Command
       c.action do |global_options,options,args|
         id = full_resource_id( require_arg(args, "RESOURCE") )
         puts api.resource(id).exists?
-      end
-    end
-
-    resource.desc "Give a privilege on a resource"
-    resource.arg_name "RESOURCE ROLE PRIVILEGE"
-    resource.command :permit do |c|
-      c.desc "allow transfer to other roles"
-      c.switch [:g, :grantable]
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        role = require_arg(args, "ROLE")
-        privilege = require_arg(args, "PRIVILEGE")
-        $stderr.print "Granting #{role} permission to #{privilege} #{id}... "
-        unless options[:g]
-          api.resource(id).permit privilege, role
-        else
-          api.resource(id).permit privilege, role, grant_option: true
-        end
-        
-        puts "Permission granted"
-      end
-    end
-
-    resource.desc "Deny a privilege on a resource"
-    resource.arg_name "RESOURCE ROLE PRIVILEGE"
-    resource.command :deny do |c|
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        role = require_arg(args, "ROLE")
-        privilege = require_arg(args, "PRIVILEGE")
-        api.resource(id).deny privilege, role
-        puts "Permission revoked"
       end
     end
 
@@ -115,17 +64,6 @@ class Conjur::Command::Resources < Conjur::Command
       end
     end
 
-    resource.desc "Grant ownership on a resource to a new owner"
-    resource.arg_name "RESOURCE USER"
-    resource.command :give do |c|
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        owner = require_arg(args, "USER")
-        api.resource(id).give_to owner
-        puts "Ownership granted"
-      end
-    end
-
     resource.desc "List roles with a specified permission on the resource"
     resource.arg_name "RESOURCE PERMISSION"
     resource.command :permitted_roles do |c|
@@ -133,28 +71,6 @@ class Conjur::Command::Resources < Conjur::Command
         id = full_resource_id( require_arg(args, "RESOURCE") )
         permission = require_arg(args, "PERMISSION")
         display api.resource(id).permitted_roles(permission)
-      end
-    end
-
-    resource.desc "Set an annotation on a resource"
-    resource.arg_name "RESOURCE ANNOTATION value"
-    resource.command :annotate do |c|
-      interactive_option c
-      
-      c.action do |global_options, options, args|
-        id = full_resource_id require_arg(args, 'RESOURCE')
-
-        annotations = if options[:interactive]
-          prompt_for_annotations
-        else
-          name = require_arg args, 'ANNOTATION'
-          value = require_arg args, 'value'
-          { name => value }
-        end
-        unless annotations.blank?
-          api.resource(id).annotations.merge!(annotations)
-          puts "Set annotations #{annotations.keys} for resource '#{id}'"
-        end
       end
     end
 

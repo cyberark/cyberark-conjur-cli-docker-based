@@ -1,3 +1,7 @@
+# 6.0.0
+
+* WIP
+
 # 5.3.0
 
 * Add `jobs` subcommands for `ldap-sync`.

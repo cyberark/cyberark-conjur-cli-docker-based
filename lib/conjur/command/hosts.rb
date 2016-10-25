@@ -26,63 +26,12 @@ class Conjur::Command::Hosts < Conjur::Command
   
   desc "Manage hosts"
   command :host do |hosts|
-    hosts.desc "Create a new host"
-    hosts.arg_name "NAME"
-    hosts.command :create do |c|
-      c.arg_name "password"
-      c.flag [:p,:password]
-
-      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional)"
-      c.flag [:cidr]
-
-      acting_as_option(c)
-
-      c.action do |global_options,options,args|
-        id = args.shift
-
-        unless id
-          ActiveSupport::Deprecation.warn "id argument will be required in future releases"
-        end
-
-        cidr = format_cidr(options.delete(:cidr))
-        options[:id] = id if id
-        options[:cidr] = cidr unless cidr.nil?
-          
-        display api.create_host(options), options
-      end
-    end
-
     hosts.desc "Show a host"
     hosts.arg_name "HOST"
     hosts.command :show do |c|
       c.action do |global_options,options,args|
         id = require_arg(args, 'HOST')
         display(api.host(id), options)
-      end
-    end
-
-    hosts.desc "Decommission a host"
-    hosts.arg_name "HOST"
-    hosts.command :retire do |c|
-      retire_options c
-
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'HOST')
-        
-        host = api.host(id)
-
-        validate_retire_privileges host, options
-        
-        host_layer_roles(host).each do |layer|
-          puts "Removing from layer #{layer.id}"
-          api.layer(layer.id).remove_host host
-        end
-
-        retire_resource host
-        retire_role host
-        give_away_resource host, options
-        
-        puts "Host retired"
       end
     end
 
@@ -150,19 +99,6 @@ class Conjur::Command::Hosts < Conjur::Command
 
         host.update(host_options)
         puts "Host updated"
-      end
-    end
-
-    hosts.desc "[Deprecated] Enroll a new host into conjur"
-    hosts.arg_name "HOST"
-    hosts.command :enroll do |c|
-      hide_docs(c)
-      c.action do |global_options, options, args|
-        id = require_arg(args, 'HOST')
-        enrollment_url = api.host(id).enrollment_url
-        puts enrollment_url
-        $stderr.puts "On the target host, please execute the following command:"
-        $stderr.puts "curl -L #{enrollment_url} | bash"
       end
     end
 

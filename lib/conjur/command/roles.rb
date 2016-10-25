@@ -25,34 +25,6 @@ class Conjur::Command::Roles < Conjur::Command
 
   desc "Manage roles"
   command :role do |role|
-
-    role.desc "Create a new role"
-    role.arg_name "ROLE"
-    role.command :create do |c|
-      acting_as_option(c)
-      
-      c.desc "Output a JSON response with a single field, roleid"
-      c.switch "json"
-
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'ROLE')
-        role = api.role(id)
-
-        if ownerid = options.delete(:ownerid)
-          options[:acting_as] = ownerid
-        end
-
-        role.create(options)
-        if options[:json]
-          display({
-            roleid: role.roleid
-          })
-        else
-          puts "Created role #{role.roleid}"
-        end
-      end
-    end
-
     role.desc "Determines whether a role exists"
     role.arg_name "ROLE"
     role.command :exists do |c|
@@ -101,37 +73,6 @@ class Conjur::Command::Roles < Conjur::Command
         display_members api.role(role).members, options
       end
     end
-
-    role.desc "Grant a role to another role. You must have admin permission on the granting role."
-    role.arg_name "ROLE-1 ROLE-2"
-    role.command :grant_to do |c|
-      c.desc "Whether to grant with admin option"
-      c.switch [:a,:admin]
-
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'ROLE-1')
-        member = require_arg(args, 'ROLE-2')
-        role = api.role(id)
-        grant_options = {}
-        grant_options[:admin_option] = true if options[:admin]
-        role.grant_to member, grant_options
-        puts "Role granted"
-      end
-    end
-
-
-    role.desc "Revoke a role from another role. You must have admin permission on the revoking role."
-    role.arg_name "ROLE-1 ROLE-2"
-    role.command :revoke_from do |c|
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'ROLE-1')
-        member = require_arg(args, 'ROLE-2')
-        role = api.role(id)
-        role.revoke_from member
-        puts "Role revoked"
-      end
-    end
-
 
     role.long_desc <<-EOD
 Retrieves a digraph representing the role members and memberships of one or more roles.

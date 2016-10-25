@@ -1,3 +1,4 @@
+@wip
 Feature: Logout the user
 
   Scenario: Login a new user with a password

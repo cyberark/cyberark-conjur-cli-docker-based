@@ -23,47 +23,6 @@ class Conjur::Command::HostFactories < Conjur::Command
   desc "Manage host factories"
 
   command :hostfactory do |hf|
-    hf.desc "Create a new host factory"
-    hf.arg_name "id"
-    hf.command :create do |c|
-      acting_as_option(c)
-
-      c.arg_name "layer"
-      c.desc "A space-delimited list of layers to which new hosts will belong"
-      c.flag [:l, :layer]
-
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'hostfactory')
-        
-        unless options[:ownerid]
-          exit_now! "Use --as-group or --as-role to indicate the host factory role"
-        end
-        
-        owner_role = api.role(options[:ownerid])
-
-        layers = (options[:layer] || "").split(/\s/)
-        exit_now! "Provide at least one layer" unless layers.count > 0
-
-        unless has_admin?(current_role, owner_role)
-          exit_now! "#{owner_role.id} must be an admin of role '#{owner_role.roleid}' to create a host factory for it" 
-        end
-        layers.each do |layerid|
-          layer = api.layer(layerid)
-          exit_now! "Layer '#{layerid}' does not exist" unless layer.exists?
-          unless has_admin?(owner_role, layer.role)
-            exit_now! "#{owner_role.id} must be an admin of layer '#{layerid}' to create a host factory for it" 
-          end
-        end
-        
-        command_options = options.dup
-        command_options[:layers] = layers
-        command_options[:roleid] = options[:ownerid]
-          
-        host_factory = api.create_host_factory id, command_options
-        display host_factory
-      end
-    end
-
     hf.desc "Show a host factory"
     hf.arg_name "id"
     hf.command :show do |c|

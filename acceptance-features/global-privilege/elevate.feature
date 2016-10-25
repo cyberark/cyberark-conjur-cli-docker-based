@@ -1,3 +1,4 @@
+@wip
 Feature: 'elevate' can be used to activate root-like privileges
 
   Background:

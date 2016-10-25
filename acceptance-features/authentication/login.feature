@@ -1,3 +1,4 @@
+@wip
 Feature: Login a new user
 
   Scenario: Login a new user with a password

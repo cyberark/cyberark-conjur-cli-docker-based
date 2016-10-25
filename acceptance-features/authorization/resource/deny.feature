@@ -1,12 +1,33 @@
 Feature: Deny a privilege on a Resource
 
   Background:
-    Given I successfully run `conjur resource create food:$ns/bacon`
+    Given I load the policy:
+    """
+    - !resource
+      kind: food
+      id: bacon
 
+    - !user alice
+
+    - !permit
+      role: !user alice
+      privilege: fry
+      resource: !resource
+        kind: food
+        id: bacon
+    """
+
+  @wip
+  @announce-output
   Scenario: Once granted, privileges can be revoked
-  
-    Given I create a new user named "alice@$ns"
-    And I successfully run `conjur resource permit food:$ns/bacon user:alice@$ns fry`
-    When I successfully run `conjur resource deny food:$ns/bacon user:alice@$ns fry`
-    And I successfully run `conjur resource show food:$ns/bacon`
+    When I apply the policy:
+    """
+    - !deny
+      role: !user alice
+      privilege: fry
+      resource: !resource
+        kind: food
+        id: bacon
+    """
+    And I successfully run `conjur resource show food:bacon`
     Then the JSON at "permissions" should have 0 items

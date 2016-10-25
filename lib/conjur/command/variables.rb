@@ -21,100 +21,12 @@
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
-    var.desc "Create and store a variable"
-    var.arg_name "NAME VALUE"
-    var.command :create do |c|
-      c.arg_name "MIME-TYPE"
-      c.flag [:m, :"mime-type"], default_value: 'text/plain'
-
-      c.arg_name "KIND"
-      c.flag [:k, :"kind"], default_value: 'secret'
-
-      c.arg_name "VALUE"
-      c.desc "Initial value, which may also be specified as the second command argument after the variable id"
-      c.flag [:v, :"value"]
-
-      acting_as_option c
-      
-      annotate_option c
-      
-      interactive_option c
-
-      c.action do |global_options,options, args|
-        @default_mime_type = c.flags[:m].default_value
-        @default_kind = c.flags[:k].default_value
-        
-        id = args.shift unless args.empty?
-        value = args.shift unless args.empty?
-        
-        exit_now! "Received conflicting value arguments" if value && options[:value]
-
-        groupid = options[:ownerid]
-        mime_type = options[:m]
-        kind = options[:k]
-        value ||= options[:v]
-        interactive = options[:interactive] || id.blank?
-        annotate = options[:annotate]
-          
-        exit_now! "Received --annotate option without --interactive" if annotate && !interactive
-          
-        annotations = {}
-        # If the user asked for interactive mode, or he didn't specify and id
-        # prompt for any missing options.
-        if interactive
-          id ||= prompt_for_id :variable
-          
-          groupid ||= prompt_for_group
-
-          kind = prompt_for_kind if !kind || kind == @default_kind
-          
-          mime_type = prompt_for_mime_type if mime_type.blank? || mime_type == @default_mime_type
-
-          annotations = prompt_for_annotations if annotate
-
-          value ||= prompt_for_value
-          
-          prompt_to_confirm :variable, "Id"    => id,
-            "Kind"  => kind,
-            "MIME type" => mime_type,
-            "Owner" => groupid,
-            "Value" => value
-        end
-        
-        variable_options = { id: id }
-        variable_options[:ownerid] = groupid if groupid
-        variable_options[:value] = value unless value.blank?
-        var = api.create_variable(mime_type, kind, variable_options)
-        api.resource(var).annotations.merge!(annotations) if annotations && !annotations.empty?
-        display(var, options)
-      end
-    end
-
     var.desc "Show a variable"
     var.arg_name "VARIABLE"
     var.command :show do |c|
       c.action do |global_options,options,args|
         id = require_arg(args, 'VARIABLE')
         display(api.variable(id), options)
-      end
-    end
-
-    var.desc "Decommission a variable"
-    var.arg_name "VARIABLE"
-    var.command :retire do |c|
-      retire_options c
-      
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'VARIABLE')
-        
-        variable = api.variable(id)
-
-        validate_retire_privileges variable, options
-        
-        retire_resource variable
-        give_away_resource variable, options
-        
-        puts "Variable retired"
       end
     end
 
@@ -236,25 +148,6 @@ class Conjur::Command::Variables < Conjur::Command
   end
 
   class << self
-    def prompt_for_kind
-      highline.ask('Enter the kind: ') {|q| q.default = @default_kind }
-    end
-    
-    def prompt_for_mime_type
-      highline.choose do |menu|
-        menu.prompt = 'Enter the MIME type: '
-        menu.choice  @default_mime_type 
-        menu.choices *%w(application/json application/xml application/x-yaml application/x-pem-file)
-        menu.choice "other", nil do |c|
-          @highline.ask('Enter a custom mime type: ')
-        end
-      end
-    end
-    
-    def prompt_for_value
-      read_till_eof('Enter the secret value (^D on its own line to finish):')
-    end
-    
     def durations(options)
       [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
     end
