@@ -16,7 +16,6 @@ Feature: Grant membership in a role to another role
     And the JSON should include "cucumber:user:admin"
     And the JSON should include "cucumber:user:alice"
 
-  @wip
   Scenario: Granting a role gives the grantee permissions of the granted role
     Given I load the policy:
     """
