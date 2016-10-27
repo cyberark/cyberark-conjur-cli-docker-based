@@ -26,7 +26,9 @@ module GliderWorld
   protected
 
   def submit_policy method, id, body
-    @api_keys = JSON.parse RestClient::Resource.new("http://localhost/api/v6", Conjur::API.new_from_key($username, $api_key).credentials) \
+    require 'uri'
+    possum_url = URI.join URI.parse(Conjur.configuration.appliance_url), '/api/v6'
+    @api_keys = JSON.parse RestClient::Resource.new(possum_url, Conjur::API.new_from_key($username, $api_key).credentials) \
       ['policies'] \
       [Conjur.configuration.account] \
       ['policy'] \

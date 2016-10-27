@@ -1,6 +1,10 @@
 ENV['CONJUR_APPLIANCE_URL'] ||= 'http://localhost/api/v5'
 ENV['CONJUR_ACCOUNT'] ||= 'cucumber'
 
+require 'conjur/cli'
+Conjur::Config.load
+Conjur::Config.apply
+
 $username = 'admin'
 $api_key = Conjur::API.login $username, 'secret'
 
