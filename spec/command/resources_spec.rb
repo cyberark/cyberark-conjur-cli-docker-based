@@ -31,18 +31,6 @@ describe Conjur::Command::Resources, logged_in: true do
     end
   end
 
-  describe_command "resource:create #{KIND}:#{ID}"  do
-    before :each do
-      allow(resource_instance).to receive(:create)
-    end
-    it "calls resource.create()" do
-      expect(resource_instance).to receive(:create)
-      invoke_silently
-    end
-    it_behaves_like "it obtains resource by id"
-    it_behaves_like "it displays resource attributes"
-  end
-
   describe_command "resource:show #{KIND}:#{ID}" do
     it_behaves_like "it obtains resource by id"
     it_behaves_like "it displays resource attributes"
@@ -68,33 +56,6 @@ describe Conjur::Command::Resources, logged_in: true do
         expect { invoke }.to write "false"
       end
     end
-  end
-
-  describe_command "resource:permit #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
-    before(:each) { allow(resource_instance).to receive(:permit).and_return(true) }
-    it_behaves_like "it obtains resource by id"
-    it "calls resource.permit(#{PRIVILEGE}, #{ROLE})" do
-      expect(resource_instance).to receive(:permit).with(PRIVILEGE, ROLE)
-      invoke_silently
-    end
-    it {  expect { invoke }.to write "Permission granted" }
-  end
-
-  describe_command "resource:permit -g #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
-    it 'calls resource.permit() with grant option' do
-      expect(resource_instance).to receive(:permit).with(PRIVILEGE, ROLE, grant_option: true)
-      invoke_silently
-    end
-  end
-
-  describe_command "resource:deny #{KIND}:#{ID} #{ROLE} #{PRIVILEGE}" do
-    before(:each) { allow(resource_instance).to receive(:deny).and_return(true) }
-    it_behaves_like "it obtains resource by id"
-    it "calls resource.deny(#{PRIVILEGE},#{ROLE})" do
-      expect(resource_instance).to receive(:deny).with(PRIVILEGE, ROLE)
-      invoke_silently
-    end
-    it { expect { invoke }.to write "Permission revoked" }
   end
 
   describe_command "resource:check #{KIND}:#{ID} #{PRIVILEGE}" do
@@ -125,16 +86,6 @@ describe Conjur::Command::Resources, logged_in: true do
     it { expect { invoke }.to write role_response }
   end
 
-  describe_command "resource:give #{KIND}:#{ID} #{OWNER}" do
-    before(:each) { allow(resource_instance).to receive(:give_to).and_return(true) }
-    it_behaves_like "it obtains resource by id"
-    it "calls resource.give_to(#{OWNER})" do
-      expect(resource_instance).to receive(:give_to).with(OWNER)
-      invoke_silently
-    end
-    it { expect { invoke }.to write "Ownership granted" }
-  end
-
   describe_command "resource:permitted_roles #{KIND}:#{ID} #{PRIVILEGE}" do
     let(:roles_list) { %W[klaatu barada nikto] }
     before(:each) { 
@@ -147,16 +98,6 @@ describe Conjur::Command::Resources, logged_in: true do
     end
     it "displays JSONised list of roles" do
       expect(JSON.parse( expect { invoke }.to write )).to eq(roles_list)
-    end
-  end
-  
-  context "interactivity" do
-    subject { Conjur::Command::Resources }
-    describe_command 'resource:annotate -i #{KIND}:#{ID}' do
-      it { 
-        is_expected.to receive(:prompt_for_annotations) 
-        invoke_silently
-      }
     end
   end
 end

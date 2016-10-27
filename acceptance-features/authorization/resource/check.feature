@@ -1,4 +1,3 @@
-@possum
 Feature: Checking permissions on a resource
 
   Background:

@@ -20,7 +20,7 @@ Before do
   step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{$username}")
   step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{$api_key}")
 
-  possum_api.put "/policies/cucumber/policy/bootstrap", File.read(File.expand_path('blank.yml', File.dirname(__FILE__)))
+  put_policy "bootstrap", File.read(File.expand_path('blank.yml', File.dirname(__FILE__)))
 end
 
 After do

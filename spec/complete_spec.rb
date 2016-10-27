@@ -28,10 +28,6 @@ describe Conjur::CLI::Complete do
         it { expects_completions_for('host l').to include 'layers',
                                                           'list' }
       end
-
-      context 'with "conjur rubydsl"' do
-        it { expects_completions_for('rubydsl ').to include 'load' }
-      end
     end
 
     describe 'for deprecated subcommands such as `conjur field`' do
@@ -55,16 +51,6 @@ describe Conjur::CLI::Complete do
         it { expects_completions_for('audit all -s -')
              .to include '-f', '--follow', '-l', '--limit=',
                          '-o', '--offset=', '-s', '--short' }
-      end
-
-      context 'conjur layer create --as-' do
-        it { expects_completions_for('layer create --as-')
-             .to include '--as-role=' }
-      end
-
-      context 'conjur group create --as-role' do
-        it { expects_completions_for('layer create --as-role')
-             .to contain_exactly '--as-role=' }
       end
     end
 
@@ -106,10 +92,6 @@ describe Conjur::CLI::Complete do
           }
           context 'for a command' do
             it { expects_completions_for('group show ')
-                 .to contain_exactly(*groups) }
-          end
-          context 'for a flag' do
-            it { expects_completions_for('group create --as-group=')
                  .to contain_exactly(*groups) }
           end
         end
@@ -175,10 +157,6 @@ describe Conjur::CLI::Complete do
     end
 
     describe 'completes mid-line' do
-      it 'completes a subcommand not at the end of a line' do
-        expect(described_class.new('conjur gr create dwarves/7', 9).completions)
-          .to include 'group '
-      end
       it 'tolerates garbage flags and arguments' do
         expect(described_class.new('conjur omg --lol wat pu').completions)
           .to include 'pubkeys '
