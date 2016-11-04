@@ -29,7 +29,7 @@ module Conjur
     
     class << self
       attr_accessor :prefix
-      
+
       def method_missing *a, &b
         Conjur::CLI.send *a, &b
       end
@@ -464,6 +464,10 @@ an alternative destination role.)
         other_role.members.any? { |m| memberships.member?(m.member.roleid) && m.admin_option }
       rescue RestClient::Forbidden
         false
+      end
+
+      def notify_deprecated
+        STDERR.puts 'WARNING! This command is deprecated and will be removed. Use policy instead.'
       end
 
     end

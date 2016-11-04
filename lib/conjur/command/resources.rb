@@ -23,12 +23,14 @@ class Conjur::Command::Resources < Conjur::Command
   desc "Manage resources"
   command :resource do |resource|
 
-    resource.desc "Create a new resource"
+    resource.desc "Create a new resource [DEPRECATED]"
     resource.arg_name "RESOURCE"
     resource.command :create do |c|
       acting_as_option(c)
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = full_resource_id( require_arg(args, "RESOURCE") )
         resource = api.resource(id)
 
@@ -59,12 +61,14 @@ class Conjur::Command::Resources < Conjur::Command
       end
     end
 
-    resource.desc "Give a privilege on a resource"
+    resource.desc "Give a privilege on a resource [DEPRECATED]"
     resource.arg_name "RESOURCE ROLE PRIVILEGE"
     resource.command :permit do |c|
       c.desc "allow transfer to other roles"
       c.switch [:g, :grantable]
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = full_resource_id( require_arg(args, "RESOURCE") )
         role = require_arg(args, "ROLE")
         privilege = require_arg(args, "PRIVILEGE")
@@ -79,10 +83,12 @@ class Conjur::Command::Resources < Conjur::Command
       end
     end
 
-    resource.desc "Deny a privilege on a resource"
+    resource.desc "Deny a privilege on a resource [DEPRECATED]"
     resource.arg_name "RESOURCE ROLE PRIVILEGE"
     resource.command :deny do |c|
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = full_resource_id( require_arg(args, "RESOURCE") )
         role = require_arg(args, "ROLE")
         privilege = require_arg(args, "PRIVILEGE")
@@ -115,10 +121,12 @@ class Conjur::Command::Resources < Conjur::Command
       end
     end
 
-    resource.desc "Grant ownership on a resource to a new owner"
+    resource.desc "Grant ownership on a resource to a new owner [DEPRECATED]"
     resource.arg_name "RESOURCE USER"
     resource.command :give do |c|
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = full_resource_id( require_arg(args, "RESOURCE") )
         owner = require_arg(args, "USER")
         api.resource(id).give_to owner
@@ -136,12 +144,14 @@ class Conjur::Command::Resources < Conjur::Command
       end
     end
 
-    resource.desc "Set an annotation on a resource"
+    resource.desc "Set an annotation on a resource [DEPRECATED]"
     resource.arg_name "RESOURCE ANNOTATION value"
     resource.command :annotate do |c|
       interactive_option c
       
       c.action do |global_options, options, args|
+        notify_deprecated
+
         id = full_resource_id require_arg(args, 'RESOURCE')
 
         annotations = if options[:interactive]

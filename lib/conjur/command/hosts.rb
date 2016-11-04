@@ -26,7 +26,7 @@ class Conjur::Command::Hosts < Conjur::Command
   
   desc "Manage hosts"
   command :host do |hosts|
-    hosts.desc "Create a new host"
+    hosts.desc "Create a new host [DEPRECATED]"
     hosts.arg_name "NAME"
     hosts.command :create do |c|
       c.arg_name "password"
@@ -38,6 +38,8 @@ class Conjur::Command::Hosts < Conjur::Command
       acting_as_option(c)
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = args.shift
 
         unless id
@@ -61,12 +63,14 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-    hosts.desc "Decommission a host"
+    hosts.desc "Decommission a host [DEPRECATED]"
     hosts.arg_name "HOST"
     hosts.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'HOST')
         
         host = api.host(id)
@@ -132,13 +136,15 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-    hosts.desc "Update a hosts's attributes"
+    hosts.desc "Update a hosts's attributes [DEPRECATED]"
     hosts.arg_name "HOST"
     hosts.command :update do |c|
       c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional). Use 'all' to reset"
       c.flag [:cidr]
 
       c.action do |global_options, options, args|
+        notify_deprecated
+
         id = require_arg(args, 'HOST')
 
         host = api.host(id)
@@ -153,7 +159,7 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-    hosts.desc "[Deprecated] Enroll a new host into conjur"
+    hosts.desc "Enroll a new host into conjur [DEPRECATED]"
     hosts.arg_name "HOST"
     hosts.command :enroll do |c|
       hide_docs(c)

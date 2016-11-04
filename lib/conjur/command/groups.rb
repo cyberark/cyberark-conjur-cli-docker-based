@@ -29,16 +29,17 @@ class Conjur::Command::Groups < Conjur::Command
   
   desc "Manage groups"
   command :group do |group|
-    group.desc "Create a new group"
+    group.desc "Create a new group [DEPRECATED]"
     group.command :create do |c|
       c.desc "GID number to be associated with the group (optional)"
       c.flag [:gidnumber]
 
       acting_as_option(c)
-
       interactive_option c
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = args.shift
         
         interactive = options[:interactive] || id.blank?
@@ -86,12 +87,14 @@ class Conjur::Command::Groups < Conjur::Command
       end
     end
     
-    group.desc "Update group's attributes (eg. gidnumber)"
+    group.desc "Update group's attributes (eg. gidnumber) [DEPRECATED]"
     group.arg_name "GROUP"
     group.command :update do |c|
       c.desc "GID number to be associated with the group"
       c.flag [:gidnumber]
       c.action do |global_options, options, args|
+        notify_deprecated
+
         id = require_arg(args, 'GROUP')
 
         options[:gidnumber] = Integer(options[:gidnumber])
@@ -110,12 +113,14 @@ class Conjur::Command::Groups < Conjur::Command
       end
     end
 
-    group.desc "Decommission a group"
+    group.desc "Decommission a group [DEPRECATED]"
     group.arg_name "GROUP"
     group.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'GROUP')
         
         group = api.group(id)
@@ -144,7 +149,7 @@ class Conjur::Command::Groups < Conjur::Command
         end
       end
 
-      members.desc "Add a new group member"
+      members.desc "Add a new group member [DEPRECATED]"
       members.arg_name "GROUP USER"
       members.command :add do |c|
         c.desc "Also grant the admin option"
@@ -157,6 +162,8 @@ class Conjur::Command::Groups < Conjur::Command
         c.switch [:r, :'revoke-admin']
 
         c.action do |global_options,options,args|
+          notify_deprecated
+
           group = require_arg(args, 'GROUP')
           member = require_arg(args, 'USER')
           member = assume_user_kind(member)
@@ -177,10 +184,12 @@ class Conjur::Command::Groups < Conjur::Command
         end
       end
 
-      members.desc "Remove a group member"
+      members.desc "Remove a group member [DEPRECATED]"
       members.arg_name "GROUP USER"
       members.command :remove do |c|
         c.action do |global_options,options,args|
+          notify_deprecated
+
           group = require_arg(args, 'GROUP')
           member = require_arg(args, 'USER')
           member = assume_user_kind(member)

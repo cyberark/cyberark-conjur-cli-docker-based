@@ -24,7 +24,7 @@ class Conjur::Command::Users < Conjur::Command
   desc "Manage users"
   command :user do |user|
 
-    user.desc "Create a new user"
+    user.desc "Create a new user [DEPRECATED]"
     user.arg_name "NAME"
     user.command :create do |c|
       c.desc "Prompt for a password for the user (default: --no-password)"
@@ -41,6 +41,8 @@ class Conjur::Command::Users < Conjur::Command
       interactive_option c
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         login = args.shift
 
         interactive = options[:interactive] || login.blank?
@@ -101,12 +103,14 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
-    user.desc "Decommission a user"
+    user.desc "Decommission a user [DEPRECATED]"
     user.arg_name "USER"
     user.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'USER')
         
         user = api.user(id)
@@ -164,7 +168,7 @@ class Conjur::Command::Users < Conjur::Command
       end
     end
 
-    user.desc "Update a user's attributes"
+    user.desc "Update a user's attributes [DEPRECATED]"
     user.arg_name "USER"
     user.command :update do |c|
       c.desc "UID number to be associated with user (optional)"
@@ -174,6 +178,8 @@ class Conjur::Command::Users < Conjur::Command
       c.flag [:cidr]
 
       c.action do |global_options, options, args|
+        notify_deprecated
+
         login=require_arg(args,'USER')
 
         uidnumber = options[:uidnumber]

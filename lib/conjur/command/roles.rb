@@ -26,7 +26,7 @@ class Conjur::Command::Roles < Conjur::Command
   desc "Manage roles"
   command :role do |role|
 
-    role.desc "Create a new role"
+    role.desc "Create a new role [DEPRECATED]"
     role.arg_name "ROLE"
     role.command :create do |c|
       acting_as_option(c)
@@ -35,6 +35,8 @@ class Conjur::Command::Roles < Conjur::Command
       c.switch "json"
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'ROLE')
         role = api.role(id)
 
@@ -102,13 +104,15 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
-    role.desc "Grant a role to another role. You must have admin permission on the granting role."
+    role.desc "Grant a role to another role. You must have admin permission on the granting role. [DEPRECATED]"
     role.arg_name "ROLE-1 ROLE-2"
     role.command :grant_to do |c|
       c.desc "Whether to grant with admin option"
       c.switch [:a,:admin]
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'ROLE-1')
         member = require_arg(args, 'ROLE-2')
         role = api.role(id)
@@ -120,10 +124,12 @@ class Conjur::Command::Roles < Conjur::Command
     end
 
 
-    role.desc "Revoke a role from another role. You must have admin permission on the revoking role."
+    role.desc "Revoke a role from another role. You must have admin permission on the revoking role. [DEPRECATED]"
     role.arg_name "ROLE-1 ROLE-2"
     role.command :revoke_from do |c|
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'ROLE-1')
         member = require_arg(args, 'ROLE-2')
         role = api.role(id)

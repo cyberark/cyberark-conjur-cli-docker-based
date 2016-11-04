@@ -35,12 +35,14 @@ class Conjur::Command::Layers < Conjur::Command
   desc "Operations on layers"
   command :layer do |layer|
 
-    layer.desc "Create a new layer"
+    layer.desc "Create a new layer [DEPRECATED]"
     layer.arg_name "LAYER"
     layer.command :create do |c|
       acting_as_option(c)
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'LAYER')
 
         layer = api.create_layer(id, options)
@@ -104,12 +106,14 @@ class Conjur::Command::Layers < Conjur::Command
       end
     end
 
-    layer.desc "Decommission a layer"
+    layer.desc "Decommission a layer [DEPRECATED]"
     layer.arg_name "LAYER"
     layer.command :retire do |c|
       retire_options c
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'LAYER')
         
         layer = api.layer(id)
@@ -134,23 +138,27 @@ class Conjur::Command::Layers < Conjur::Command
 
     layer.desc "Operations on hosts"
     layer.command :hosts do |hosts|
-      hosts.desc "Permit a privilege on hosts in the layer"
+      hosts.desc "Permit a privilege on hosts in the layer [DEPRECATED]"
       hosts.long_desc <<-DESC
 Privilege may be : execute, update
       DESC
       hosts.arg_name "LAYER ROLE PRIVILEGE"
       hosts.command :permit do |c|
         c.action do |global_options,options,args|
+          notify_deprecated
+
           id, role_name, role = parse_layer_permission_args(global_options, options, args)
           api.layer(id).add_member role_name, role
           puts "Permission granted"
         end
       end
 
-      hosts.desc "Remove a privilege on hosts in the layer"
+      hosts.desc "Remove a privilege on hosts in the layer [DEPRECATED]"
       hosts.arg_name "LAYER ROLE PRIVILEGE"
       hosts.command :deny do |c|
         c.action do |global_options,options,args|
+          notify_deprecated
+
           id, role_name, role = parse_layer_permission_args(global_options, options, args)
           api.layer(id).remove_member role_name, role
           puts "Permission removed"
@@ -171,10 +179,12 @@ Privilege may be : execute, update
         end
       end
 
-      hosts.desc "Add a host to an layer"
+      hosts.desc "Add a host to an layer [DEPRECATED]"
       hosts.arg_name "LAYER HOST"
       hosts.command :add do |c|
         c.action do |global_options, options, args|
+          notify_deprecated
+
           id = require_arg(args, 'LAYER')
           hostid = require_hostid_arg(args)
 
@@ -183,10 +193,12 @@ Privilege may be : execute, update
         end
       end
 
-      hosts.desc "Remove a host from an layer"
+      hosts.desc "Remove a host from an layer [DEPRECATED]"
       hosts.arg_name "LAYER HOST"
       hosts.command :remove do |c|
         c.action do |global_options, options, args|
+          notify_deprecated
+
           id = require_arg(args, 'LAYER')
           hostid = require_hostid_arg(args)
 
