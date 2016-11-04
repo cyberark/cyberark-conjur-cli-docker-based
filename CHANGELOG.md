@@ -1,3 +1,7 @@
+# 5.4.0 (unreleased)
+
+* Deprecated several commands in favor of using policy.
+
 # 5.3.0
 
 * Add `jobs` subcommands for `ldap-sync`.
