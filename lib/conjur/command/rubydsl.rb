@@ -21,7 +21,7 @@
 require 'conjur/command/dsl_command'
 
 class Conjur::Command::RubyDSL < Conjur::DSLCommand
-  desc "Manage Ruby DSL policies (deprecated)"
+  desc "Manage Ruby DSL policies [DEPRECATED]"
   long_desc 'DEPRECATED. Declarative YML policy supercedes Ruby policy DSL.'
   command :rubydsl do |rubydsl|
     rubydsl.desc "Load a policy from Conjur DSL"

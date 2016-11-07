@@ -21,7 +21,7 @@
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
-    var.desc "Create and store a variable"
+    var.desc "Create and store a variable [DEPRECATED]"
     var.arg_name "NAME VALUE"
     var.command :create do |c|
       c.arg_name "MIME-TYPE"
@@ -41,6 +41,8 @@ class Conjur::Command::Variables < Conjur::Command
       interactive_option c
 
       c.action do |global_options,options, args|
+        notify_deprecated
+
         @default_mime_type = c.flags[:m].default_value
         @default_kind = c.flags[:k].default_value
         
@@ -99,12 +101,14 @@ class Conjur::Command::Variables < Conjur::Command
       end
     end
 
-    var.desc "Decommission a variable"
+    var.desc "Decommission a variable [DEPRECATED]"
     var.arg_name "VARIABLE"
     var.command :retire do |c|
       retire_options c
       
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'VARIABLE')
         
         variable = api.variable(id)

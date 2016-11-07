@@ -23,7 +23,7 @@ class Conjur::Command::HostFactories < Conjur::Command
   desc "Manage host factories"
 
   command :hostfactory do |hf|
-    hf.desc "Create a new host factory"
+    hf.desc "Create a new host factory [DEPRECATED]"
     hf.arg_name "id"
     hf.command :create do |c|
       acting_as_option(c)
@@ -33,6 +33,8 @@ class Conjur::Command::HostFactories < Conjur::Command
       c.flag [:l, :layer]
 
       c.action do |global_options,options,args|
+        notify_deprecated
+
         id = require_arg(args, 'hostfactory')
         
         unless options[:ownerid]
