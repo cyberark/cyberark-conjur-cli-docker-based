@@ -17,114 +17,72 @@ class Conjur::Command::LDAPSync < Conjur::Command
   desc 'LDAP sync management commands'
   command :'ldap-sync' do |cgrp|
 
-    cgrp.desc 'Manage detached LDAP sync jobs'
-    cgrp.command :jobs do |jobs|
+    cgrp.desc 'Manage the policy used to sync Conjur and the LDAP server'
+    cgrp.command :policy do |policy|
+      min_version policy, '4.8.0'
 
-      jobs.desc 'List detached jobs'
-      jobs.command :list do |cmd|
+      policy.desc 'Show the current policy'
+      policy.command :show do |show|
+        min_version show, '4.8.0'
+        show.desc 'LDAP Sync profile to use (defined in UI)'
+        show.arg_name 'profile'
+        show.flag ['p', 'profile']
 
-        cmd.desc "Specify output format (#{LIST_FORMATS.join(',')})"
-        cmd.flag %w(f format), default_value: 'json', must_match: LIST_FORMATS
+        show.action do |_,options,_|
 
-        cmd.desc 'Show only JOB ids'
-        cmd.switch %w(i ids-only), default_value: false
-
-        cmd.action do |_,options,_|
-          jobs = api.ldap_sync_jobs.map(&:to_h)
-
-
-          if options[:format] == 'pretty'
-            require 'table_print'
-            fields = [{id: {width: 38}}]
-
-            fields.concat([:type, :state, :exclusive]) unless options[:'ids-only']
-
-            tp jobs, *fields
+          config_name = options[:profile] || 'default'
+          resp = api.ldap_sync_policy(config_name)
+          
+          if resp['policy']
+            puts(resp['policy'])
           else
-            jobs = jobs.map{|j| j[:id]} if options[:'ids-only']
-
-            display(jobs)
-          end
-
-        end
-      end
-
-      jobs.desc 'Delete a detached job'
-      jobs.arg_name 'JOB-ID'
-      jobs.command :delete do |cmd|
-        cmd.action do |_, _, args|
-          find_job_by_id(args).delete
-          puts "Job deleted"
-        end
-      end
-
-      jobs.desc 'Show the output from a detached job'
-      jobs.arg_name 'JOB-ID'
-      jobs.command :show do |cmd|
-        cmd.action do |_,_,args|
-          find_job_by_id(args).output do |event|
-            display(event)
+            exit_now! resp['error']['message']
           end
         end
       end
     end
 
-    cgrp.desc 'Trigger a sync of users/groups from LDAP to Conjur'
-    cgrp.command :now do |cmd|
-      cmd.desc 'LDAP Sync profile to use (defined in UI)'
-      cmd.default_value 'default'
-      cmd.arg_name 'profile'
-      cmd.flag ['p', 'profile']
-  
-      cmd.desc 'Print the actions that would be performed'
-      cmd.default_value false
-      cmd.switch ['dry-run']
-  
-      cmd.desc 'Output format of sync operation (text, yaml)'
-      cmd.default_value 'text'
-      cmd.arg_name 'format'
-      cmd.flag ['f', 'format'], :must_match => ['text', 'yaml']
+    # Currently hidden. It's easier to use the CLI than cURL, though,
+    # so we might want to expose the profile subcommands.
+    cgrp.desc 'Manage profiles for LDAP sync'
+    cgrp.command :profile do |profile|
+      hide_docs(profile)
+      min_version profile, '4.8.0'
+      
+      profile.desc 'Show the profile'
+      profile.command :show do |show|
+        min_version show, '4.8.0'
 
-      cmd.desc 'Run sync as a detached job'
-      cmd.default_value true
-      cmd.switch ['detach']
+        show.arg_name 'profile'
+        show.flag ['p', 'profile']
+        show.action do |_,options,_|
+          display(api.ldap_sync_show_profile(options[:profile]))
+        end
+      end
 
-      cmd.action do |_ ,options, args|
-        assert_empty args
+      profile.desc 'Create or update a profile'
+      profile.arg_name 'PROFILE_JSON'
+      profile.long_desc %Q{Create or update the given profile.
+The profile JSON may be provided in two ways:
+
+1. As a literal (quoted) JSON string.
+
+2. In a file, by prepending an '@' to the path to the file
+}
+      profile.command :update do |update|
+        min_version update, '4.8.0'
         
-        format = options[:format] == 'text' ? 'application/json' : 'text/yaml'
-
-        dry_run = !!options[:'dry-run']
-
-        # Don't ever run dry-run jobs detached
-        options[:detach] = false if dry_run
-
-        $stderr.puts "Performing #{dry_run ? 'dry run ' : ''}LDAP sync"
-  
-        response = api.ldap_sync_now(:config_name => options[:profile], 
-          :format => format, 
-          :dry_run => dry_run,
-          :detach_job => options[:detach]
-        )
-  
-        if !options[:detach]
-          if options[:format] == 'text'
-            puts "Messages:"
-            response['events'].each do |event|
-              puts [ event['timestamp'], event['severity'], event['message'] ].join("\t")
-            end
-            puts
-            puts "Actions:"
-            response['result']['actions'].each do |action|
-              puts action
-            end
-          else
-            puts response
-          end
-        else
-          display response
+        update.arg_name 'profile'
+        update.flag ['p', 'profile']
+        update.action do |_, options, args|
+          config = require_arg(args, 'PROFILE_JSON')
+          config = File.read(config[1..-1]) if config[0] == '@'
+          display(api.ldap_sync_update_profile(JSON.parse(config)))
         end
       end
+
     end
+
+
   end
 end
