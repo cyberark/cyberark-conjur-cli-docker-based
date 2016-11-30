@@ -9,10 +9,11 @@ class Conjur::Command::LDAPSync < Conjur::Command
   end
 
   def self.show_messages(resp)
-    msgs = resp['events'].collect do |e|
-      next unless e['severity'] == 'warn' || e['severity'] == 'error'
-      "\n" + e['severity'].upcase + ": " + e['message']
-    end.compact
+    msgs = resp['events'].each_with_object([]) do |e, arr|
+      if e['severity'] == 'warn' || e['severity'] == 'error'
+        arr << "\n#{e['severity'].upcase}: #{e['message']}"
+      end
+    end
     $stderr.puts(msgs.join("\n") + "\n\n") unless msgs.empty?
   end
 
