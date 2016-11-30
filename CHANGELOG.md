@@ -1,7 +1,7 @@
 # 5.4.0
 
 * Deprecated several commands in favor of using policy.
-* Add `policy` subcommand for `ldap-sync`, get rid if `jobs` and `now` subcommands.
+* Add `policy` subcommand for `ldap-sync`, get rid of `jobs` and `now` subcommands.
 * Relax constraint on activesupport gem
 
 # 5.3.0
