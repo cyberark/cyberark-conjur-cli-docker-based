@@ -4,14 +4,16 @@ class Conjur::Command::LDAPSync < Conjur::Command
 
   LIST_FORMATS = %w(pretty json)
 
-  def self.find_job_by_id args
-    job_id = require_arg args, 'JOB-ID'
+  def self.error_messages(resp)
+    resp['events'].collect {|e| e['message'] if e['severity'] == 'error'}.compact
+  end
 
-    if (job = api.ldap_sync_jobs.find{|j| j.id == job_id})
-      job
-    else
-      exit_now! "No job found with ID '#{job_id}'"
-    end
+  def self.show_messages(resp)
+    msgs = resp['events'].collect do |e|
+      next unless e['severity'] == 'warn' || e['severity'] == 'error'
+      "\n" + e['severity'].upcase + ": " + e['message']
+    end.compact
+    $stderr.puts(msgs.join("\n") + "\n\n") unless msgs.empty?
   end
 
   desc 'LDAP sync management commands'
@@ -33,8 +35,14 @@ class Conjur::Command::LDAPSync < Conjur::Command
           config_name = options[:profile] || 'default'
           resp = api.ldap_sync_policy(config_name)
           
-          if resp['policy']
-            puts(resp['policy'])
+          show_messages(resp)
+
+          if (policy = resp['policy'])
+            if resp['ok']
+              puts(resp['policy'])
+            else
+              exit_now! "Failed creating the policy."
+            end
           else
             exit_now! resp['error']['message']
           end
@@ -77,12 +85,33 @@ The profile JSON may be provided in two ways:
         update.action do |_, options, args|
           config = require_arg(args, 'PROFILE_JSON')
           config = File.read(config[1..-1]) if config[0] == '@'
-          display(api.ldap_sync_update_profile(JSON.parse(config)))
+          display(api.ldap_sync_update_profile(options[:profile], JSON.parse(config)))
         end
       end
 
     end
 
+    cgrp.desc 'Search using an LDAP sync profile'
+    cgrp.command :search do |search|
+      hide_docs(search)
+      min_version search, '4.8.0'
+      
+      search.desc 'LDAP Sync profile to use (defined in UI)'
+      search.arg_name 'profile'
+      search.flag ['p', 'profile']
+      search.action do |_,options,_|
+        resp = api.ldap_sync_search(options[:profile] || 'default')
+                                                                    
+        show_messages(resp)
+
+        if resp['ok']
+          display resp
+        else
+          exit_now! "Search failed."
+        end
+
+      end
+    end
 
   end
 end
