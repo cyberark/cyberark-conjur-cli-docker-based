@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Conjur::Command::LDAPSync, logged_in: true do
 
-  let (:policy_response) { { 'policy' => <<eop
+  let (:policy_response) { { 'ok' => true, 'events' => [], 'policy' => <<eop
 "---
 - !user
   annotations:
