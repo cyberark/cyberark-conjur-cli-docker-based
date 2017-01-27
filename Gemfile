@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-#ruby=ruby-2.2.4
+#ruby=ruby-2.2.5
 #ruby-gemset=conjur-cli
 
 # Specify your gem's dependencies in conjur.gemspec
@@ -8,7 +8,7 @@ gemspec
 
 gem 'activesupport', '~> 4.2'
 
-gem 'conjur-api', '>= 4.28.1', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'master'
+gem 'conjur-api', '>= 4.28.1', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'feature/new_from_token_file'
 gem 'semantic', '>= 1.4.1', git: 'https://github.com/jlindsey/semantic.git'
 
 group :test, :development do

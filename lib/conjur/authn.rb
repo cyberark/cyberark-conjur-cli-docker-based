@@ -128,6 +128,8 @@ module Conjur::Authn
       end
       if token = token_from_environment
         cls.new_from_token token
+      elsif token_file = token_from_file
+        cls.new_from_token_file token_file
       else
         cls.new_from_key(*get_credentials(options))
       end
@@ -152,6 +154,14 @@ module Conjur::Authn
       require 'json'
       require 'base64'
       JSON.parse(Base64.decode64(token))
+    end
+
+    def token_from_file
+      token_file = ENV['CONJUR_AUTHN_TOKEN_FILE']
+      if token_file && !File.exists?(token_file)
+        $stderr.puts "Warning: CONJUR_AUTHN_TOKEN_FILE #{token_file.inspect} does not exist"
+      end
+      token_file
     end
   end
 end
