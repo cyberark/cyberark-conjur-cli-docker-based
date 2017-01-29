@@ -1,3 +1,7 @@
+# 5.5.0
+
+* Use `CONJUR_AUTHN_TOKEN_FILE` as the Conjur access token file, if it's available in the environment.
+
 # 5.4.0
 
 * Deprecated several commands in favor of using policy.
