@@ -10,7 +10,7 @@ puts "Performing acceptance tests as root-ish user '#{username}'"
 
 # Future Aruba
 Aruba.configure do |config|
-  config.exit_timeout = 15
+  config.exit_timeout = 30
   config.io_wait_timeout = 2
 end
 
