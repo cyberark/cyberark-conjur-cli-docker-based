@@ -74,21 +74,32 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
-    role.desc "Lists role memberships. The role membership list is recursively expanded."
+    role.desc "Lists role memberships. The role membership list is recursively expanded by default."
     role.arg_name "ROLE"
 
     role.command :memberships do |c|
+      c.desc "Verbose output. Only meaningful with --no-recursive."
+      c.switch [:V,:verbose]
+
+      c.desc "Whether to recursively expand role memberships"
+      c.default_value true
+      c.switch [:r, :recursive]
+
       c.desc "Whether to show system (internal) roles"
-      c.switch [:s, :system]
+      c.switch [:system]
+
+      command_option_kind c
+      command_options_for_search c
 
       c.action do |global_options,options,args|
         roleid = args.shift
+        assert_empty(args)
         role = roleid.nil? && api.current_role || api.role(roleid)
-        memberships = role.all.map(&:roleid)
-        unless options[:system]
-          memberships.reject!{|id| id =~ /^.+?:@/}
-        end
-        display memberships
+
+        opts = process_command_options_for_search(options)
+        opts[:recursive] = false unless options[:recursive]
+        memberships = role.all(opts)
+        display_members memberships, :role, options
       end
     end
 
@@ -98,9 +109,20 @@ class Conjur::Command::Roles < Conjur::Command
       c.desc "Verbose output"
       c.switch [:V,:verbose]
 
+      c.desc "Whether to show system (internal) roles"
+      c.switch [:system]
+
+      command_option_kind c
+      command_options_for_search c
+
       c.action do |global_options,options,args|
-        role = args.shift || api.user(api.username).roleid
-        display_members api.role(role).members, options
+        roleid = args.shift
+        assert_empty(args)
+        role = roleid.nil? && api.current_role || api.role(roleid)
+        opts = process_command_options_for_search(options)
+
+        members = role.members(opts)
+        display_members members, :member, options
       end
     end
 

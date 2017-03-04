@@ -137,10 +137,15 @@ class Conjur::Command::Resources < Conjur::Command
     resource.desc "List roles with a specified permission on the resource"
     resource.arg_name "RESOURCE PERMISSION"
     resource.command :permitted_roles do |c|
+      command_option_kind c
+      command_options_for_search c
+
       c.action do |global_options,options,args|
         id = full_resource_id( require_arg(args, "RESOURCE") )
         permission = require_arg(args, "PERMISSION")
-        display api.resource(id).permitted_roles(permission)
+
+        opts = process_command_options_for_search(options)
+        display api.resource(id).permitted_roles(permission, opts)
       end
     end
 
@@ -191,9 +196,7 @@ class Conjur::Command::Resources < Conjur::Command
 
     resource.desc "List all resources"
     resource.command :list do |c|
-      c.desc "Filter by kind"
-      c.flag [:k, :kind]
-
+      command_option_kind c
       command_options_for_list c
 
       c.action do |global_options, options, args|
