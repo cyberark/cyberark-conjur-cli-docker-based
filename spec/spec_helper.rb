@@ -5,19 +5,19 @@ require 'ostruct'
 
 require "simplecov"
 SimpleCov.start
-  
+
 def post_response(id, attributes = {})
   attributes[:id] = id
-  
+
   OpenStruct.new({
-    headers: { location: [ collection_url, id ].join('/') }, 
+    headers: { location: [ collection_url, id ].join('/') },
     body: attributes.to_json
   })
 end
 
 # stub parameters to be used in resource/asset tests
 KIND="asset_kind"
-ID="unique_id" 
+ID="unique_id"
 ROLE='<role>'
 MEMBER='<member>'
 PRIVILEGE='<privilege>'
@@ -27,6 +27,7 @@ ACCOUNT='<core_account>'
 require 'conjur/command/rspec/helpers'
 
 ENV['CONJURRC'] = '/dev/null'
+ENV['CONJUR_SKIP_PLUGINS'] = '1'
 
 require 'conjur/cli'
 require 'conjur/api'
@@ -37,7 +38,7 @@ shared_context "fresh config" do
     ENV.delete_if do |k,v|
       k =~ /^CONJUR_/
     end
-    
+
     @configuration = Conjur.configuration
     Conjur.configuration = Conjur::Configuration.new
   }
@@ -56,7 +57,7 @@ RSpec::Core::DSL.change_global_dsl do
       end
       before {
         require 'methadone'
-        
+
         option_parser = OptionParser.new
         expect(option_parser).to receive(:parse!).with(no_args) do |*args|
           option_parser.parse! argv

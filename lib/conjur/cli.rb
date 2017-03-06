@@ -32,6 +32,8 @@ ENV['RUBY_MIME_TYPES_CACHE'] ||= (
   XDG['CACHE'].to_path.tap(&FileUtils.method(:mkdir_p)) + 'ruby-mime-types.cache'
 ).to_s
 
+CORE_PLUGINS = ['policy']
+
 module Conjur
   autoload :Config,                 'conjur/config'
   autoload :Log,                    'conjur/log'
@@ -69,6 +71,17 @@ module Conjur
         super args
       end
 
+      def install_core_plugins
+        to_install = CORE_PLUGINS - Conjur::Config.plugins
+        unless to_install.empty? or ENV['CONJUR_SKIP_PLUGINS']
+          puts 'Installing core plugins'
+          to_install.each do |plugin|
+            puts "- #{plugin}"
+            self.run ['plugin', 'install', plugin]
+          end
+        end
+      end
+
       def load_plugins
         # These used to be plugins but now they are in the core CLI
         plugins = Conjur::Config.plugins - %w(audit-send host-factory layer pubkeys)
@@ -90,6 +103,8 @@ module Conjur
         subcommand_option_handling :normal
         load_config
         apply_config
+        commands_from 'conjur/command'
+        install_core_plugins
         load_plugins
         commands_from 'conjur/command'
       end
