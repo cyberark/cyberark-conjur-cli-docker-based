@@ -142,35 +142,58 @@ module Conjur
           end
         end.join("\n")
       end
-      
-      def command_options_for_list(c)
+
+      def command_option_kind c
+        c.desc "Filter by kind"
+        c.flag [:k, :kind]
+      end
+
+      def command_option_as_role c
         return if c.flags.member?(:role) # avoid duplicate flags
         c.desc "Role to act as. By default, the current logged-in role is used."
         c.arg_name 'ROLE'
         c.flag [:role]
-    
+      end
+
+      def command_options_for_search c
         c.desc "Full-text search on resource id and annotation values" 
         c.flag [:s, :search]
-        
-        c.desc "Maximum number of records to return"
-        c.flag [:l, :limit]
         
         c.desc "Offset to start from"
         c.flag [:o, :offset]
         
+        c.desc "Maximum number of records to return"
+        c.flag [:l, :limit]
+
+        c.desc "Show the number of results, rather than printing them"
+        c.switch [:count]
+      end
+
+      def command_options_for_list(c)
+        command_option_as_role c
+        command_options_for_search c
+
         c.desc "Show only ids"
         c.switch [:i, :ids]
-        
+
         c.desc "Show annotations in 'raw' format"
         c.switch [:r, :"raw-annotations"]
       end
+
+      def process_command_options_for_search options
+        opts = options.slice(:search, :count, :limit, :offset, :kind)
+        opts[:acting_as] = options[:role] if options[:role]
+        opts[:search] = opts[:search].gsub('-',' ') if opts[:search]
+        opts[:kind] = opts[:kind].split(',') if opts[:kind]
+        opts
+      end
       
       def command_impl_for_list(global_options, options, args)
-        opts = options.slice(:search, :limit, :options, :kind) 
-        opts[:acting_as] = options[:role] if options[:role]
-        opts[:search]=opts[:search].gsub('-',' ') if opts[:search]
+        opts = process_command_options_for_search(options)
         resources = api.resources(opts)
-        if options[:ids]
+        if resources.is_a?(Numeric)
+          puts resources
+        elsif options[:ids]
           puts JSON.pretty_generate(resources.map(&:resourceid))
         else
           resources = resources.map &:attributes
@@ -297,23 +320,58 @@ an alternative destination role.)
         obj.resource.give_to destination_role
       end
       
-      def display_members(members, options)
-        result = if options[:V]
-          members.collect {|member|
-            {
-              member: member.member.roleid,
-              grantor: member.grantor.roleid,
-              admin_option: member.admin_option
-            }
-          }
+      # Displays members, which may be either:
+      #
+      # * A numeric count
+      # * A list of role ids
+      # * A list of RoleGrant
+      #
+      # +options+ may include:
+      #
+      # * **V** Show full RoleGrant info
+      # * **system** show system (internal) roles
+      #
+      # @return [Numeric, Hash] Convert the input to a number or Hash.
+      def display_members(members, member_field, options)
+        # Get this case out of the way
+        return display(members) if members.is_a?(Numeric)
+
+        result, roleid_function = if members.blank?
+          [ [], nil ]
+        elsif members.first.is_a?(Conjur::RoleGrant)
+          if options[:V]
+            items = members.collect do |member|
+              {
+                member: member.member.roleid,
+                grantor: member.grantor.roleid,
+                admin_option: member.admin_option
+              }.tap do |obj|
+                obj[:role] = member.role.roleid if member.role
+              end
+            end
+            [
+              items, lambda {|member| member[member_field] }
+            ]
+          else
+            [ members.map{|m| m.send(member_field) }.map(&:roleid), lambda{|r| r} ]
+          end
         else
-          members.map(&:member).map(&:roleid)
+          [ members.map(&:roleid), lambda{|r| r} ]
         end
+
+        unless options[:system]
+          result.reject! do |member|
+            roleid_function.call(member) =~ /^.+?:@/
+          end
+        end
+
         display result
       end
 
       def display(obj, options = {})
-        str = if obj.respond_to?(:attributes)
+        str = if obj.is_a?(Numeric)
+          obj.to_s
+        elsif obj.respond_to?(:attributes)
           JSON.pretty_generate obj.attributes
         elsif obj.respond_to?(:id)
           obj.id

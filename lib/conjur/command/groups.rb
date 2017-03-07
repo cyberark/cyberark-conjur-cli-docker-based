@@ -145,7 +145,7 @@ class Conjur::Command::Groups < Conjur::Command
         c.switch [:V,:verbose]
         c.action do |global_options,options,args|
           group = require_arg(args, 'GROUP')
-          display_members api.group(group).role.members, options
+          display_members api.group(group).role.members, :member, options
         end
       end
 
