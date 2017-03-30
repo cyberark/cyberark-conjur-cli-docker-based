@@ -8,7 +8,6 @@ username, password = Conjur::Authn.get_credentials
 raise "Not logged in to Conjur" unless username && password
 puts "Performing acceptance tests as root-ish user '#{username}'"
 
-# Future Aruba
 Aruba.configure do |config|
   config.exit_timeout = 30
   config.io_wait_timeout = 2

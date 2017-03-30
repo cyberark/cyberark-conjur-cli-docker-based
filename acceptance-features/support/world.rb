@@ -15,6 +15,7 @@ module ConjurCLIWorld
   end
   
   def save_password username, password
+    raise "Password for #{username} not found" if password.blank?
     raise "Found existing password for user '#{username}'" if passwords[username]
     passwords[username] = password
   end
@@ -34,8 +35,13 @@ module ConjurCLIWorld
     admin_api.current_role.role_id
   end
 
+  def random_hex nbytes = 12
+    @random ||= Random.new
+    @random.bytes(nbytes).unpack('h*').first
+  end
+
   def namespace
-    @namespace ||= admin_api.create_variable("text/plain", "id").id
+    @namespace ||= random_hex
   end
   
   # Aruba's method
@@ -45,7 +51,7 @@ module ConjurCLIWorld
   end 
 
   # Substitute the namespace for marker $ns
-  def unescape(string)
+  def sanitize_text string
     string = super
     string.gsub("$ns", namespace)
   end
