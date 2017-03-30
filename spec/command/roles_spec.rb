@@ -95,7 +95,21 @@ describe Conjur::Command::Roles, logged_in: true do
 
       describe_command "role:members -k hamster -s frontend -o 10 -l 10" do
         it "lists selected roles" do
-          expect(role).to receive(:members).with({kind: ['hamster'], search: 'frontend', offset: "10", limit: "10"}).and_return(all_role_grants)
+          expect(role).to receive(:members).with({kind: 'hamster', search: 'frontend', offset: "10", limit: "10"}).and_return(all_role_grants)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+
+      describe_command "role:members -k hamster,giraffe" do
+        it "lists selected roles" do
+          expect(role).to receive(:members).with({kind: %w(hamster giraffe)}).and_return(all_role_grants)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+
+      describe_command "role:members -k hamster -k giraffe" do
+        it "applies only the last 'kind' filter" do
+          expect(role).to receive(:members).with({kind: 'giraffe'}).and_return(all_role_grants)
           expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
         end
       end
@@ -179,7 +193,7 @@ describe Conjur::Command::Roles, logged_in: true do
   
       describe_command "role:memberships -k hamster -s frontend -o 10 -l 10" do
         it "lists selected roles" do
-          expect(role).to receive(:all).with({kind: ['hamster'], search: 'frontend', offset: "10", limit: "10"}).and_return(all_role_objects)
+          expect(role).to receive(:all).with({kind: 'hamster', search: 'frontend', offset: "10", limit: "10"}).and_return(all_role_objects)
           expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
         end
       end
