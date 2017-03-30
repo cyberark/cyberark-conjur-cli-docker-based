@@ -166,6 +166,12 @@ describe Conjur::Command::Resources, logged_in: true do
         ])
       end
     end
+    describe_command "resource:list -i -k jobs" do
+      it "searches by resource kind" do
+        expect(api).to receive(:resources).with({kind: 'jobs'}).and_return(resources)
+        expect(JSON.parse( expect { invoke }.to write )).to eq(resource_ids)
+      end
+    end
     describe_command "resource:list -i" do
       it "displays resource ids" do
         expect(api).to receive(:resources).with({}).and_return(resources)
