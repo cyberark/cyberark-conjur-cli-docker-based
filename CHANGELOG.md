@@ -1,3 +1,7 @@
+# 5.6.1
+
+* Fix handling of `-k / --kind` argument to `resource list`.
+
 # 5.6.0
 
 The following enhancements require Conjur server 4.9.1.0 or later:

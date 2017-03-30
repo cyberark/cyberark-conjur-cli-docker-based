@@ -184,7 +184,9 @@ module Conjur
         opts = options.slice(:search, :count, :limit, :offset, :kind)
         opts[:acting_as] = options[:role] if options[:role]
         opts[:search] = opts[:search].gsub('-',' ') if opts[:search]
-        opts[:kind] = opts[:kind].split(',') if opts[:kind]
+        if opts[:kind] && opts.index(',')
+          opts[:kind] = opts[:kind].split(',')
+        end
         opts
       end
       
