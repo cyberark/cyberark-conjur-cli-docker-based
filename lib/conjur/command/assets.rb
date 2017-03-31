@@ -118,4 +118,37 @@ class Conjur::Command::Assets < Conjur::Command
       end
     end
   end
+  
+  desc "Provision cloud resources for an asset"
+  arg_name "provisioner kind:id"
+  command :provision do |c|
+    c.action do |global_options, options, args|
+      provisioner = require_arg(args, 'provisioner')
+      kind, id = get_kind_and_id_from_args args, 'kind:id'
+      asset = api.send(kind, id)
+      raise "asset #{kind}:#{id} does not exist" unless asset.exists?
+      path = "conjur/provisioner/#{kind}/#{provisioner}"
+      
+      # Hmm could be DRYer
+      begin
+        require path
+      rescue LoadError => ex
+        raise "unable to find #{provisioner} provisioner for #{kind} asset (LoadError while requiring #{path})"
+      end
+
+      begin 
+        name = path.classify
+        mod = name.constantize
+      rescue NameError
+        raise "unable to find #{provisioner} provisioner for #{kind} asset (missing const #{name})"
+      end
+      
+      asset.extend mod
+      
+      if Conjur.log
+        Conjur.log << "provisioning asset #{kind}:#{id} for #{provisioner}"
+      end
+      asset.provision
+    end
+  end
 end

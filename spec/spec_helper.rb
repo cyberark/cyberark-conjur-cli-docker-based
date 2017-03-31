@@ -23,6 +23,7 @@ MEMBER='<member>'
 PRIVILEGE='<privilege>'
 OWNER='<owner/userid>'
 ACCOUNT='<core_account>'
+PROVISIONER='some_provisioner'
 
 require 'conjur/command/rspec/helpers'
 
