@@ -21,24 +21,6 @@
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
-    var.desc "Show a variable"
-    var.arg_name "VARIABLE"
-    var.command :show do |c|
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'VARIABLE')
-        display(api.variable(id), options)
-      end
-    end
-
-    var.desc "List variables"
-    var.command :list do |c|
-      command_options_for_list c
-
-      c.action do |global_options, options, args|
-        command_impl_for_list global_options, options.merge(kind: "variable"), args
-      end
-    end
-
     var.desc "Access variable values"
     var.command :values do |values|
       values.desc "Add a value"
@@ -65,92 +47,5 @@ class Conjur::Command::Variables < Conjur::Command
         $stdout.write api.variable(id).value(options[:version])
       end
     end
-
-    var.desc 'Set the expiration for a variable'
-    var.command :expire do |c|
-      c.arg_name "NOW"
-      c.desc 'Set variable to expire immediately'
-      min_version c, '4.6.0'
-      c.switch [:n, :'now'], :negatable => false
-
-      c.arg_name "DAYS"
-      c.desc 'Set variable to expire after the given number of days'
-      c.flag [:d, :'days']
-
-      c.arg_name "MONTHS"
-      c.desc 'Set variable to expire after the given number of months'
-      c.flag [:m, :'months']
-
-      c.arg_name "DURATION"
-      c.desc 'Set variable to expire after the given ISO8601 duration'
-      c.flag [:i, :'in']
-
-      c.action do |global_options, options, args|
-        id = require_arg(args, 'VARIABLE')
-
-        exit_now! 'Specify only one duration' if durations(options) > 1
-        exit_now! 'Specify at least one duration' if durations(options) == 0
-
-        now = options[:n]
-        days = options[:d]
-        months = options[:m]
-
-        case
-        when now.present?
-          duration = 'P0Y'
-        when days.present?
-          duration = "P#{days.to_i}D"
-        when months.present?
-          duration = "P#{months.to_i}M"
-        else
-          duration = options[:i]
-        end
-
-        display api.variable(id).expires_in(duration)
-      end
-    end
-
-    var.desc 'Display expiring variables'
-    var.long_desc 'Only variables that expire within the given duration are displayed. If no duration is provided, show all visible variables that are set to expire.'
-    var.command :expirations do |c|
-      c.arg_name 'DAYS'
-      c.desc 'Display variables that expire within the given number of days'
-      min_version c, '4.6.0'
-      c.flag [:d, :'days']
-
-      c.arg_name 'MONTHS'
-      c.desc 'Display variables that expire within the given number of months'
-      c.flag [:m, :'months']
-
-      c.arg_name 'IN'
-      c.desc 'Display variables that expire within the given ISO8601 interval'
-      c.flag [:i, :'in']
-
-      c.action do | global_options, options, args|
-
-        days = options[:d]
-        months = options[:m]
-        duration = options[:i]
-
-        exit_now! 'Specify only one duration' if durations(options) > 1
-
-        case
-        when days.present?
-          duration = "P#{days.to_i}D"
-        when months.present?
-          duration = "P#{months.to_i}M"
-        end
-
-        display api.variable_expirations(duration)
-      end
-    end
-
   end
-
-  class << self
-    def durations(options)
-      [options[:n],options[:d],options[:m],options[:i]].count {|o| o.present?}
-    end
-  end
-
 end
