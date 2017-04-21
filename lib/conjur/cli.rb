@@ -117,7 +117,7 @@ module Conjur
       require 'conjur/api'
 
       if command.name_for_help.first == "init" and options.has_key?("account")
-        ENV["CONJUR_ACCOUNT"]=options["account"]
+        ENV["CONJUR_ACCOUNT"] = options["account"]
       end
       apply_config
       require 'active_support/core_ext'

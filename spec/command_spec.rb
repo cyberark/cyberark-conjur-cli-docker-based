@@ -10,7 +10,7 @@ describe Conjur::Command do
           end
         end 
         context "brief id(2 tokens)" do
-          before(:each) { allow(described_class).to receive(:conjur_account).and_return("current/acc") }
+          before(:each) { allow(Conjur.configuration).to receive(:account).and_return("current/acc") }
           it "injects current account as a prefix" do
             expect(described_class.full_resource_id("a:b")).to eq("current/acc:a:b")
           end

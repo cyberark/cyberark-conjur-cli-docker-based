@@ -34,7 +34,6 @@ module Conjur::Authn
     end
   end
   
-  autoload :API,      'conjur/authn-api'
   class << self
     def login(options = {})
       delete_credentials
@@ -43,16 +42,12 @@ module Conjur::Authn
     
     def authenticate(options = {})
       require 'conjur/api'
-      Conjur::API.authenticate(*get_credentials(options))
+      Conjur::API.authenticate *get_credentials(options)
     end
     
     def delete_credentials
-      netrc.delete host
+      netrc.delete Conjur.configuration.appliance_url
       netrc.save
-    end
-    
-    def host
-      Conjur::Authn::API.host
     end
     
     def netrc
@@ -83,7 +78,7 @@ module Conjur::Authn
     end
     
     def read_credentials
-      netrc[host]
+      netrc[Conjur.configuration.appliance_url]
     end
     
     def fetch_credentials(options = {})
@@ -94,7 +89,7 @@ module Conjur::Authn
     alias save_credentials fetch_credentials
     
     def write_credentials
-      netrc[host] = @credentials
+      netrc[Conjur.configuration.appliance_url] = @credentials
       netrc.save
       @credentials
     end
@@ -129,7 +124,7 @@ module Conjur::Authn
       if token = token_from_environment
         cls.new_from_token token
       else
-        cls.new_from_key(*get_credentials(options))
+        cls.new_from_key *get_credentials(options)
       end
     end
     

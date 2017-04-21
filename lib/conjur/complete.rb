@@ -200,8 +200,8 @@ class Conjur::CLI::Complete
   end
 
   def complete_role
-    Conjur::Command.api.current_role.all
-      .map { |r| Resource.new(r.roleid) }
+    Conjur::Command.api.current_role(Conjur.configuration.account).memberships
+      .map { |r| Resource.new(r.id) }
       .reject { |r| r.kind.start_with? '@' }
       .map(&:to_s)
   end

@@ -38,11 +38,11 @@ class Conjur::Command::Init < Conjur::Command
   end
 
   Conjur::CLI.command :init do |c|
-    c.desc "Hostname of the Conjur endpoint (required for virtual appliance)"
-    c.arg_name 'HOSTNAME'
-    c.flag ["h", "hostname"]
+    c.desc "URL of the Conjur service"
+    c.arg_name 'URL'
+    c.flag ["u", "url"]
 
-    c.desc "Conjur organization account name (not required for appliance)"
+    c.desc "Conjur organization account name"
     c.flag ["a", "account"]
 
     c.desc "Conjur SSL certificate (will be obtained from host unless provided by this option)"
@@ -56,40 +56,26 @@ class Conjur::Command::Init < Conjur::Command
     c.flag "force"
 
     c.action do |global_options,options,args|
-      hostname = options[:hostname] || highline.ask("Enter the hostname (and optional port) of your Conjur endpoint: ").to_s
-      protocol, hostname = (hostname.scan %r(^(?:(.*)://)?(.*))).first
-      exit_now! "only https protocol supported" unless protocol.nil? || protocol == 'https'
-      if hostname
-        Conjur.configuration.core_url = "https://#{hostname}/api"
-      end
+      url = options[:url] || highline.ask("Enter the URL of your Conjur service: ").to_s
+      url = URI.parse(url)
 
-      if (certificate = options[:certificate]).blank?
-        unless hostname.blank?
-          connect_hostname = if hostname.include?(':')
-            hostname
-          else
-            hostname + ':443'
-          end
-          fingerprint, certificate = get_certificate connect_hostname
+      Conjur.configuration.appliance_url = url.to_s
 
-          puts
-          puts fingerprint
+      if (certificate = options[:certificate]).blank? && url.scheme == "https"
+        connect_hostname = [ url.host, url.port ].join(":")
+        fingerprint, certificate = get_certificate connect_hostname
 
-          puts "\nPlease verify this certificate on the appliance using command:
-                openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
-          exit_now! "You decided not to trust the certificate" unless highline.ask("Trust this certificate (yes/no): ").strip == "yes"
-        end
+        puts
+        puts fingerprint
+
+        puts "\nPlease verify this certificate on the appliance using command:
+              openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
+        exit_now! "You decided not to trust the certificate" unless highline.ask("Trust this certificate (yes/no): ").strip == "yes"
       end
       
       configure_cert_store certificate
       
-      account = options[:account]
-      account ||= if hostname
-        account = Conjur::Core::API.info['account'] or raise "Expecting 'account' in Core info"
-      else
-        # using .to_s to overcome https://github.com/JEG2/highline/issues/69
-        highline.ask("Enter your organization account name: ").to_s
-      end
+      account = options[:account] || highline.ask("Enter your organization account name: ").to_s
 
       exit_now! "account is required" if account.blank?
 
@@ -98,7 +84,7 @@ class Conjur::Command::Init < Conjur::Command
         plugins: []
       }
 
-      config[:appliance_url] = "https://#{hostname}/api" unless hostname.blank?
+      config[:appliance_url] = url.to_s
 
       config_file = File.expand_path('~/.conjurrc')
 

@@ -20,17 +20,29 @@
 #
 class Conjur::Command::Resources < Conjur::Command
 
+  desc "Show an object"
+  arg_name "RESOURCE"
+  command :show do |c|
+    c.action do |global_options,options,args|
+      id = full_resource_id( require_arg(args, "RESOURCE") )
+      display api.resource(id).attributes
+    end
+  end
+  
+  desc "List objects"
+  command :list do |c|
+    c.desc "Filter by kind"
+    c.flag [:k, :kind]
+
+    command_options_for_list c
+
+    c.action do |global_options, options, args|
+      command_impl_for_list global_options, options, args
+    end
+  end
+
   desc "Manage resources"
   command :resource do |resource|
-    resource.desc "Show a resource"
-    resource.arg_name "RESOURCE"
-    resource.command :show do |c|
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        display api.resource(id).attributes
-      end
-    end
-
     resource.desc "Determines whether a resource exists"
     resource.arg_name "RESOURCE"
     resource.command :exists do |c|
@@ -61,49 +73,6 @@ class Conjur::Command::Resources < Conjur::Command
         else
           puts api.resource(id).permitted? privilege
         end
-      end
-    end
-
-    resource.desc "List roles with a specified permission on the resource"
-    resource.arg_name "RESOURCE PERMISSION"
-    resource.command :permitted_roles do |c|
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        permission = require_arg(args, "PERMISSION")
-        display api.resource(id).permitted_roles(permission)
-      end
-    end
-
-    resource.desc "Show an annotation for a resource"
-    resource.arg_name "RESOURCE ANNOTATION"
-    resource.command :annotation do |c|
-      c.action do |global_options, options, args|
-        id = full_resource_id require_arg args, 'RESOURCE'
-        name = require_arg args, 'ANNOTATION'
-        value = api.resource(id).annotations[name]
-        puts value unless value.nil?
-      end
-    end
-
-    resource.desc "Print annotations as JSON"
-    resource.arg_name 'RESOURCE'
-    resource.command :annotations do |c|
-      c.action do |go, o, args|
-        id = full_resource_id require_arg args, 'RESOURCE'
-        annots = api.resource(id).annotations.to_h
-        puts annots.to_json
-      end
-    end
-
-    resource.desc "List all resources"
-    resource.command :list do |c|
-      c.desc "Filter by kind"
-      c.flag [:k, :kind]
-
-      command_options_for_list c
-
-      c.action do |global_options, options, args|
-        command_impl_for_list global_options, options, args
       end
     end
   end

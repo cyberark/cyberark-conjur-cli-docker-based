@@ -32,7 +32,7 @@ class Conjur::Command::Roles < Conjur::Command
       c.switch "json"
       
       c.action do |global_options,options,args|
-        id = require_arg(args, 'ROLE')
+        id = full_role_id(require_arg(args, 'ROLE'))
         role = api.role(id)
         if options[:json]
           display({
@@ -53,8 +53,8 @@ class Conjur::Command::Roles < Conjur::Command
 
       c.action do |global_options,options,args|
         roleid = args.shift
-        role = roleid.nil? && api.current_role || api.role(roleid)
-        memberships = role.all.map(&:roleid)
+        role = roleid.nil? && api.current_role(Conjur.configuration.account) || api.role(full_role_id(roleid))
+        memberships = role.memberships.map(&:id)
         unless options[:system]
           memberships.reject!{|id| id =~ /^.+?:@/}
         end
@@ -69,8 +69,9 @@ class Conjur::Command::Roles < Conjur::Command
       c.switch [:V,:verbose]
 
       c.action do |global_options,options,args|
-        role = args.shift || api.user(api.username).roleid
-        display_members api.role(role).members, options
+        roleid = args.shift
+        role = roleid.nil? && api.current_role(Conjur.configuration.account) || api.role(full_role_id(roleid))
+        display_members role.members, options
       end
     end
 

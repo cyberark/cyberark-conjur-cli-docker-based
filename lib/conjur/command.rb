@@ -171,7 +171,7 @@ module Conjur
         opts[:search]=opts[:search].gsub('-',' ') if opts[:search]
         resources = api.resources(opts)
         if options[:ids]
-          puts JSON.pretty_generate(resources.map(&:resourceid))
+          puts JSON.pretty_generate(resources.map(&:id))
         else
           resources = resources.map &:attributes
           unless options[:'raw-annotations']
@@ -195,119 +195,18 @@ module Conjur
         end
         exit_now! message unless valid
       end
-      
-      def retire_options command
-        command.arg_name 'role'
-        command.desc "Specify a role to give the retired record to (default: the 'attic' user)"
-        command.long_desc %Q(When retired, all a record's roles and permissions are revoked.
-        
-As a final step, the record is 'given' (e.g. 'conjur resource give') to a destination role.
-The default role to receive the record is the user 'attic'. This option can be used to specify
-an alternative destination role.)
-        command.flag [:d, :"destination-role"]
-      end
-      
-      def destination_role options
-        destination = options[:"destination-role"]
-        if destination
-          api.role(destination)
-        else
-          api.user('attic')
-        end
-      end
-      
-      def elevated?
-        api.privilege == 'elevate' && api.global_privilege_permitted?('elevate')
-      end
-      
-      def validate_retire_privileges record, options
-        return true if elevated?
-        
-        if record.respond_to?(:role)
-          memberships = current_user.role.memberships.map(&:roleid)
-          validate_privileges "You can't administer this record" do
-            # The current user has a role which is admin of the record's role
-            record.role.members.find{|m| memberships.member?(m.member.roleid) && m.admin_option}
-          end
-        end
-        
-        validate_privileges "You don't own the record" do
-          # The current user has the role which owns the record's resource
-          current_user.role.member_of?(record.resource.ownerid)
-        end
-        
-        role = destination_role(options)
-        exit_now! "Destination role '#{role.roleid}' doesn't exist" unless role.exists?
-      end
-      
-      def retire_resource obj
-        obj.resource.attributes['permissions'].each do |p|
-          role = api.role(p['role'])
-          privilege = p['privilege']
-          next if obj.respond_to?(:roleid) && role.roleid == obj.roleid && privilege == 'read'
-          puts "Denying #{privilege} privilege to #{role.roleid}"
-          obj.resource.deny(privilege, role)
-        end
-      end
-        
-      def retire_role obj
-        members = obj.role.members
-        # Move the invoking role to the end of the roles list, so that it doesn't
-        # lose its permissions in the middle of this operation.
-        # I'm sure there's a cleaner way to do this.
-        self_member = members.select{|m| m.member.roleid == current_user.role.roleid}
-        self_member.each do |m|
-          members.delete m
-        end
-        members.concat self_member if self_member
-        members.each do |r|
-          member = api.role(r.member)
-          puts "Revoking from role #{member.roleid}"
-          obj.role.revoke_from member
-        end
-      end
 
-      def retire_internal_role roleObj
-        members = roleObj.members
-        # Move the invoking role to the end of the roles list, so that it doesn't
-        # lose its permissions in the middle of this operation.
-        self_member = members.select{|m| m.member.roleid == current_user.role.roleid}
-        self_member.each do |m|
-          members.delete m
-        end
-        members.concat self_member if self_member
-        members.each do |r|
-          member = api.role(r.member)
-          puts "Revoking from role #{member.roleid}"
-          roleObj.revoke_from member
-        end
-      end
-      
-      def give_away_resource obj, options
-        destination = options[:"destination-role"]
-        destination_role = if destination
-          api.role(destination)
-        else
-          api.user('attic')
-        end
-
-        exit_now! "Role #{destination_role.roleid} doesn't exist" unless destination_role.exists?
-        
-        puts "Giving ownership to '#{destination_role.roleid}'"
-        obj.resource.give_to destination_role
-      end
-      
       def display_members(members, options)
         result = if options[:V]
           members.collect {|member|
             {
-              member: member.member.roleid,
-              grantor: member.grantor.roleid,
+              role: member.role.id,
+              member: member.member.id,
               admin_option: member.admin_option
             }
           }
         else
-          members.map(&:member).map(&:roleid)
+          members.map(&:member).map(&:id)
         end
         display result
       end
@@ -327,104 +226,8 @@ an alternative destination role.)
         puts str
       end
 
-      def prompt_to_confirm kind, properties
-        puts
-        puts "A new #{kind} will be created with the following properties:"
-        puts
-        properties.select{|k,v| !v.blank?}.each do |k,v|
-          printf "%-10s: %s\n", k, v
-        end
-        puts
-        
-        exit(0) unless %w(yes y).member?(highline.ask("Proceed? (yes/no): ").strip.downcase)
-      end
-      
       def integer? v
         Integer(v, 10) rescue false
-      end
-    
-      def prompt_for_id kind, label = 'id'
-        highline.ask("Enter the #{label}: ") do |q|
-          q.readline = true
-          q.validate = lambda{|id|
-            !id.blank? && !api.send(kind, id).exists?
-          }
-          q.responses[:not_valid] = "<% if @answer.blank? %>"\
-              "#{label} cannot be blank<% else %>"\
-              "A #{kind} called '<%= @answer %>' already exists<% end %>"
-        end
-      end
-
-      def prompt_for_public_key
-        public_key = highline.ask("Enter the public key (press enter to skip): ") do |q|
-          q.validate = lambda{|key|
-            if key.blank?
-              true
-            else
-              validate_public_key key
-            end
-          }
-          q.responses[:not_valid] = "Public key format is invalid; please try again"
-        end
-        public_key.blank? ? nil : public_key.strip
-      end
-    
-      # http://serverfault.com/questions/453296/how-do-i-validate-a-rsa-ssh-public-key-file-id-rsa-pub
-      def validate_public_key key
-        if system('which ssh-keygen 2>&1 > /dev/null')
-          Conjur.log.debug "Using ssh-keygen to verify the public key\n" if Conjur.log
-          require 'tempfile'
-          tempfile = Tempfile.new 'public_key'
-          tempfile.write(key)
-          tempfile.close
-          `ssh-keygen -l -f #{tempfile.path}`
-          $? == 0
-        else
-          Conjur.log.debug "ssh-keygen is not available; falling back to simple string testing\n" if Conjur.log
-          # Should be a line with at least 2 components,
-          # first one being the algo id and second a base64 string.
-          # In principle this means:
-          #   Base64.strict_decode64 key.strip[/\Assh-\w+ (\S+).*/, 1]
-
-          # Since the pubkeys service is more strict: needs a name and
-          # rejects ones with a space, instead reproduce its algorithm here.
-          begin
-            components = key.strip.split ' '
-            Base64.strict_decode64 components[1]
-            components.length == 3
-          rescue NoMethodError, ArgumentError
-            false
-          end
-        end
-      end
-      
-      def prompt_for_group options = {}
-        options[:hint] ||= "press enter to own the record yourself"
-        group_ids = api.groups.map(&:id)
-        
-        highline.ask("Enter the group which will own the record (#{options[:hint]}): ", [ "" ] + group_ids) do |q|
-          require 'readline'
-          Readline.completion_append_character = ""
-          Readline.completer_word_break_characters = ""
-          
-          q.readline = true
-          q.validate = lambda{|id|
-            @group = nil
-            id.empty? || (@group = api.group(id)).exists?
-          }
-          q.responses[:not_valid] = "Group '<%= @answer %>' doesn't exist, or you don't have permission to use it"
-        end
-        @group ? @group.roleid : nil
-      end
-
-      def prompt_for_idnumber label
-        result = highline.ask("Enter a #{label}: ") do |q|
-          q.validate = lambda{|id|
-            id.blank? || integer?(id)
-          }
-          q.responses[:not_valid] = "The #{label} must be an integer"
-        end
-        result.blank? ? nil : result.to_i
       end
 
       def prompt_for_password
@@ -449,19 +252,10 @@ an alternative destination role.)
         password
       end
       
-      def current_role
-        kind, id = api.username.split('/', 2)
-        if id.nil?
-          id = kind
-          kind = 'user'
-        end
-        api.role([ kind, id ].join(":"))
-      end
-      
       def has_admin?(role, other_role)
-        return true if role.roleid == other_role.roleid
-        memberships = role.memberships.map(&:roleid)
-        other_role.members.any? { |m| memberships.member?(m.member.roleid) && m.admin_option }
+        return true if role.id == other_role.id
+        memberships = role.memberships.map(&:id)
+        other_role.members.any? { |m| memberships.member?(m.member.id) && m.admin_option }
       rescue RestClient::Forbidden
         false
       end

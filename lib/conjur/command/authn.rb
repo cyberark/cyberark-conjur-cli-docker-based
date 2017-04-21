@@ -88,7 +88,7 @@ It should be running the CAS RESTful services at the /v1 path
       c.action do
         begin
           creds = Conjur::Authn.get_credentials(noask: true)
-          puts({account: Conjur::Core::API.conjur_account, username: creds[0]}.to_json)
+          puts({account: Conjur.configuration.account, username: creds[0]}.to_json)
         rescue Conjur::Authn::NoCredentialsError
           exit_now! 'Not logged in.', -1
         end

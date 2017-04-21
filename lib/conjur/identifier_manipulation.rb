@@ -7,10 +7,12 @@ module Conjur
         raise "Expecting at least two tokens in #{id}"
       end
       if parts.size == 2
-        id = [conjur_account, parts].flatten.join(":")
+        id = [Conjur.configuration.account, parts].flatten.join(":")
       end
       id
     end
+    
+    alias full_role_id full_resource_id
 
     # removes accounts from 3+-tokens id, extracts kind
     def get_kind_and_id_from_args args, argname='id'
@@ -20,10 +22,6 @@ module Conjur
       tokens.shift if tokens.size>=3 # get rid of account
       kind=tokens.shift.gsub('-','_')
       [kind, tokens.join(':')]
-    end
-
-    def conjur_account
-      Conjur::Core::API.conjur_account
     end
   end
 end

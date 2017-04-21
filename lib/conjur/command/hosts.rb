@@ -21,28 +21,11 @@
 
 class Conjur::Command::Hosts < Conjur::Command
   def self.host_layer_roles host
-    host.role.all.select{|r| r.kind == "layer"}
+    host.memberships.select{|r| r.kind == "layer"}
   end
   
   desc "Manage hosts"
   command :host do |hosts|
-    hosts.desc "Show a host"
-    hosts.arg_name "HOST"
-    hosts.command :show do |c|
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'HOST')
-        display(api.host(id), options)
-      end
-    end
-
-    hosts.desc "List hosts"
-    hosts.command :list do |c|
-      command_options_for_list c
-      c.action do |global_options, options, args|
-        command_impl_for_list global_options, options.merge(kind: "host"), args
-      end
-    end
-
     hosts.desc "Rotate a host's API key"
     hosts.command :rotate_api_key do |c|
       c.desc "Login of host whose API key we want to rotate (default: logged-in host)"
@@ -50,8 +33,9 @@ class Conjur::Command::Hosts < Conjur::Command
       c.action do |_global, options, _args|
         if options.include?(:host)
           host = options[:host]
+          host_resourceid = full_resource_id("host:#{host}")
 
-          unless api.host(host).exists?
+          unless api.resource(host_resourceid).exists?
             exit_now! "host '#{host}' not found"
           end
 
@@ -65,7 +49,7 @@ class Conjur::Command::Hosts < Conjur::Command
             exit_now! 'To rotate your own API key, use this command without the --host flag'
           end
 
-          puts api.user(host).rotate_api_key
+          puts api.resource(host_resourceid).rotate_api_key
         else
           username, password = Conjur::Authn.read_credentials
           # Make sure the current identity is a host
@@ -81,33 +65,12 @@ class Conjur::Command::Hosts < Conjur::Command
       end
     end
 
-    hosts.desc "Update a hosts's attributes"
-    hosts.arg_name "HOST"
-    hosts.command :update do |c|
-      c.desc "A comma-delimited list of CIDR addresses to restrict host to (optional). Use 'all' to reset"
-      c.flag [:cidr]
-
-      c.action do |global_options, options, args|
-        id = require_arg(args, 'HOST')
-
-        host = api.host(id)
-
-        cidr = format_cidr(options[:cidr])
-
-        host_options = { }
-        host_options[:cidr] = cidr unless cidr.nil?
-
-        host.update(host_options)
-        puts "Host updated"
-      end
-    end
-
     hosts.desc "List the layers to which the host belongs"
     hosts.arg_name "HOST"
     hosts.command :layers do |c|
       c.action do |global_options, options, args|
         id = require_arg(args, 'HOST')
-        host = api.host(id)
+        host = api.resource(full_resource_id("host:#{id}"))
         display host_layer_roles(host).map(&:identifier), options
       end
     end

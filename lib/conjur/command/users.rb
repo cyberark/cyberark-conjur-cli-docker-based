@@ -23,43 +23,6 @@ class Conjur::Command::Users < Conjur::Command
 
   desc "Manage users"
   command :user do |user|
-    user.desc "Show a user"
-    user.arg_name "USER"
-    user.command :show do |c|
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'USER')
-        display(api.user(id), options)
-      end
-    end
-
-    user.desc "Decommission a user"
-    user.arg_name "USER"
-    user.command :retire do |c|
-      retire_options c
-
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'USER')
-        
-        user = api.user(id)
-        
-        validate_retire_privileges user, options
-
-        retire_resource user
-        retire_role user
-        give_away_resource user, options
-        
-        puts "User retired"
-      end
-    end
-
-    user.desc "List users"
-    user.command :list do |c|
-      command_options_for_list c
-
-      c.action do |global_options, options, args|
-        command_impl_for_list global_options, options.merge(kind: "user"), args
-      end
-    end
 
     user.desc "Update the password of the logged-in user"
     user.command :update_password do |c|
@@ -94,47 +57,6 @@ class Conjur::Command::Users < Conjur::Command
         end
       end
     end
-
-    user.desc "Update a user's attributes"
-    user.arg_name "USER"
-    user.command :update do |c|
-      c.desc "UID number to be associated with user (optional)"
-      c.flag [:uidnumber]
-
-      c.desc "A comma-delimited list of CIDR addresses to restrict user to (optional). Use 'all' to reset"
-      c.flag [:cidr]
-
-      c.action do |global_options, options, args|
-        login=require_arg(args,'USER')
-
-        uidnumber = options[:uidnumber]
-        cidr = format_cidr(options[:cidr])
-
-        validate_uidnumber(uidnumber)
-
-        user_options = { }
-        user_options[:uidnumber] = uidnumber.to_i if uidnumber
-        user_options[:cidr] = cidr unless cidr.nil?
-
-        api.user(login).update(user_options)
-        puts "User updated"
-      end
-    end
-
-    user.desc "Find the user by UID" 
-    user.arg_name "uid"
-    user.command :uidsearch do |c| 
-      c.action do |global_options, options, args| 
-        uidnumber = require_arg(args,'uid')
-        raise "Uidnumber should be integer" unless /\d+/ =~ uidnumber
-        uidnumber=uidnumber.to_i
-        display api.find_users(uidnumber: uidnumber)
-      end
-    end
-  end
-    
-  def self.prompt_for_uidnumber
-    prompt_for_idnumber "uid number"
   end
 
   def self.format_cidr(cidr)
@@ -146,9 +68,5 @@ class Conjur::Command::Users < Conjur::Command
     else
       cidr.split(',').each {|x| x.strip!}
     end
-  end
-
-  def self.validate_uidnumber(uidnumber)
-    exit_now! 'uidnumber should be integer' unless uidnumber.blank? || /\d+/ =~ uidnumber
   end
 end

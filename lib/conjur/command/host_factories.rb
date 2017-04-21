@@ -23,23 +23,6 @@ class Conjur::Command::HostFactories < Conjur::Command
   desc "Manage host factories"
 
   command :hostfactory do |hf|
-    hf.desc "Show a host factory"
-    hf.arg_name "id"
-    hf.command :show do |c|
-      c.action do |global_options,options,args|
-        id = require_arg(args, 'id')
-        display(api.host_factory(id), options)
-      end
-    end
-
-    hf.desc "List host factories"
-    hf.command :list do |c|
-      command_options_for_list c
-      c.action do |global_options, options, args|
-        command_impl_for_list global_options, options.merge(kind: "host_factory"), args
-      end
-    end
-
     hf.desc "Operations on tokens"
     hf.long_desc <<-DESC
 This command creates one or more identical tokens. A token is always created with an 
@@ -106,16 +89,6 @@ By default, this command creates one token. Optionally, it can be used to create
           
           api.revoke_host_factory_token token
           puts "Token revoked"
-        end
-      end
-      
-      tokens.desc "Show a token"
-      tokens.arg_name "token"
-      tokens.command :show do |c|
-        c.action do |global_options,options,args|
-          token = require_arg(args, 'token')
-          
-          display api.show_host_factory_token(token), options
         end
       end
     end

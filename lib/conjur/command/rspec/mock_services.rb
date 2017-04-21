@@ -20,7 +20,7 @@ shared_context "with mock authn" do
   let(:api_key) { 'sekrit' }
   let(:api) { Conjur::API.new_from_key(username, api_key) }
   before do
-    allow(Conjur::Core::API).to receive(:conjur_account) { account }
+    allow(Conjur.configuration).to receive(:account) { account }
     allow(Conjur::Authn).to receive_messages(netrc: netrc, host: authn_host)
     Conjur::Config.merge 'account' => account
   end

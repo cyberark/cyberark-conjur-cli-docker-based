@@ -71,13 +71,13 @@ describe Conjur::Command::Init do
       end
     end
 
-    describe_command 'init -a the-account -h foobar' do
+    describe_command 'init -a the-account -u https://foobar' do
       it "can't get the cert" do
         expect { invoke }.to raise_error(GLI::CustomExit, /unable to retrieve certificate/i)
       end
     end
 
-    describe_command 'init -a the-account -h localhost -c the-cert' do
+    describe_command 'init -a the-account -u https://localhost -c the-cert' do
       it "writes config and cert files" do
         expect(File).to receive(:open).twice
         expect(Conjur::Command::Init).to receive(:configure_cert_store).with "the-cert"
@@ -115,7 +115,7 @@ describe Conjur::Command::Init do
       end
       
       context "default behavior" do
-        describe_command "init -a the-account -h localhost -c the-cert" do
+        describe_command "init -a the-account -u https://localhost -c the-cert" do
           before(:each) {
             allow(File).to receive(:expand_path).and_call_original
             allow(File).to receive(:expand_path).with('~/.conjurrc').and_return("#{tmpdir}/.conjurrc")
@@ -132,7 +132,7 @@ describe Conjur::Command::Init do
       end
 
       context "explicit output file" do
-        describe_command "init -f #{tmpdir}/.conjurrc2 -a the-account -h localhost -c the-cert" do
+        describe_command "init -f #{tmpdir}/.conjurrc2 -a the-account -u https://localhost -c the-cert" do
           include_examples "check config and cert files", File.join(tmpdir, ".conjurrc2")
           it "prints the config file location" do
             expect { invoke }.to write("Wrote configuration to #{tmpdir}/.conjurrc2")
@@ -141,14 +141,14 @@ describe Conjur::Command::Init do
       end
 
       context "to CONJURRC" do
-        describe_command "init -a the-account -h localhost -c the-cert" do
+        describe_command "init -a the-account -u https://localhost -c the-cert" do
           file = File.join(tmpdir, ".conjurrc_env")
           include_examples "check config and cert files", file, file
         end
       end
       
       context "explicit output file overrides CONJURRC" do
-        describe_command "init -f #{tmpdir}/.conjurrc_2 -a the-account -h localhost -c the-cert" do
+        describe_command "init -f #{tmpdir}/.conjurrc_2 -a the-account -u https://localhost -c the-cert" do
           ENV['CONJURRC'] = "#{tmpdir}/.conjurrc_env_2"
           include_examples "check config and cert files", File.join(tmpdir, ".conjurrc_2")
         end
