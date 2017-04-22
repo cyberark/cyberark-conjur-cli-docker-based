@@ -75,5 +75,16 @@ class Conjur::Command::Resources < Conjur::Command
         end
       end
     end
+    
+    resource.desc "List roles with a specified privilege on the resource"
+    resource.arg_name "RESOURCE PRIVILEGE"
+    resource.command :permitted_roles do |c|
+      c.action do |global_options,options,args|
+        id = full_resource_id(require_arg(args, "RESOURCE"))
+        permission = require_arg(args, "PRIVILEGE")
+
+        display api.resource(id).permitted_roles(permission)
+      end
+    end
   end
 end

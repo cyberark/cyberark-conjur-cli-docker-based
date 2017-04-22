@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2013 Conjur Inc
+# Copyright (C) 2017 Conjur Inc
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of
 # this software and associated documentation files (the "Software"), to deal in
@@ -18,36 +18,25 @@
 # IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-class Conjur::Command::Variables < Conjur::Command
-  desc "Manage variables"
-  command :variable do |var|
-    var.desc "Access variable values"
-    var.command :values do |values|
-      values.desc "Add a value"
-      values.arg_name "VARIABLE VALUE"
-      values.command :add do |c|
-        c.action do |global_options,options,args|
-          id = require_arg(args, 'VARIABLE')
-          value = args.shift || STDIN.read
-          assert_empty(args)
-
-          api.resource(full_resource_id("variable:#{id}")).add_value(value)
-          puts "Value added"
-        end
-      end
-    end
-
-    var.desc "Get a value"
-    var.arg_name "VARIABLE"
-    var.command :value do |c|
-      c.desc "Version number"
-      c.flag [:v, :version]
-
+class Conjur::Command::Policies < Conjur::Command
+  desc "Manage policies"
+  command :policy do |p|
+    p.desc "Load a policy"
+    p.arg_name "POLICY FILENAME"
+    p.command :load do |c|
       c.action do |global_options,options,args|
-        id = require_arg(args, 'VARIABLE')
-        assert_empty(args)
+        policy_id = require_arg(args, 'POLICY')
+        filename = require_arg(args, 'FILENAME')
+        policy = if filename == '-'
+          STDIN.read
+        else
+          require 'open-uri'
+          open(filename).read
+        end
         
-        $stdout.write api.resource(full_resource_id("variable:#{id}")).value(options[:version])
+        result = api.load_policy policy_id, policy
+        $stderr.puts "Loaded policy '#{policy_id}'"
+        puts JSON.pretty_generate(result)
       end
     end
   end
