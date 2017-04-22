@@ -24,6 +24,12 @@ class Conjur::Command::Policies < Conjur::Command
     p.desc "Load a policy"
     p.arg_name "POLICY FILENAME"
     p.command :load do |c|
+      c.desc "Fully replace the existing policy, deleting any data that is not declared in the new policy."
+      c.switch :replace
+
+      c.desc "Allow explicit deletion statements in the policy."
+      c.switch :delete
+      
       c.action do |global_options,options,args|
         policy_id = require_arg(args, 'POLICY')
         filename = require_arg(args, 'FILENAME')
@@ -34,7 +40,15 @@ class Conjur::Command::Policies < Conjur::Command
           open(filename).read
         end
         
-        result = api.load_policy policy_id, policy
+        method = if options[:replace]
+          Conjur::API::POLICY_METHOD_PUT
+        elsif options[:delete]
+          Conjur::API::POLICY_METHOD_PATCH
+        else
+          Conjur::API::POLICY_METHOD_POST
+        end
+        
+        result = api.load_policy policy_id, policy, method: method
         $stderr.puts "Loaded policy '#{policy_id}'"
         puts JSON.pretty_generate(result)
       end

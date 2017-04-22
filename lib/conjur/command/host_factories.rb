@@ -71,12 +71,10 @@ By default, this command creates one token. Optionally, it can be used to create
           end
           expiration = Time.now + duration
           count = (options[:count] || 1).to_i
-          command_options = {}
           
           cidr = format_cidr(options.delete(:cidr))
-          command_options[:cidr] = cidr unless cidr.nil?
 
-          tokens = api.host_factory(id).create_tokens expiration, count, command_options
+          tokens = api.resource(full_resource_id("host_factory:#{id}")).create_tokens expiration, count: count, cidr: cidr
           display tokens.map(&:to_json)
         end
       end
