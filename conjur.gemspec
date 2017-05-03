@@ -16,16 +16,13 @@ Gem::Specification.new do |gem|
   gem.version       = Conjur::VERSION
 
   gem.add_dependency 'activesupport', '~> 4.2'
-  gem.add_dependency 'conjur-api', '~> 4.21'
+  gem.add_dependency 'conjur-api'
   gem.add_dependency 'gli', '>=2.8.0'
   gem.add_dependency 'highline', '~> 1.7'
   gem.add_dependency 'netrc', '~> 0.10'
-  gem.add_dependency 'methadone', '~> 1.9'
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'xdg', '~> 2.2'
   gem.add_dependency 'table_print', '~> 1.5'
-
-  gem.add_runtime_dependency 'cas_rest_client', '~> 1.3'
 
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov'
@@ -37,4 +34,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'json_spec'
   gem.add_development_dependency 'cucumber-api'
   gem.add_development_dependency 'addressable'
+  gem.add_development_dependency 'pry-byebug'
 end

@@ -1,12 +1,26 @@
-require 'simplecov'
+$LOAD_PATH.unshift File.expand_path('../..', File.dirname(__FILE__))
+
+require 'json_spec/cucumber'
+
 require 'aruba/cucumber'
-require 'methadone/cucumber'
-require 'cucumber/rspec/doubles'
-require "json_spec/cucumber"
+require 'json_spec/cucumber'
+require 'simplecov'
 
 SimpleCov.start
 
-Aruba.configure do |config|
-  config.exit_timeout    = 15
-  config.io_wait_timeout = 2
+ENV['CONJUR_APPLIANCE_URL'] ||= 'http://localhost/api/v6'
+ENV['CONJUR_ACCOUNT'] ||= 'cucumber'
+
+require 'conjur/cli'
+
+Conjur::Config.load
+Conjur::Config.apply
+
+$netrc_file_path = ENV['CONJURRC'] || File.expand_path('~/.netrc')
+if File.exists?($netrc_file_path)
+  $netrc_file = File.read($netrc_file_path)
 end
+
+$conjur = Conjur::Authn.connect nil, noask: true
+
+puts "Performing CLI tests as user '#{$conjur.current_role(Conjur.configuration.account).login}'"

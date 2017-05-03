@@ -1,8 +1,9 @@
-Given /a graph with edges/ do |table|
+
+Given /^a graph with edges$/ do |table|
   graph table.raw
 end
 
-Then %r{the graph JSON should be} do |json|
+Then %r{^the graph JSON should be:$} do |json|
   json = expand_roles json
   last_graph = extract_filtered_graph json
   expect(last_graph.to_json).to be_json_eql(json)

@@ -41,6 +41,30 @@ class Conjur::Command::Resources < Conjur::Command
     end
   end
 
+  desc "Check for a privilege on a resource"
+  long_desc """
+By default, the privilege is checked for the logged-in user.
+Permission checks may be performed for other roles using the optional role argument.
+When the role argument is used, either the logged-in user must either own the specified
+resource or must have specified role in its memberships.
+"""
+  arg_name "RESOURCE PRIVILEGE"
+  command :check do |c|
+    c.desc "Role to check. By default, the current logged-in role is used"
+    c.flag [:r,:role]
+
+    c.action do |global_options,options,args|
+      id = full_resource_id(require_arg(args, "RESOURCE"))
+      privilege = args.shift or raise "Missing parameter: privilege"
+      role = if options[:role]
+        full_role_id(options[:role])
+      else
+        nil
+      end
+      puts api.resource(id).permitted? privilege, role: role
+    end
+  end
+
   desc "Manage resources"
   command :resource do |resource|
     resource.desc "Determines whether a resource exists"
@@ -49,30 +73,6 @@ class Conjur::Command::Resources < Conjur::Command
       c.action do |global_options,options,args|
         id = full_resource_id( require_arg(args, "RESOURCE") )
         puts api.resource(id).exists?
-      end
-    end
-
-    resource.desc "Check for a privilege on a resource"
-    resource.long_desc """
-  By default, the privilege is checked for the logged-in user.
-  Permission checks may be performed for other roles using the optional role argument.
-  When the role argument is used, either the logged-in user must either own the specified
-  resource or be an admin of the specified role (i.e. be granted the specified role with grant option).
-  """
-    resource.arg_name "RESOURCE PRIVILEGE"
-    resource.command :check do |c|
-      c.desc "Role to check. By default, the current logged-in role is used"
-      c.flag [:r,:role]
-
-      c.action do |global_options,options,args|
-        id = full_resource_id( require_arg(args, "RESOURCE") )
-        privilege = args.shift or raise "Missing parameter: privilege"
-        if role = options[:role]
-          role = api.role(role)
-          puts role.permitted? id, privilege
-        else
-          puts api.resource(id).permitted? privilege
-        end
       end
     end
     

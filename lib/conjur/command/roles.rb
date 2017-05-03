@@ -20,9 +20,6 @@
 #
 
 class Conjur::Command::Roles < Conjur::Command
-  GRAPH_FORMATS = %w(json dot)
-
-
   desc "Manage roles"
   command :role do |role|
     role.desc "Determines whether a role exists"
@@ -72,87 +69,6 @@ class Conjur::Command::Roles < Conjur::Command
         roleid = args.shift
         role = roleid.nil? && api.current_role(Conjur.configuration.account) || api.role(full_role_id(roleid))
         display_members role.members, options
-      end
-    end
-
-    role.long_desc <<-EOD
-Retrieves a digraph representing the role members and memberships of one or more roles.
-
-The --[no-]ancestors and --[no-descendants] determine whether the graph should include ancestors, descendants, or both.  Both
-are included in the graph by default.
-
-The --acting-as flag specifies, as usual, a role as which to perform the action.  The default is the role of the currently
-authenticated user.  Only roles visible to this role will be included in the resulting graph.
-
-The output is always written to the standard output, and can be one of the following forms (specified with the --format flag):
-
-   * png: use the 'dot' command to generate a png image representing the graph.
-
-   * dot: produce a file in a suitable format for use with the 'dot' program.
-
-   * json [default]: output a JSON representation of the graph.
-
-In order to generate png images, the 'dot' program must be present and on your path.  This program is usually installed
-as part of the 'graphviz' package, and is available via apt-get on debian like systems and homebrew on OSX.
-
-The JSON format is determined by the presence of the --short flag.  If the --short flag is present, the JSON will be an array of
-edges, with each edge represented as an array:
-
-  [
-    [ 'parent1', 'child1' ],
-    [ 'parent2', 'child2'],
-    ...
-  ]
-
-If the --short flag is not present, the JSON output will be more verbose:
-
-  {
-    "graph": [
-      {
-        "parent": "parent1",
-        "child":  "child1"
-      },
-      ...
-    ]
-  }
-EOD
-    
-    role.desc "Describe role memberships as a digraph"
-    role.arg_name "ROLE", :multiple
-    role.command :graph do |c|
-      c.desc "Output formats [#{GRAPH_FORMATS}]"
-      c.flag [:f,:format], default_value: 'json', must_match: GRAPH_FORMATS
-
-      c.desc "Use a more compact JSON format"
-      c.switch [:s, :short]
-
-      c.desc "Whether to show ancestors"
-      c.switch [:a, :ancestors], default_value: true
-
-      c.desc "Whether to show descendants"
-      c.switch [:d, :descendants], default_value: true
-
-      acting_as_option(c)
-
-      c.action do |_, options, args|
-        format = options[:format].downcase.to_sym
-        if options[:short] and format != :json
-          $stderr.puts "WARNING: the --short option is meaningless when --format is not json"
-        end
-
-        params = options.slice(:ancestors, :descendants)
-        params[:as_role] = options[:acting_as] if options.member?(:acting_as)
-
-        graph = api.role_graph(args, params)
-
-        output = case format
-          when :json then graph.to_json(options[:short]) + "\n"
-          when :dot then graph.to_dot + "\n"
-          else raise "Unsupported format: #{format}" # not strictly necessary, because GLI must_match checks it,
-                                                     # but might as well?
-        end
-
-        $stdout.write output
       end
     end
   end

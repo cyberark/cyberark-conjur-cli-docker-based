@@ -19,7 +19,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 require 'base64'
-require 'semantic'
 
 module Conjur
   class Command
@@ -70,59 +69,10 @@ module Conjur
         def command.nodoc; true end
       end
 
-      def acting_as_option command
-        return if command.flags.member?(:"as-group") # avoid duplicate flags
-        command.desc 'Perform all actions as the specified Group'
-        command.arg_name 'GROUP'
-        command.flag [:'as-group']
-
-        command.desc 'Perform all actions as the specified Role'
-        command.arg_name 'ROLE'
-        command.flag [:'as-role']
-      end
-
-      def collection_option command
-        command.desc 'An optional prefix for created roles and resources'
-        command.arg_name 'collection'
-        command.flag [:collection]
-      end
-
       def context_option command
         command.desc "Load context from this config file, and save it when finished. The file permissions will be 0600 by default."
         command.arg_name "FILE"
         command.flag [:c, :context]
-      end
-      
-      def interactive_option command
-        command.arg_name 'interactive'
-        command.desc 'Create variable interactively'
-        command.switch [:i, :'interactive']
-      end
-      
-      def annotate_option command
-        command.arg_name 'annotate'
-        command.desc 'Add variable annotations interactively'
-        command.switch [:a, :annotate]
-      end
-
-      def min_version command, version
-        version = Semantic::Version.new version
-        if version.pre == nil
-          # Version check doesn't work correctly if one version has
-          # the "-###" suffix and the other does not. Versions
-          # returned by the server have the suffix.
-          version.pre = "0"
-        end
-        command.instance_variable_set(:@conjur_min_version, version)
-      end
-
-      def prompt_for_annotations
-        highline.say('Add annotations (a name and value for each one):')
-        {}.tap do |annotations|
-          until (name = highline.ask('  annotation name (press enter to quit annotations): ')).empty?
-            annotations[name] = read_till_eof('  annotation value (^D on its own line to finish):')
-          end
-        end
       end
       
       def highline

@@ -37,7 +37,7 @@ module Conjur
         initialize(coder.scalar)
       end
       def conjur_id
-        @id
+        [ Conjur.configuration.account, "variable", @id ].join(":")
       end
     end
 
@@ -104,14 +104,17 @@ module Conjur
     end
 
     def obtain(api)
-      runtime_environment={}
-      variable_ids= @definition.values.map { |v| v.conjur_id rescue nil }.compact
-      conjur_values=api.variable_values(variable_ids)
-      @definition.each do |environment_name, reference|
-        if reference.respond_to?(:evaluate)
-          runtime_environment[environment_name] = reference.evaluate( conjur_values[reference.conjur_id] )
+      runtime_environment = {}
+      @definition.each do |environment_name, v|
+        value = if v.conjur_id
+          api.resource(v.conjur_id).value
         else
-          runtime_environment[environment_name] = reference # is a literal value
+          v
+        end
+        if v.respond_to?(:evaluate)
+          runtime_environment[environment_name] = v.evaluate(value)
+        else
+          runtime_environment[environment_name] = v # is a literal value
         end
       end
       return runtime_environment
@@ -121,7 +124,7 @@ module Conjur
       Hash[
         @definition.map.each do |k,v|
           if v.respond_to? :conjur_id
-            if api.resource("variable:"+v.conjur_id).permitted?(:execute)
+            if api.resource(v.conjur_id).permitted?(:execute)
               status = :available
             else
               status = :unavailable

@@ -99,7 +99,7 @@ By default, this command creates one token. Optionally, it can be used to create
         c.action do |global_options,options,args|
           token = require_arg(args, 'token')
           id = require_arg(args, 'host-id')
-          
+
           host = Conjur::API.host_factory_create_host token, id, options
           display host
         end
