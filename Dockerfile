@@ -4,7 +4,7 @@ RUN mkdir /src
 WORKDIR /src
 
 COPY Gemfile Gemfile
-COPY conjur.gemspec conjur.gemspec
+COPY conjur-cli.gemspec conjur-cli.gemspec
 COPY lib/conjur/version.rb lib/conjur/version.rb
 
 # Make sure only one version of bundler is available
