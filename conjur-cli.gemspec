@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/conjur/version', __FILE__)
+require "English"
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Rafal Rzepecki", "Kevin Gilpin"]
@@ -8,7 +9,9 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/conjurinc/cli-ruby"
   gem.license       = 'MIT'
 
-  gem.files         = `git ls-files`.split($\) + Dir['build_number']
+  gem.files         = (`git ls-files`.split($OUTPUT_RECORD_SEPARATOR)
+                                     .select { |x| x !~ /^Dockerfile/ }
+                      ) + Dir["build_number"]
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "conjur-cli"

@@ -4,4 +4,4 @@ coverage
 */reports
 vendor
 pkg
-
+Dockerfile*
