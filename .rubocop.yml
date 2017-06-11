@@ -8,7 +8,7 @@ Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Lint/EndAlignment:
-  AlignWith: start_of_line
+  EnforcedStyleAlignWith: start_of_line
 
 Style/AndOr:
   EnforcedStyle: conditionals
