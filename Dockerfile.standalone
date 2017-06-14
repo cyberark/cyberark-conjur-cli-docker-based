@@ -8,6 +8,11 @@
 
 FROM ruby:2.4.1
 
+# some useful tools for interactive usage
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  jq curl vim nano \
+  && rm -rf /var/lib/apt/lists/*
+
 # cache a reasonable version of api-ruby & deps
 RUN mkdir -p /usr/src && \
     cd /usr/src && \
