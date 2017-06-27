@@ -154,16 +154,18 @@ module Conjur
         $stderr.puts "error: this command is not supported by the current Conjur server version"
         run_default_handler = false
       elsif exception.is_a?(RestClient::Exception) && exception.response
-        err = Conjur::Error.create exception.response.body
-
         if exception.http_code == 401
           $stderr.puts "Unable to authenticate with Conjur API. Please check your credentials."
           run_default_handler = false
-        elsif err
-          $stderr.puts "error: " + err.message
-          run_default_handler = false # suppress default error message
         else
-          $stderr.puts exception.response.body
+          err = Conjur::Error.create exception.response.body
+
+          if err
+            $stderr.puts "error: " + err.message
+            run_default_handler = false # suppress default error message
+          else
+            $stderr.puts exception.response.body
+          end
         end
       end
 
