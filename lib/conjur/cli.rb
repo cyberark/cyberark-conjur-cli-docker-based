@@ -155,7 +155,7 @@ module Conjur
         run_default_handler = false
       elsif exception.is_a?(RestClient::Exception) && exception.response
         if exception.http_code == 401
-          $stderr.puts "Unable to authenticate with Conjur API. Please check your credentials."
+          $stderr.puts "Unable to authenticate with Conjur. Please check your credentials."
           run_default_handler = false
         else
           err = Conjur::Error.create exception.response.body
