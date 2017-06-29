@@ -23,7 +23,7 @@ Before do
   step %Q(I set the environment variable "CONJUR_AUTHN_LOGIN" to "#{$conjur.username}")
   step %Q(I set the environment variable "CONJUR_AUTHN_API_KEY" to "#{$conjur.api_key}")
 
-  $conjur.load_policy "bootstrap", File.read(File.expand_path('blank.yml', File.dirname(__FILE__))), method: Conjur::API::POLICY_METHOD_PUT
+  $conjur.load_policy "root", File.read(File.expand_path('blank.yml', File.dirname(__FILE__))), method: Conjur::API::POLICY_METHOD_PUT
 end
 
 After '@restore-login' do
