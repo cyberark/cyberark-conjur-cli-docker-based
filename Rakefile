@@ -9,7 +9,7 @@ begin
   require 'rspec/core/rake_task'
 
   RSpec::Core::RakeTask.new :spec do |t|
-    t.rspec_opts = '--tag ~wip'
+    t.rspec_opts = '--tag ~wip --format junit --out spec/reports'
   end
 
   Cucumber::Rake::Task.new :features

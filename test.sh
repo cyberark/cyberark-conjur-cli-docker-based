@@ -22,13 +22,15 @@ server_cid=$(docker run -d \
 set -o pipefail
 admin_api_key=( $(cat ci/setup-account.sh | docker exec -i $server_cid /bin/bash | tail -1) )
 
+mkdir -p spec/reports features/reports
+
 docker run \
 	-i \
 	--rm \
 	--link $pg_cid:pg \
 	--link $server_cid:possum \
-    -v $PWD/spec/reports:/src/conjur-api/spec/reports \
-    -v $PWD/features/reports:/src/conjur-api/features/reports \
+    -v $PWD/spec/reports:/src/spec/reports \
+    -v $PWD/features/reports:/src/features/reports \
 	-e DATABASE_URL=postgres://postgres@pg/postgres \
 	-e RAILS_ENV=test \
 	-e CONJUR_APPLIANCE_URL=http://possum \

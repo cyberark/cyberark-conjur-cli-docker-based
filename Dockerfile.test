@@ -1,0 +1,8 @@
+FROM cli-ruby:@@RUBY_VERSION@@
+
+RUN apt-get update && \
+  apt-get install -y vim
+
+RUN bundle update
+
+COPY . ./
