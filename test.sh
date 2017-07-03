@@ -1,5 +1,7 @@
 #!/bin/bash -ex
 
+RUBY_VERSION=${1-2.2.4}
+
 function finish {
 	docker rm -f $pg_cid
 	docker rm -f $server_cid
