@@ -58,23 +58,4 @@ describe Conjur::Command do
     end
   end
 
-  describe "supports asset retirement" do
-    let(:role){ double('Role', roleid: 'the-role-id')}
-    let(:permission){ { 'role' => 'the-role-id', 'privilege' => 'read' } }
-    let(:permissions){ [ permission ] }
-    let(:resource){ double('Resource', deny: nil, attributes: {'permissions' => permissions}) }
-    let(:resources){ [resource] }
-    let(:api){ double('API') }
-    let(:asset){ double('Asset', resources: resources, resource: resource) }
-    describe "#retire_resource" do
-      context "when given an object without a role" do
-        it 'works' do
-          expect(described_class).to receive(:api).and_return api
-          expect(api).to receive(:role).with('the-role-id').and_return role
-          described_class.retire_resource(asset)
-        end
-      end
-    end
-  end
-
 end

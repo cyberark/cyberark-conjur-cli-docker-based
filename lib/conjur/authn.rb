@@ -46,7 +46,7 @@ module Conjur::Authn
     end
     
     def delete_credentials
-      netrc.delete Conjur.configuration.appliance_url
+      netrc.delete Conjur.configuration.authn_url
       netrc.save
     end
     
@@ -78,7 +78,7 @@ module Conjur::Authn
     end
     
     def read_credentials
-      netrc[Conjur.configuration.appliance_url]
+      netrc[Conjur.configuration.authn_url]
     end
     
     def fetch_credentials(options = {})
@@ -89,7 +89,7 @@ module Conjur::Authn
     alias save_credentials fetch_credentials
     
     def write_credentials
-      netrc[Conjur.configuration.appliance_url] = @credentials
+      netrc[Conjur.configuration.authn_url] = @credentials
       netrc.save
       @credentials
     end

@@ -1,7 +1,11 @@
+require 'spec_helper'
+
 require 'conjur/authn'
 require 'conjur/config'
 
 describe Conjur::Authn do
+  include_context "fresh config"
+
   let(:netrc) { Netrc.read '' }
   before do
     Conjur::Authn.instance_variable_set("@netrc", netrc)

@@ -8,7 +8,10 @@ begin
   require 'cucumber/rake/task'
   require 'rspec/core/rake_task'
 
-  RSpec::Core::RakeTask.new :spec
+  RSpec::Core::RakeTask.new :spec do |t|
+    t.rspec_opts = '--tag ~wip'
+  end
+
   Cucumber::Rake::Task.new :features
 
   task :jenkins => ['ci:setup:rspec', :spec] do

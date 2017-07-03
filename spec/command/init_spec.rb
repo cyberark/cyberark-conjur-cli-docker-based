@@ -49,15 +49,15 @@ describe Conjur::Command::Init do
 
     context "auto-fetching fingerprint" do
       before {
-        allow_any_instance_of(HighLine).to receive(:ask).with("Enter the hostname (and optional port) of your Conjur endpoint: ").and_return "the-host"
+        allow_any_instance_of(HighLine).to receive(:ask).with("Enter the URL of your Conjur service: ").and_return "http://host.example.com"
         allow(Conjur::Command::Init).to receive_messages get_certificate: ["the-fingerprint", nil]
         allow_any_instance_of(HighLine).to receive(:ask).with(/^Trust this certificate/).and_return "yes"
       }
 
       describe_command 'init' do
-        it "fetches account and writes config file" do
-          # Stub hostname
-          expect(Conjur::Core::API).to receive(:info).and_return "account" => "the-account"
+        it "writes config file" do
+          expect_any_instance_of(HighLine).to receive(:ask).with("Enter the URL of your Conjur service: ").and_return "http://host.example.com"
+          expect_any_instance_of(HighLine).to receive(:ask).with("Enter your organization account name: ").and_return "the-account"
           expect(File).to receive(:open)
           invoke
         end
@@ -71,8 +71,13 @@ describe Conjur::Command::Init do
       end
     end
 
-    describe_command 'init -a the-account -u https://foobar' do
+    describe_command 'init -a the-account -u https://nohost.example.com' do
       it "can't get the cert" do
+        # GLI only raises CustomExit if GLI_DEBUG is set
+        ENV['GLI_DEBUG'] = 'true'
+
+        expect(TCPSocket).to receive(:new).and_raise "can't connect"
+        
         expect { invoke }.to raise_error(GLI::CustomExit, /unable to retrieve certificate/i)
       end
     end
@@ -107,7 +112,7 @@ describe Conjur::Command::Init do
 
           expect(YAML.load(File.read(file))).to eq({
             account: 'the-account',
-            appliance_url: "https://localhost/api",
+            appliance_url: "https://localhost",
             cert_file: File.join(File.dirname(file), "conjur-the-account.pem"),
             plugins: [],
           }.stringify_keys)

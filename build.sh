@@ -1,24 +1,13 @@
 #!/bin/bash -ex
 
-# Constants
-RUBY_VERSION_DEFAULT="2.2.4"
+RUBY_VERSION=${1-2.2.4}
 
-# Arguments
-RUBY_VERSION=${1-${RUBY_VERSION_DEFAULT}}
 
-# Script
+dockerfile=Dockerfile.${RUBY_VERSION}
+test_dockerfile=Dockerfile.test.${RUBY_VERSION}
 
-# Clones 'Dockerfile' and updates the Ruby version in FROM, returning the cloned file's path
-function dockerfile_path {
-    echo "Setting Ruby version as ${RUBY_VERSION}" >&2
-    cp "Dockerfile" "Dockerfile.${RUBY_VERSION}"
-    sed -i -e "s/${RUBY_VERSION_DEFAULT}/${RUBY_VERSION}/g" Dockerfile.${RUBY_VERSION}
+sed "s/@@RUBY_VERSION@@/${RUBY_VERSION}/g" Dockerfile > $dockerfile
+sed "s/@@RUBY_VERSION@@/${RUBY_VERSION}/g" Dockerfile.test > $test_dockerfile
 
-    echo "Dockerfile.${RUBY_VERSION}"
-}
-
-rm -f Gemfile.lock # Needed for bundle to work right
-
-IMAGE_NAME="cli-ruby:${RUBY_VERSION}" # The tag is the version of Ruby tested against
-
-docker build -t ${IMAGE_NAME} -f $(dockerfile_path) .
+docker build -t cli-ruby:${RUBY_VERSION} -f $dockerfile .
+docker build -t cli-ruby-test:${RUBY_VERSION} -f $test_dockerfile .
