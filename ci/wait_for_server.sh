@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 for i in $(seq 10); do
 	curl -o /dev/null -fs -X OPTIONS http://possum > /dev/null && break
