@@ -12,13 +12,13 @@ function finish {
 }
 trap finish EXIT
 
-POSSUM_DATA_KEY="$(docker-compose run --no-deps possum data-key generate)"
+POSSUM_DATA_KEY="$(docker-compose run -T --no-deps possum data-key generate)"
 
 docker-compose up -d possum
 
 docker-compose run test ci/wait_for_server.sh
 
-CONJUR_AUTHN_API_KEY=$(docker-compose exec possum rails r "print Credentials['cucumber:user:admin'].api_key")
+CONJUR_AUTHN_API_KEY=$(docker-compose exec -T possum rails r "print Credentials['cucumber:user:admin'].api_key")
 
 docker-compose run test "$@"
 
