@@ -1,0 +1,30 @@
+version: '2'
+services:
+  pg:
+    image: postgres:9.3
+
+  possum:
+    image: "${POSSUM_IMAGE}"
+    command: server -a cucumber
+    depends_on: 
+      - pg
+    environment:
+      - POSSUM_DATA_KEY
+      - DATABASE_URL=postgres://postgres@pg/postgres
+
+  test:
+    image: cli-test:${RUBY_VERSION}
+    build:
+      context: .
+      dockerfile: Dockerfile.${RUBY_VERSION}
+    entrypoint: ci/cli-test.sh
+    environment:
+      - DATABASE_URL=postgres://postgres@pg/postgres
+      - RAILS_ENV=test
+      - CONJUR_APPLIANCE_URL=http://possum
+      - CONJUR_ACCOUNT=cucumber
+      - CONJUR_AUTHN_LOGIN=admin
+      - CONJUR_AUTHN_API_KEY
+    volumes:
+      - .:/src
+
