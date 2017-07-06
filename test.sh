@@ -1,7 +1,6 @@
 #!/bin/bash -ex
 
 set -a
-POSSUM_IMAGE=registry.tld/possum:0.1.0-stable
 
 : ${RUBY_VERSION=2.2}
 sed "s/\${RUBY_VERSION}/$RUBY_VERSION/" Dockerfile > Dockerfile.$RUBY_VERSION

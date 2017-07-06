@@ -4,7 +4,7 @@ services:
     image: postgres:9.3
 
   possum:
-    image: "${POSSUM_IMAGE}"
+    image: registry.tld/possum:0.1.0-stable
     command: server -a cucumber
     depends_on: 
       - pg

@@ -8,7 +8,7 @@ begin
   require 'cucumber/rake/task'
   require 'rspec/core/rake_task'
 
-  # spec reports get written to spec/reports by default
+  # ci_reporter_rspec cleans and then writes results to spec/reports
   RSpec::Core::RakeTask.new :spec do |t|
     t.rspec_opts = '--tag ~wip --format junit'
   end
