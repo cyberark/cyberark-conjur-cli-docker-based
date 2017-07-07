@@ -8,7 +8,11 @@ begin
   require 'cucumber/rake/task'
   require 'rspec/core/rake_task'
 
-  RSpec::Core::RakeTask.new :spec
+  # ci_reporter_rspec cleans and then writes results to spec/reports
+  RSpec::Core::RakeTask.new :spec do |t|
+    t.rspec_opts = '--tag ~wip --format junit'
+  end
+
   Cucumber::Rake::Task.new :features
 
   task :jenkins => ['ci:setup:rspec', :spec] do

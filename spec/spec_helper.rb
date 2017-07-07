@@ -18,15 +18,16 @@ end
 # stub parameters to be used in resource/asset tests
 KIND="asset_kind"
 ID="unique_id" 
-ROLE='<role>'
 MEMBER='<member>'
 PRIVILEGE='<privilege>'
 OWNER='<owner/userid>'
 ACCOUNT='<core_account>'
+ROLE="#{ACCOUNT}:user:user"
 
 require 'conjur/command/rspec/helpers'
 
 ENV['CONJURRC'] = '/dev/null'
+ENV['CONJUR_ACCOUNT'] = ACCOUNT
 
 require 'conjur/cli'
 require 'conjur/api'
@@ -35,6 +36,8 @@ require 'conjur/complete'
 shared_context "fresh config" do
   before {
     ENV.delete_if do |k,v|
+      next if k == 'CONJUR_ACCOUNT'
+
       k =~ /^CONJUR_/
     end
     

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Conjur::CLI::Complete do
+describe Conjur::CLI::Complete, wip: true do
   def expects_completions_for string, point=nil
     expect(described_class.new("conjur #{string}",point)
             .completions

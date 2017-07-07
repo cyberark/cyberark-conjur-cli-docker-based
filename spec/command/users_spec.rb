@@ -1,6 +1,9 @@
 require 'spec_helper'
 
 describe Conjur::Command::Users, logged_in: true do
+  let (:rotate_api_key_url) { [Conjur.configuration.authn_url, account, 'api_key'].join('/') }
+  let (:update_password_url) { [Conjur.configuration.authn_url, account, 'password'].join('/') }
+
   context "updating password" do
     before do
      expect(RestClient::Request).to receive(:execute).with({
@@ -33,7 +36,7 @@ describe Conjur::Command::Users, logged_in: true do
       before do
         expect(RestClient::Request).to receive(:execute).with({
                     method: :put,
-                    url: 'https://authn.example.com/users/api_key',
+                    url: rotate_api_key_url,
                     user: username,
                     password: api_key,
                     headers: {},

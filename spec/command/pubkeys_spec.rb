@@ -24,54 +24,9 @@ require 'conjur/command/pubkeys'
 describe Conjur::Command::Pubkeys, logged_in: true do
   describe_command "pubkeys:show alice" do
     it "calls api.public_keys('alice') and prints the result" do
-      expect(described_class.api).to receive(:public_keys).with('alice').and_return "a public key"
+      expect(Conjur::API).to receive(:public_keys).with('alice', account: account).and_return "a public key"
       expect{ invoke }.to write("a public key")
     end
   end
   
-  describe_command "pubkeys:names alice" do
-    let(:keys){ ["x y foo", "x y bar"].join("\n") }
-    let(:names){ "bar\nfoo" }
-    it "calls api.public_keys('alice') and prints the names" do
-      expect(described_class.api).to receive(:public_keys).with('alice').and_return keys
-      expect{ invoke }.to write(names) 
-    end
-  end
-  
-  describe_command "pubkeys:add alice data" do
-    it "calls api.add_public_key('alice', 'data') and prints the key name" do
-      expect(described_class.api).to receive(:add_public_key).with('alice', 'data')
-      expect{ invoke }.to write("Public key 'data' added")
-    end
-  end
-  
-  describe_command "pubkeys:add alice @id_rsa.pub" do
-    let(:file_contents){ "ssh-rsa blahblah keyname" }
-    it "calls api.add_public_key('alice', data) and prints the key name" do
-      expect(File).to receive(:read) do |filename|
-        expect(filename).to end_with("id_rsa.pub")
-        file_contents
-      end
-      expect(described_class.api).to receive(:add_public_key).with('alice', file_contents)
-      expect{ invoke }.to write("Public key 'keyname' added")
-    end
-  end
-  
-  describe_command "pubkeys:add alice" do
-    let(:stdin_contents){ "ssh-rsa blahblah keyname" }
-    it "calls api.add_public_key('alice', stdin) and prints the key name" do
-      expect(STDIN).to receive(:read).and_return(stdin_contents)
-      allow(STDIN).to receive(:isatty).and_return(false)
-      expect(described_class).to receive(:validate_public_key).and_return(true)
-      expect(described_class.api).to receive(:add_public_key).with('alice', stdin_contents)
-      expect{ invoke }.to write("Public key 'keyname' added")
-    end
-  end
-  
-  describe_command "pubkeys:delete alice keyname" do
-    it "calls api.delete_public_key('alice', 'keyname')" do
-      expect(described_class.api).to receive(:delete_public_key).with("alice", "keyname")
-      expect{ invoke }.to write("Public key 'keyname' deleted")
-    end
-  end
 end

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Conjur::Command::Resources, logged_in: true do
 
   let (:full_resource_id) { [account, KIND, ID].join(":") }
-  let (:resource_instance) { double(attributes: resource_attributes) }
+  let (:resource_instance) { double('resource_instance', attributes: resource_attributes) }
   let (:resource_attributes) { { "some" => "attribute"} }
 
   before :each do
@@ -31,7 +31,7 @@ describe Conjur::Command::Resources, logged_in: true do
     end
   end
 
-  describe_command "resource:show #{KIND}:#{ID}" do
+  describe_command "show #{KIND}:#{ID}" do
     it_behaves_like "it obtains resource by id"
     it_behaves_like "it displays resource attributes"
   end
@@ -58,32 +58,20 @@ describe Conjur::Command::Resources, logged_in: true do
     end
   end
 
-  describe_command "resource:check #{KIND}:#{ID} #{PRIVILEGE}" do
+  describe_command "check #{KIND}:#{ID} #{PRIVILEGE}" do
     it "performs a permission check for the logged-in user" do
-      expect(api).to receive(:resource).with("the-account:#{KIND}:#{ID}").and_return bacon = double("the-account:#{KIND}:#{ID}")
-      expect(bacon).to receive(:permitted?).with(PRIVILEGE)
+      expect(resource_instance).to receive(:permitted?).with(PRIVILEGE, role: nil)
       
       invoke
     end
   end
 
-  describe_command "resource:check -r #{ROLE} #{KIND}:#{ID} #{PRIVILEGE}" do
-    let (:role_instance) { double() }
-    let (:role_response) { "role response: true|false" }
-    let (:account) { ACCOUNT }
-    before(:each) { 
-      allow(api).to receive(:role).and_return(role_instance)
-      allow(role_instance).to receive(:permitted?).and_return(role_response)
-    }
-    it 'obtains role object by id' do
-      expect(api).to receive(:role).with(ROLE)
+  describe_command "check -r #{ROLE} #{KIND}:#{ID} #{PRIVILEGE}" do
+    it "performs a permission check for #{ROLE}" do
+
+      expect(resource_instance).to receive(:permitted?).with(PRIVILEGE, role: ROLE)
       invoke_silently
     end
-    it "calls role.permitted?('#{ACCOUNT}:#{KIND}:#{ID}', #{PRIVILEGE})" do
-      expect(role_instance).to receive(:permitted?).with([ACCOUNT,KIND,ID].join(":"),PRIVILEGE)
-      invoke_silently
-    end
-    it { expect { invoke }.to write role_response }
   end
 
   describe_command "resource:permitted_roles #{KIND}:#{ID} #{PRIVILEGE}" do

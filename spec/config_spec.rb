@@ -114,6 +114,7 @@ describe Conjur::Config do
   describe "#apply" do
     before { 
       allow(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file) 
+      allow(File).to receive(:open)
     }
 
     context "ssl_certificate string" do

@@ -3,9 +3,10 @@ shared_context "with fake endpoints and test config" do
   let(:authz_host) { 'https://authz.example.com' }
   let(:core_host) { 'https://core.example.com/api' }
   before do
-    allow(Conjur::Authn::API).to receive(:host) { authn_host }
-    allow(Conjur::Authz::API).to receive(:host) { authz_host }
-    allow(Conjur::Core::API).to receive(:host) { core_host }
+    allow(Conjur.configuration).to receive(:account) { account }
+    allow(Conjur.configuration).to receive(:authn_url) { authn_host }
+    allow(Conjur.configuration).to receive(:authz_url) { authz_host }
+    allow(Conjur.configuration).to receive(:core_url) { core_host }
 
     ENV['GLI_DEBUG'] = 'true'
   end
@@ -20,7 +21,6 @@ shared_context "with mock authn" do
   let(:api_key) { 'sekrit' }
   let(:api) { Conjur::API.new_from_key(username, api_key) }
   before do
-    allow(Conjur.configuration).to receive(:account) { account }
     allow(Conjur::Authn).to receive_messages(netrc: netrc, host: authn_host)
     Conjur::Config.merge 'account' => account
   end

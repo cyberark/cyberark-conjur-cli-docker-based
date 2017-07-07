@@ -1,7 +1,7 @@
+Gemfile.lock
 tmp
 *.deb
 coverage
 */reports
 vendor
 pkg
-Dockerfile*
