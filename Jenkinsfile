@@ -4,10 +4,11 @@ pipeline {
   options {
     timestamps()
     buildDiscarder(logRotator(numToKeepStr: '30'))
-    skipDefaultCheckout()  // see 'Checkout SCM' below, once perms are fixed this is no longer needed
+    // skipDefaultCheckout()  // see 'Checkout SCM' below, once perms are fixed this is no longer needed
   } 
 
   stages {
+    /*
     stage('Checkout SCM') {
       steps {
         sh 'sudo chown -R jenkins:jenkins .'  // bad docker mount creates unreadable files TODO fix this
@@ -16,6 +17,7 @@ pipeline {
         checkout scm
       }
     }
+    */
 
     stage('Test 2.2') {
       environment {
