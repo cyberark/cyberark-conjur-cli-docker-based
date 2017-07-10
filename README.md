@@ -24,6 +24,16 @@ These are based off [Dockerfile.standalone](Dockerfile.standalone) and can be re
 
 Note these images are not subject to any QA at the moment and so should never be used in production, especially without specific image id pin.
 
+## Development
+
+Create a sandbox environment in Docker using the `./dev` folder:
+
+```sh-session
+$ cd dev
+dev $ ./start.sh
+```
+
+
 ## Contributing
 
 1. Fork it
