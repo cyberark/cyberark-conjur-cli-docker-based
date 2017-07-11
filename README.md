@@ -9,9 +9,11 @@ A complete reference guide is available at [developer.conjur.net](http://develop
 
 ## Quick start
 
-    $ docker run -it conjurinc/cli5
-    $ conjur -v
-    conjur version 6.0.0beta.1
+```sh-session
+$ docker run -it -v $PWD:/work conjurinc/cli5
+root@2b5f618dfdcb:/# conjur -v
+conjur version 6.0.0.pre.beta.2
+```
 
 ## Docker images
 
@@ -48,7 +50,7 @@ Logged in
 
 At this point, you can use any CLI command you like.
 
-### Running Cucucumber
+### Running Cucumber
 
 To install dev packages, run `bundle` from within the container:
 
@@ -59,8 +61,9 @@ root@2b5f618dfdcb:/usr/src/cli-ruby# bundle
 
 Then you can run the cucumber tests:
 
-```
+```sh-session
 root@2b5f618dfdcb:/usr/src/cli-ruby# cucumber
+...
 ```
 
 ## Contributing
