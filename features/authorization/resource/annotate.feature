@@ -17,6 +17,6 @@ Feature: Annotate a resource
     And the JSON at "annotations/0/value" should be "crispy"
   
   Scenario: Annotations are searchable
-    When I successfully run `conjur list -k food -s "crispy"`
+    When I successfully run `conjur list --inspect -k food -s "crispy"`
     Then the JSON should have 1 entry
     And the JSON at "0/annotations/preparation-style" should be "crispy"

@@ -108,8 +108,8 @@ module Conjur
         c.desc "Offset to start from"
         c.flag [:o, :offset]
         
-        c.desc "Show only ids"
-        c.switch [:i, :ids]
+        c.desc "Show full object information"
+        c.switch [:inspect]
         
         c.desc "Show annotations in 'raw' format"
         c.switch [:r, :"raw-annotations"]
@@ -120,9 +120,7 @@ module Conjur
         opts[:acting_as] = options[:role] if options[:role]
         opts[:search]=opts[:search].gsub('-',' ') if opts[:search]
         resources = api.resources(opts)
-        if options[:ids]
-          puts JSON.pretty_generate(resources.map(&:id))
-        else
+        if options[:inspect]
           resources = resources.map &:attributes
           unless options[:'raw-annotations']
             resources = resources.map do |r|
@@ -134,6 +132,8 @@ module Conjur
             end
           end
           puts JSON.pretty_generate resources
+        else
+          puts JSON.pretty_generate(resources.map(&:id))
         end
       end
       

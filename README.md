@@ -9,9 +9,11 @@ A complete reference guide is available at [developer.conjur.net](http://develop
 
 ## Quick start
 
-    $ docker run -it conjurinc/cli5
-    $ conjur -v
-    conjur version 6.0.0beta.1
+```sh-session
+$ docker run -it -v $PWD:/work conjurinc/cli5
+root@2b5f618dfdcb:/# conjur -v
+conjur version 6.0.0.pre.beta.2
+```
 
 ## Docker images
 
@@ -23,6 +25,46 @@ These are based off [Dockerfile.standalone](Dockerfile.standalone) and can be re
     docker build . -f Dockerfile.standalone -t conjurinc/cli5
 
 Note these images are not subject to any QA at the moment and so should never be used in production, especially without specific image id pin.
+
+## Development
+
+Create a sandbox environment in Docker using the `./dev` folder:
+
+```sh-session
+$ cd dev
+dev $ ./start.sh
+```
+
+This will drop you into a bash shell in a container called `cli`. The sandbox also includes a Postgres container and Possum server container. The environment is already setup to connect the CLI to the server:
+
+* **CONJUR_APPLIANCE_URL** `http://possum`
+* **CONJUR_ACCOUNT** `cucumber`
+
+You can obtain the API key for the role `cucumber:user:admin` from the Docker logs of the `possum` container. Use it to login:
+
+```sh-session
+root@2b5f618dfdcb:/# conjur authn login admin
+Please enter admin's password (it will not be echoed):
+Logged in
+```
+
+At this point, you can use any CLI command you like.
+
+### Running Cucumber
+
+To install dev packages, run `bundle` from within the container:
+
+```sh-session
+root@2b5f618dfdcb:/# cd /usr/src/cli-ruby/
+root@2b5f618dfdcb:/usr/src/cli-ruby# bundle
+```
+
+Then you can run the cucumber tests:
+
+```sh-session
+root@2b5f618dfdcb:/usr/src/cli-ruby# cucumber
+...
+```
 
 ## Contributing
 

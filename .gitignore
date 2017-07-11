@@ -10,6 +10,7 @@
 *.json
 *.pem
 testdata/
+dev/data_key
 *.gem
 *.rbc
 .bundle
