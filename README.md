@@ -33,6 +33,35 @@ $ cd dev
 dev $ ./start.sh
 ```
 
+This will drop you into a bash shell in a container called `cli`. The sandbox also includes a Postgres container and Possum server container. The environment is already setup to connect the CLI to the server:
+
+* **CONJUR_APPLIANCE_URL** `http://possum`
+* **CONJUR_ACCOUNT** `cucumber`
+
+You can obtain the API key for the role `cucumber:user:admin` from the Docker logs of the `possum` container. Use it to login:
+
+```sh-session
+root@2b5f618dfdcb:/# conjur authn login admin
+Please enter admin's password (it will not be echoed):
+Logged in
+```
+
+At this point, you can use any CLI command you like.
+
+### Running Cucucumber
+
+To install dev packages, run `bundle` from within the container:
+
+```sh-session
+root@2b5f618dfdcb:/# cd /usr/src/cli-ruby/
+root@2b5f618dfdcb:/usr/src/cli-ruby# bundle
+```
+
+Then you can run the cucumber tests:
+
+```
+root@2b5f618dfdcb:/usr/src/cli-ruby# cucumber
+```
 
 ## Contributing
 
