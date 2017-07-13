@@ -45,7 +45,7 @@ class Conjur::Command::Users < Conjur::Command
         if options.include?(:user)
           # Make sure we're not trying to rotate our own key with the user flag.
           if api.username == options[:user]
-            exit_now! 'To rotate your own API key, use this command without the --user flag'
+            exit_now! 'To rotate the API key of the currently logged-in user, use this command without any flags or options'
           end
           puts api.resource([ Conjur.configuration.account, "user", options[:user] ].join(":")).rotate_api_key
         else
