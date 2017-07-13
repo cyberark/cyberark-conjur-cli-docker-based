@@ -46,7 +46,7 @@ class Conjur::Command::Hosts < Conjur::Command
 
           # Make sure we're not trying to rotate our own key with the user flag.
           if api.username == host
-            exit_now! 'To rotate your own API key, use this command without the --host flag'
+            exit_now! 'To rotate the API key of the currently logged-in host, use this command without any flags or options'
           end
 
           puts api.resource(host_resourceid).rotate_api_key
