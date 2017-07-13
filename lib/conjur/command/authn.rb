@@ -52,16 +52,32 @@ login again using the new user credentials. To erase credentials, use the 'authn
 
     authn.desc "Obtains an authentication token using the current logged-in user"
     authn.command :authenticate do |c|
-      c.arg_name 'header'
       c.desc "Base64 encode the result and format as an HTTP Authorization header"
       c.switch [:H,:header]
 
+      c.arg_name 'filename'
+      c.desc 'Keeps a fresh access token in the indicated file. With this argument, the command runs forever.'
+      c.flag [ :f, :filename ]
+
       c.action do |global_options,options,args|
-        token = Conjur::Authn.authenticate(options)
-        if options[:header]
-          puts "Authorization: Token token=\"#{Base64.strict_encode64(token.to_json)}\""
+        # Authenticate will try and parse the token file to read the expiration time.
+        # It only knows how to do that if the token file contains a JSON access token.
+        raise "--header option is not supported with --filename option" if options[:header] && options[:filename]
+
+        authenticate = lambda { 
+          Conjur::Authn.authenticate
+        }
+    
+        if filename = options[:filename]
+          Conjur::Authenticator.run authenticate: authenticate, filename: filename
         else
-          display token
+          formatter = if options[:header]
+            lambda {|token| "Authorization: Token token=\"#{Base64.strict_encode64(JSON.generate token)}\"" }
+          else
+            lambda {|token| JSON.pretty_generate token }
+          end
+
+          puts formatter.call(authenticate.call)
         end
       end
     end

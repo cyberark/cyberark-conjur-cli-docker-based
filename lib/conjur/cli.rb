@@ -37,6 +37,7 @@ module Conjur
   autoload :Log,                    'conjur/log'
   autoload :IdentifierManipulation, 'conjur/identifier_manipulation'
   autoload :Authn,                  'conjur/authn'
+  autoload :Authenticator,          'conjur/authenticator'
   autoload :Command,                'conjur/command'
   autoload :DSL,                    'conjur/dsl/runner'
   autoload :DSLCommand,             'conjur/command/dsl_command'
