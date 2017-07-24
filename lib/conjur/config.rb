@@ -90,17 +90,7 @@ module Conjur
           cfg.set k, value if value
         end
 
-        if Conjur.log
-          require 'conjur/api'
-          host = begin
-            Conjur::Authn::API.host
-          rescue RuntimeError
-            nil
-          end
-          if host
-            Conjur.log << "Using authn host #{Conjur::Authn::API.host}\n"
-          end
-        end
+        Conjur.log << "Using authn url #{Conjur.configuration.authn_url}\n" if Conjur.log
 
         Conjur.config.apply_cert_config!
       end
