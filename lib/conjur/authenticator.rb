@@ -1,6 +1,9 @@
 module Conjur
   # Keeps a fresh Conjur access token in a named file by re-authenticating as needed.
   class Authenticator
+    require 'tempfile'
+    require 'fileutils'
+
     TOKEN_LIFESPAN = ( ENV['CONJUR_TOKEN_LIFESPAN'] || 5 * 60 ).to_i.seconds
     DELAY = ( ENV['CONJUR_TOKEN_REFRESH_DELAY'] || 10 ).to_i.seconds
 
@@ -15,7 +18,7 @@ module Conjur
 
     class << self
       def default_filename
-        "/etc/conjur-auth/token"
+        "/run/conjur-access-token"
       end
 
       # Check the token every +DELAY+ seconds and refresh it if it's out of date. 
@@ -35,11 +38,15 @@ module Conjur
     # Perform atomic replacement of the token
     def refresh
       token = authenticate.call
-      require 'fileutils'
-      temp_filename = File.join(directory, "token.#{random}")
-      File.write temp_filename, JSON.pretty_generate(token)
-      FileUtils.mv temp_filename, filename
-      Conjur.log << "Refreshed Conjur auth token to #{filename.inspect}\n" if Conjur.log
+      file = Tempfile.new('conjur-access-token.')
+      begin
+        file.write JSON.pretty_generate(token)
+        file.close
+        FileUtils.mv file.path, filename
+        Conjur.log << "Refreshed Conjur auth token to #{filename.inspect}\n" if Conjur.log
+      ensure
+        file.unlink
+      end
     rescue
       $stderr.puts $!
     end
