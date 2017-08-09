@@ -9,7 +9,7 @@ services:
     depends_on: 
       - pg
     environment:
-      - POSSUM_DATA_KEY
+      - CONJUR_DATA_KEY
       - DATABASE_URL=postgres://postgres@pg/postgres
 
   test:

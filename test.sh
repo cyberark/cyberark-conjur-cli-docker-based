@@ -17,13 +17,14 @@ build() {
   sed "s/\${RUBY_VERSION}/$RUBY_VERSION/" Dockerfile > Dockerfile.$RUBY_VERSION
   
   docker-compose build --pull
+
 }
 
 start_possum() {
 
   docker-compose pull pg possum 
   
-  env POSSUM_DATA_KEY="$(docker-compose run -T --no-deps possum data-key generate)" \
+  env CONJUR_DATA_KEY="$(docker-compose run -T --no-deps possum data-key generate)" \
     docker-compose up -d possum
   trap "docker-compose down" EXIT
   
