@@ -1,3 +1,7 @@
+# Latest
+
+License changed to Apache 2.0
+
 # 5.6.1
 
 * Fix handling of `-k / --kind` argument to `resource list`.
