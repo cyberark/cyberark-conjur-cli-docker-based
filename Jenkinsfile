@@ -43,6 +43,17 @@ pipeline {
         junit 'spec/reports/*.xml, features/reports/*.xml'
       }
     }
+
+    stage('Publish to RubyGems') {
+      when {
+        branch 'possum'
+      }
+      steps {
+        build job: 'release-rubygems',
+        parameters: [string(name: 'GEM_NAME', value: 'conjur-cli'),
+                     string(name: 'GEM_BRANCH', value: 'possum')]
+      }
+    }
   }
 
   post {

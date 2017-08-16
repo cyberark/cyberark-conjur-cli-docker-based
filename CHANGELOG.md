@@ -1,6 +1,6 @@
-# 6.0.0
+# 6.0.0.pre
 
-WIP
+* Provides compatibility with [cyberark/conjur](https://github.com/cyberark/conjur), Conjur 5 CE.
 
 # 5.3.0
 
