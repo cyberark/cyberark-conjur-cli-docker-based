@@ -7,13 +7,14 @@ pipeline {
   } 
 
   stages {
-
     stage('Test 2.2') {
       environment {
         RUBY_VERSION = '2.2'
       }
 
       steps {
+        milestone(1)
+            
         sh './test.sh'
 
         junit 'spec/reports/*.xml, features/reports/*.xml'
@@ -44,14 +45,37 @@ pipeline {
       }
     }
 
-    stage('Publish to RubyGems') {
+    stage('Publish to RubyGems?') {
       when {
-        branch 'possum'
+        branch 'master'
       }
       steps {
-        build job: 'release-rubygems',
-        parameters: [string(name: 'GEM_NAME', value: 'conjur-cli'),
-                     string(name: 'GEM_BRANCH', value: 'possum')]
+        milestone(2)
+        input(
+          message: 'Publich to RubyGems?',
+          parameters: [
+            booleanParam(defaultValue: false,
+                         description: 'Approve and publish this gem to RubyGems',
+                         name: 'PUBLISH')
+          ],
+          submitterParameter: 'PUBLISHER'
+        )
+        milestone(3)
+      }
+    }
+
+    stage('Publishing to RubyGems') {
+      when {
+        branch 'master'
+        environment name: 'PUBLISH', value: 'true'
+      }
+      steps {
+        echo 'publishing!'
+        // build(job: 'release-rubygems', parameters: [
+        //   string(name: 'GEM_NAME', value: 'conjur-cli'),
+        //   string(name: 'GEM_BRANCH', value: 'possum')
+        // ])
+        milestone(4)
       }
     }
   }
