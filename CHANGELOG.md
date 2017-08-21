@@ -1,6 +1,7 @@
-# Latest
+# 5.6.2
 
-License changed to Apache 2.0
+* License changed to Apache 2.0
+* Don't let conjur-api drift to v5.
 
 # 5.6.1
 
