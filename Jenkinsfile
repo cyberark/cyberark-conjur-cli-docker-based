@@ -43,6 +43,25 @@ pipeline {
         junit 'spec/reports/*.xml, features/reports/*.xml'
       }
     }
+
+    stage('Build deb') {
+      steps {
+        sh './build-deb.sh'
+        
+        archiveArtifacts artifacts: '*.deb', fingerprint: true
+      }
+    }
+
+    stage('Publish deb') {
+      when {
+        branch 'master'
+      }
+
+      steps {
+        sh './publish.sh conjurtools stable'
+      }
+    }
+
   }
 
   post {
