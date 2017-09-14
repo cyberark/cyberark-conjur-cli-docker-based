@@ -7,13 +7,14 @@ pipeline {
   } 
 
   stages {
-
     stage('Test 2.2') {
       environment {
         RUBY_VERSION = '2.2'
       }
 
       steps {
+        milestone(1)
+            
         sh './test.sh'
 
         junit 'spec/reports/*.xml, features/reports/*.xml'
@@ -41,6 +42,42 @@ pipeline {
         sh './test.sh'
 
         junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+    }
+
+    // Only publish to RubyGems if branch is 'master'
+    // AND someone confirms this stage within 5 minutes
+    stage('Publish to RubyGems?') {
+      when {
+        allOf {
+          branch 'master'
+          expression {
+            boolean publish = false
+
+            if(env.PUBLISH_GEM == "true") {
+              return true
+            }
+
+            try {
+              timeout(time: 5, unit: 'MINUTES') {
+                input(message: 'Publish to RubyGems?')
+                publish = true
+              }
+            } catch (final ignore) {
+              publish = false
+            }
+
+            return publish
+          }
+        }
+      }
+      steps {
+        milestone(2)
+        build(job: 'release-rubygems', parameters: [
+          string(name: 'GEM_NAME', value: 'conjur-api'),
+          string(name: 'GEM_BRANCH', value: "${env.BRANCH_NAME}")
+        ])
+        milestone(3)
       }
     }
   }
