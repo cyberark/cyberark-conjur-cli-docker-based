@@ -8,4 +8,4 @@ gemspec
 
 gem 'activesupport', '~> 4.2'
 
-gem 'conjur-api', git: 'https://github.com/conjurinc/api-ruby.git', branch: 'possum'
+gem 'conjur-api', '~> 5.0.0'

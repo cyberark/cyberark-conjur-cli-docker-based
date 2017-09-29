@@ -1,6 +1,8 @@
 #!/bin/bash -ex
 
-: ${RUBY_VERSION=2.2}
+RUBY_VERSION_DEFAULT=2.2.5
+
+RUBY_VERSION=${1-${RUBY_VERSION_DEFAULT}}
 
 main() {
   build
@@ -17,11 +19,9 @@ build() {
   sed "s/\${RUBY_VERSION}/$RUBY_VERSION/" Dockerfile > Dockerfile.$RUBY_VERSION
   
   docker-compose build --pull
-
 }
 
 start_possum() {
-
   docker-compose pull pg possum 
   
   env CONJUR_DATA_KEY="$(docker-compose run -T --no-deps possum data-key generate)" \
