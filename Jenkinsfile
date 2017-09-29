@@ -3,51 +3,49 @@ pipeline {
 
   options {
     timestamps()
-    buildDiscarder(logRotator(numToKeepStr: '30'))
-  } 
+    buildDiscarder(logRotator(daysToKeepStr: '30'))
+  }
 
   stages {
-    stage('Test 2.2') {
-      environment {
-        RUBY_VERSION = '2.2.8'
-      }
+    stage('Run unit tests') {
+      parallel {
+        stage('Test 2.2') {
+          environment {
+            RUBY_VERSION = '2.2.8'
+          }
+          steps {
+            sh './test.sh'
+            junit 'spec/reports/*.xml, features/reports/*.xml'
+          }
+        }
 
-      steps {
-        milestone(1)
-            
-        sh './test.sh'
+        stage('Test 2.3') {
+          environment {
+            RUBY_VERSION = '2.3.5'
+          }
+          steps {
+            sh './test.sh'
+            junit 'spec/reports/*.xml, features/reports/*.xml'
+          }
+        }
 
-        junit 'spec/reports/*.xml, features/reports/*.xml'
-      }
-    }
-
-    stage('Test 2.3') {
-      environment {
-        RUBY_VERSION = '2.3.5'
-      }
-
-      steps {
-        sh './test.sh'
-
-        junit 'spec/reports/*.xml, features/reports/*.xml'
-      }
-    }
-
-    stage('Test 2.4') {
-      environment {
-        RUBY_VERSION = '2.4.2'
-      }
-
-      steps {
-        sh './test.sh'
-
-        junit 'spec/reports/*.xml, features/reports/*.xml'
+        stage('Test 2.4') {
+          environment {
+            RUBY_VERSION = '2.4.2'
+          }
+          steps {
+            sh './test.sh'
+            junit 'spec/reports/*.xml, features/reports/*.xml'
+          }
+        }
       }
     }
 
     // Only publish to RubyGems if branch is 'master'
     // AND someone confirms this stage within 5 minutes
     stage('Publish to RubyGems?') {
+      agent { label 'releaser-v2' }
+
       when {
         allOf {
           branch 'master'
@@ -72,12 +70,10 @@ pipeline {
         }
       }
       steps {
-        milestone(2)
-        build(job: 'release-rubygems', parameters: [
-          string(name: 'GEM_NAME', value: 'conjur-api'),
-          string(name: 'GEM_BRANCH', value: "${env.BRANCH_NAME}")
-        ])
-        milestone(3)
+        sh './publish.sh'
+        // Clean up this workspace
+        sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
+        deleteDir()
       }
     }
   }
@@ -85,7 +81,8 @@ pipeline {
   post {
     always {
       sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
-    }      
+      deleteDir()
+    }
     failure {
       slackSend(color: 'danger', message: "${env.JOB_NAME} #${env.BUILD_NUMBER} FAILURE (<${env.BUILD_URL}|Open>)")
     }
