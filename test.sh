@@ -1,8 +1,9 @@
 #!/bin/bash -ex
 
-RUBY_VERSION_DEFAULT=2.2.5
+: ${RUBY_VERSION=2.2.5}
 
-RUBY_VERSION=${1-${RUBY_VERSION_DEFAULT}}
+# My local RUBY_VERSION is set to ruby-#.#.# so this allows running locally.
+RUBY_VERSION=$(cut -d '-' -f 2 <<< $RUBY_VERSION)
 
 main() {
   build
