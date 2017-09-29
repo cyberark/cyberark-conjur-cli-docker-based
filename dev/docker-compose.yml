@@ -3,12 +3,12 @@ services:
   pg:
     image: postgres:9.3
     
-  possum:
-    image: possum
+  conjur:
+    image: conjur
     command: server -a cucumber
     environment:
       DATABASE_URL: postgres://postgres@pg/postgres
-      POSSUM_DATA_KEY:
+      CONJUR_DATA_KEY:
 
   cli:
     build:
@@ -17,7 +17,7 @@ services:
     entrypoint: sleep
     command: infinity
     environment:
-      CONJUR_APPLIANCE_URL: http://possum
+      CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: cucumber
     working_dir: /src/conjur-cli
     volumes:

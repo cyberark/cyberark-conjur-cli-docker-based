@@ -3,8 +3,8 @@ services:
   pg:
     image: postgres:9.3
 
-  possum:
-    image: registry.tld/possum:0.1.0-stable
+  conjur:
+    image: registry.tld/conjur:0.1.0-stable
     command: server -a cucumber
     depends_on: 
       - pg
@@ -21,7 +21,7 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres@pg/postgres
       - RAILS_ENV=test
-      - CONJUR_APPLIANCE_URL=http://possum
+      - CONJUR_APPLIANCE_URL=http://conjur
       - CONJUR_ACCOUNT=cucumber
       - CONJUR_AUTHN_LOGIN=admin
       - CONJUR_AUTHN_API_KEY
