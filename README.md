@@ -35,12 +35,12 @@ $ cd dev
 dev $ ./start.sh
 ```
 
-This will drop you into a bash shell in a container called `cli`. The sandbox also includes a Postgres container and Possum server container. The environment is already setup to connect the CLI to the server:
+This will drop you into a bash shell in a container called `cli`. The sandbox also includes a Postgres container and Conjur server container. The environment is already setup to connect the CLI to the server:
 
-* **CONJUR_APPLIANCE_URL** `http://possum`
+* **CONJUR_APPLIANCE_URL** `http://conjur`
 * **CONJUR_ACCOUNT** `cucumber`
 
-You can obtain the API key for the role `cucumber:user:admin` from the Docker logs of the `possum` container. Use it to login:
+You can obtain the API key for the role `cucumber:user:admin` from the Docker logs of the Conjur container. Use it to login:
 
 ```sh-session
 root@2b5f618dfdcb:/# conjur authn login admin

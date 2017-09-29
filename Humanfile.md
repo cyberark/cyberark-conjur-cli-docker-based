@@ -27,11 +27,5 @@ Github repo: https://github.com/conjurinc/cli-ruby
 ### [Automated build settings](https://hub.docker.com/r/conjurinc/cli5/~/settings/automated-builds/):
 
 - Automatically build on pushes: yes.
-- Branch-tag mapping (type ‖ name ‖ dockerfile location ‖ docker tag name)
-  - branch ‖ standalone-dockerized ‖ /Dockerfile.standalone ‖ latest
-  - branch ‖ possum ‖ /Dockerfile.standalone ‖ latest
-
-Note: the first branch-tag mapping can be removed after merging: it is only
-useful for this feature branch.
 
 [Configuration true as of 2017-06-14T20:41+00:00.]
