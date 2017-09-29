@@ -8,38 +8,26 @@ pipeline {
 
   stages {
     stage('Test 2.2') {
-      environment {
-        RUBY_VERSION = '2.2.0'
-      }
-
       steps {
         milestone(1)
             
-        sh './test.sh'
+        sh './test.sh 2.2.0'
 
         junit 'spec/reports/*.xml, features/reports/*.xml'
       }
     }
 
     stage('Test 2.3') {
-      environment {
-        RUBY_VERSION = '2.3.0'
-      }
-
       steps {
-        sh './test.sh'
+        sh './test.sh 2.3.0'
 
         junit 'spec/reports/*.xml, features/reports/*.xml'
       }
     }
 
     stage('Test 2.4') {
-      environment {
-        RUBY_VERSION = '2.4.0'
-      }
-
       steps {
-        sh './test.sh'
+        sh './test.sh 2.4.0'
 
         junit 'spec/reports/*.xml, features/reports/*.xml'
       }
