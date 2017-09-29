@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Test 2.2') {
       environment {
-        RUBY_VERSION = '2.2.0'
+        RUBY_VERSION = '2.2.8'
       }
 
       steps {
@@ -23,7 +23,7 @@ pipeline {
 
     stage('Test 2.3') {
       environment {
-        RUBY_VERSION = '2.3.0'
+        RUBY_VERSION = '2.3.5'
       }
 
       steps {
@@ -35,7 +35,7 @@ pipeline {
 
     stage('Test 2.4') {
       environment {
-        RUBY_VERSION = '2.4.0'
+        RUBY_VERSION = '2.4.2'
       }
 
       steps {

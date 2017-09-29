@@ -8,4 +8,4 @@ gemspec
 
 gem 'activesupport', '~> 4.2'
 
-gem 'conjur-api', '~> 5.0.0'
+gem 'conjur-api', '~> 5'
