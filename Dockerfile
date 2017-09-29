@@ -12,5 +12,5 @@ COPY lib/conjur/version.rb lib/conjur/version.rb
 # Make sure only one version of bundler is available
 RUN gem uninstall bundler -i /usr/local/lib/ruby/gems/${RUBY_VERSION} bundler || true && \
   gem uninstall bundler -aIx || true && \
-  gem install bundler -v 1.11.2 || true && \
+  gem install bundler -v 1.11.2 && \
   bundle install
