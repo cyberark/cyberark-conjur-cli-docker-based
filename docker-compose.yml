@@ -4,7 +4,7 @@ services:
     image: postgres:9.3
 
   conjur:
-    image: registry.tld/conjur:0.1.0-stable
+    image: cyberark/conjur
     command: server -a cucumber
     depends_on: 
       - pg
