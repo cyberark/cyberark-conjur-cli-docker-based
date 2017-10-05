@@ -28,7 +28,7 @@ module Conjur
     
     class << self
       attr_accessor :prefix
-
+      
       def method_missing *a, &b
         Conjur::CLI.send *a, &b
       end
@@ -92,63 +92,35 @@ module Conjur
           end
         end.join("\n")
       end
-
-      def command_option_kind c
-        c.desc "Filter by kind"
-        c.flag [:k, :kind]
-      end
-
-      def command_option_as_role c
+      
+      def command_options_for_list(c)
         return if c.flags.member?(:role) # avoid duplicate flags
         c.desc "Role to act as. By default, the current logged-in role is used."
         c.arg_name 'ROLE'
         c.flag [:role]
-      end
-
-      def command_options_for_search c
+    
         c.desc "Full-text search on resource id and annotation values" 
         c.flag [:s, :search]
         
-        c.desc "Offset to start from"
-        c.flag [:o, :offset]
-                
         c.desc "Maximum number of records to return"
         c.flag [:l, :limit]
-
-        c.desc "Show the number of results, rather than printing them"
-        c.switch [:count]
-      end
-
-      def command_options_for_list(c)
-        command_option_as_role c
-        command_options_for_search c
-
+        
+        c.desc "Offset to start from"
+        c.flag [:o, :offset]
+        
         c.desc "Show full object information"
         c.switch [:inspect]
-
+        
         c.desc "Show annotations in 'raw' format"
         c.switch [:r, :"raw-annotations"]
       end
-
-      def process_command_options_for_search options
-        opts = options.slice(:search, :count, :limit, :offset, :kind)
-        opts[:acting_as] = options[:role] if options[:role]
-        opts[:search] = opts[:search].gsub('-',' ') if opts[:search]
-        if opts[:kind] && opts[:kind].index(',')
-          opts[:kind] = opts[:kind].split(',')
-        end
-        opts
-      end
       
       def command_impl_for_list(global_options, options, args)
-        opts = process_command_options_for_search(options)
+        opts = options.slice(:search, :limit, :options, :kind) 
+        opts[:acting_as] = options[:role] if options[:role]
+        opts[:search]=opts[:search].gsub('-',' ') if opts[:search]
         resources = api.resources(opts)
-
-        if resources.is_a?(Numeric)
-          puts resources
-        elsif options[:ids]
-          puts JSON.pretty_generate(resources.map(&:resourceid))
-        elsif options[:inspect]
+        if options[:inspect]
           resources = resources.map &:attributes
           unless options[:'raw-annotations']
             resources = resources.map do |r|
@@ -186,20 +158,11 @@ module Conjur
         else
           members.map(&:member).map(&:id)
         end
-
-        unless options[:system]
-          result.reject! do |member|
-            roleid_function.call(member) =~ /^.+?:@/
-          end
-        end
-
         display result
       end
 
       def display(obj, options = {})
-        str = if obj.is_a?(Numeric)
-          obj.to_s
-        elsif obj.respond_to?(:attributes)
+        str = if obj.respond_to?(:attributes)
           JSON.pretty_generate obj.attributes
         elsif obj.respond_to?(:id)
           obj.id
@@ -245,10 +208,6 @@ module Conjur
         other_role.members.any? { |m| memberships.member?(m.member.id) && m.admin_option }
       rescue RestClient::Forbidden
         false
-      end
-
-      def notify_deprecated
-        STDERR.puts 'WARNING! This command is deprecated and will be removed. Use policy instead.'
       end
 
     end

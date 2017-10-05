@@ -23,6 +23,4 @@
 require 'active_support'
 require 'conjur/cli'
 
-require 'patches/gli'
-
 exit Conjur::CLI.run(ARGV)

@@ -26,7 +26,6 @@ class Conjur::Command::Hosts < Conjur::Command
   
   desc "Manage hosts"
   command :host do |hosts|
-
     hosts.desc "Rotate a host's API key"
     hosts.command :rotate_api_key do |c|
       c.desc "Login of host whose API key we want to rotate (default: logged-in host)"

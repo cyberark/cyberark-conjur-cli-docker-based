@@ -72,22 +72,6 @@ pipeline {
         deleteDir()
       }
     }
-
-    stage('Build deb') {
-      steps {
-        sh './build-deb.sh'
-      }
-    }
-
-    stage('Publish deb') {
-      when {
-        branch 'master'
-      }
-
-      steps {
-        sh './publish.sh conjurtools stable'
-      }
-    }
   }
 
   post {

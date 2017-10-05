@@ -113,7 +113,6 @@ describe Conjur::Config do
 
   describe "#apply" do
     before { 
-      allow_any_instance_of(Conjur::Configuration).to receive(:ensure_cert_readable!) 
       allow(OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE).to receive(:add_file) 
       allow(File).to receive(:open)
     }

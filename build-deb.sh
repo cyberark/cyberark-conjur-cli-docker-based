@@ -3,9 +3,7 @@
 export DEBUG=true 
 export GLI_DEBUG=true 
 
-if [[ "$(id -un)" == "jenkins" && -v BUILD_NUMBER ]]; then
-  docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd
-fi  
+debify clean
 
 docker build -t conjur-cli-fpm -f Dockerfile.fpm .
 docker build -t conjur-cli-validate-packaging -f Dockerfile.validate-packaging .

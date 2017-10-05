@@ -79,15 +79,11 @@ resource or must have specified role in its memberships.
     resource.desc "List roles with a specified privilege on the resource"
     resource.arg_name "RESOURCE PRIVILEGE"
     resource.command :permitted_roles do |c|
-      command_option_kind c
-      command_options_for_search c
-
       c.action do |global_options,options,args|
         id = full_resource_id(require_arg(args, "RESOURCE"))
         permission = require_arg(args, "PRIVILEGE")
 
-        opts = process_command_options_for_search(options)
-        display api.resource(id).permitted_roles(permission, opts)
+        display api.resource(id).permitted_roles(permission)
       end
     end
   end

@@ -21,7 +21,6 @@
 class Conjur::Command::Variables < Conjur::Command
   desc "Manage variables"
   command :variable do |var|
-
     var.desc "Access variable values"
     var.command :values do |values|
       values.desc "Add a value"

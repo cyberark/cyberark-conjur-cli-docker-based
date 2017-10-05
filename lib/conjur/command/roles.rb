@@ -22,7 +22,6 @@
 class Conjur::Command::Roles < Conjur::Command
   desc "Manage roles"
   command :role do |role|
-
     role.desc "Determines whether a role exists"
     role.arg_name "ROLE"
     role.command :exists do |c|
@@ -42,34 +41,17 @@ class Conjur::Command::Roles < Conjur::Command
       end
     end
 
-    role.desc "Lists role memberships. The role membership list is recursively expanded by default."
+    role.desc "Lists role memberships. The role membership list is recursively expanded."
     role.arg_name "ROLE"
 
     role.command :memberships do |c|
-      c.desc "Verbose output. Only meaningful with --no-recursive."
-      c.switch [:V,:verbose]
-
-      c.desc "Whether to recursively expand role memberships"
-      c.default_value true
-      c.switch [:r, :recursive]
-
       c.desc "Whether to show system (internal) roles"
-      c.switch [:system]
-
-      command_option_kind c
-      command_options_for_search c
+      c.switch [:s, :system]
 
       c.action do |global_options,options,args|
         roleid = args.shift
-
-        assert_empty(args)
-        
         role = roleid.nil? && api.current_role(Conjur.configuration.account) || api.role(full_role_id(roleid))
-
-        opts = process_command_options_for_search(options)
-        opts[:recursive] = false unless options[:recursive]
-        
-        memberships = role.memberships.all(opts).map(&:id)
+        memberships = role.memberships.map(&:id)
         unless options[:system]
           memberships.reject!{|id| id =~ /^.+?:@/}
         end
@@ -83,22 +65,10 @@ class Conjur::Command::Roles < Conjur::Command
       c.desc "Verbose output"
       c.switch [:V,:verbose]
 
-      c.desc "Whether to show system (internal) roles"
-      c.switch [:system]
-
-      command_option_kind c
-      command_options_for_search c
-
       c.action do |global_options,options,args|
         roleid = args.shift
-
-        assert_empty(args)
         role = roleid.nil? && api.current_role(Conjur.configuration.account) || api.role(full_role_id(roleid))
-        opts = process_command_options_for_search(options)
-
-        members = role.members(opts)
-
-        display_members members, options
+        display_members role.members, options
       end
     end
   end
