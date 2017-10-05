@@ -23,6 +23,7 @@ class Conjur::Command::HostFactories < Conjur::Command
   desc "Manage host factories"
 
   command :hostfactory do |hf|
+
     hf.desc "Operations on tokens"
     hf.long_desc <<-DESC
 This command creates one or more identical tokens. A token is always created with an 

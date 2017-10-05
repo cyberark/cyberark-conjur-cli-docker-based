@@ -2,13 +2,99 @@ require 'spec_helper'
 
 describe Conjur::Command::Roles, logged_in: true do
 
-  describe "role:memberships" do
+#######
+=begin
+  describe "role:members" do
     let(:all_roles) { %w(foo:user:joerandom foo:something:cool foo:something:else foo:group:admins) }
+    let(:all_role_grants) { 
+      all_roles.map do |r| 
+        Conjur::RoleGrant.new(api.role("foo:user:joerandom"), api.role(r), api.role("foo:user:admin"), false)
+      end
+    }
     let(:role) do
-      double "the role", memberships: all_roles.map{|r| double r, id: r }
+      double "the role", members: all_role_grants
     end
   
     before do
+      allow(api).to receive(:role).and_call_original
+      allow(api).to receive(:role).with(rolename).and_return role
+    end
+
+    context "when logged in as a user" do
+      let(:username) { "joerandom" }
+      let(:rolename) { "user:joerandom" }
+      
+      describe_command "role:members" do
+        it "lists all roles" do
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+
+      describe_command "role:members -V" do
+        it "lists all roles verbosely" do
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_role_grants.map(&:to_h).map(&:stringify_keys))
+        end
+        describe "without RoleGrant.role field" do
+          it "lists the roles verbosely" do
+            all_role_grants.each do |rg|
+              rg.instance_variable_set "@role", nil
+            end
+            expect(JSON::parse(expect { invoke }.to write)).to eq(all_role_grants.map(&:to_h).map(&:stringify_keys))
+          end
+        end
+      end
+
+      describe_command "role:members --count" do
+        it "counts the roles" do
+          expect(role).to receive(:members).with({count: true}).and_return(all_roles.size)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles.size)
+        end
+      end
+
+      describe_command "role:members -k hamster -s frontend -o 10 -l 10" do
+        it "lists selected roles" do
+          expect(role).to receive(:members).with({kind: 'hamster', search: 'frontend', offset: "10", limit: "10"}).and_return(all_role_grants)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+
+      describe_command "role:members -k hamster,giraffe" do
+        it "lists selected roles" do
+          expect(role).to receive(:members).with({kind: %w(hamster giraffe)}).and_return(all_role_grants)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+
+      describe_command "role:members -k hamster -k giraffe" do
+        it "applies only the last 'kind' filter" do
+          expect(role).to receive(:members).with({kind: 'giraffe'}).and_return(all_role_grants)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+  
+      describe_command "role:members foo:bar" do
+        let(:rolename) { 'foo:bar' }
+        it "lists all roles of foo:bar" do
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+    end
+  end
+=end
+#######
+
+  describe "role:memberships" do
+    let(:all_roles) { %w(foo:user:joerandom foo:something:cool foo:something:else foo:group:admins) }
+    let(:all_role_objects) { all_roles.map{|r| double r, roleid: r } }
+    let(:role) do
+      
+      double "the role", memberships: all_roles.map{|r| double r, id: r } # head
+      # double "the role", all: all_role_objects # master
+      
+    end
+  
+    before do
+      allow(api).to receive(:role).and_call_original
       allow(api).to receive(:role).with(rolename).and_return role
     end
 
@@ -18,6 +104,59 @@ describe Conjur::Command::Roles, logged_in: true do
       
       describe_command "role:memberships" do
         it "lists all roles" do
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+        end
+      end
+
+      describe_command "when empty" do
+        let(:all_roles) { [] }
+        describe_command "role:memberships" do
+          it "prints an empty array" do
+            expect(JSON::parse(expect { invoke }.to write)).to eq([])
+          end
+        end
+      end
+
+      describe_command "role:memberships" do
+        it "hides system roles" do
+          expect(role).to receive(:all).with({}).and_return([
+            double(:role, roleid: "the-account:@:hamster")
+          ])
+          expect(JSON::parse(expect { invoke }.to write)).to eq([])
+        end
+      end
+
+      describe_command "role:memberships --count" do
+        it "counts the roles" do
+          expect(role).to receive(:all).with({count: true}).and_return(all_roles.size)
+          expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles.size)
+        end
+      end
+
+      context "with full role grant info" do
+        let(:all_role_grants) { 
+          all_roles.map do |r| 
+            Conjur::RoleGrant.new(api.role(r), api.role("foo:user:joerandom"), api.role("foo:user:admin"), false)
+          end
+        }
+        before {
+          expect(role).to receive(:all).with({recursive: false}).and_return(all_role_grants)
+        }
+        describe_command "role:memberships --no-recursive" do
+          it "lists the roles" do
+            expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
+          end
+        end
+        describe_command "role:memberships -V --no-recursive" do
+          it "shows all the roles" do
+            expect(JSON::parse(expect { invoke }.to write)).to eq(all_role_grants.map(&:to_h).map(&:stringify_keys))
+          end
+        end
+      end
+  
+      describe_command "role:memberships -k hamster -s frontend -o 10 -l 10" do
+        it "lists selected roles" do
+          expect(role).to receive(:all).with({kind: 'hamster', search: 'frontend', offset: "10", limit: "10"}).and_return(all_role_objects)
           expect(JSON::parse(expect { invoke }.to write)).to eq(all_roles)
         end
       end

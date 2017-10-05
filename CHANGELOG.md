@@ -2,6 +2,33 @@
 
 * Provides compatibility with [cyberark/conjur](https://github.com/cyberark/conjur), Conjur 5 CE.
 
+# 5.6.2
+
+* License changed to Apache 2.0
+* Don't let conjur-api drift to v5.
+
+# 5.6.1
+
+* Fix handling of `-k / --kind` argument to `resource list`.
+
+# 5.6.0
+
+The following enhancements require Conjur server 4.9.1.0 or later:
+
+* Supports filter and pagination of role-listing methods `role memberships`, `role members`, and `resource permitted_roles`.
+* Supports non-recursive (`--no-recursive`) retrieval of `role memberships`.
+
+On older server versions, the new options will be ignored by the server.
+
+# 5.5.0
+
+* Use `CONJUR_AUTHN_TOKEN_FILE` as the Conjur access token file, if it's available in the environment.
+
+# 5.4.0
+
+* Deprecated several commands in favor of using policy.
+* Relax constraint on activesupport gem
+
 # 5.3.0
 
 * Add `jobs` subcommands for `ldap-sync`.

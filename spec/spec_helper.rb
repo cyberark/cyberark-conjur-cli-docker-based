@@ -1,3 +1,5 @@
+require "pry"
+
 require "rubygems"
 require "bundler/setup"
 require 'tempfile'
