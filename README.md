@@ -1,8 +1,10 @@
 # Conjur
 
-Command-line interface to Conjur. 
+Command-line interface to Conjur.
 
 A complete reference guide is available at [developer.conjur.net](http://developer.conjur.net/reference).
+
+Note that this `v4` branch is for Conjur 4.x. Use `master` for Conjur 5.x and later.
 
 ## Installation
 
