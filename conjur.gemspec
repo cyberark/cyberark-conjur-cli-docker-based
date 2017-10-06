@@ -24,6 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'xdg', '~> 2.2'
   gem.add_dependency 'table_print', '~> 1.5'
+  gem.add_dependency 'semantic', '>= 1.4.1'
 
   gem.add_runtime_dependency 'cas_rest_client', '~> 1.3'
 
