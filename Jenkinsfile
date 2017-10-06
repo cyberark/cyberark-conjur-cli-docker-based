@@ -60,6 +60,32 @@ pipeline {
       }
     }
 
+    // Only publish to RubyGems if branch is 'master'
+    // AND someone confirms this stage within 5 minutes
+    stage('Publish to RubyGems?') {
+      agent { label 'releaser-v2' }
+
+      when {
+        allOf {
+          branch 'master'
+          expression {
+            boolean publish = false
+            try {
+              timeout(time: 5, unit: 'MINUTES') {
+                input(message: 'Publish to RubyGems?')
+                publish = true
+              }
+            } catch (final ignore) {
+              publish = false
+            }
+            return publish
+          }
+        }
+      }
+      steps {
+        sh './publish-rubygem.sh'
+      }
+    }
   }
 
   post {
