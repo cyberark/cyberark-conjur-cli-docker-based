@@ -3,7 +3,7 @@
 export DEBUG=true 
 export GLI_DEBUG=true 
 
-if [[ "$(id -un)" == "jenkins" && -v BUILD_NUMBER ]]; then
+if [[ "$(id -un)" == "jenkins" ]]; then
   docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd
 fi  
 
