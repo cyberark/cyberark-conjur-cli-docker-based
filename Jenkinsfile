@@ -4,49 +4,44 @@ pipeline {
   options {
     timestamps()
     buildDiscarder(logRotator(numToKeepStr: '30'))
-  } 
+  }
 
   stages {
 
-    // stage('Test 2.2') {
-    //   environment {
-    //     RUBY_VERSION = '2.2'
-    //   }
+    stage('Test 2.2') {
+      environment {
+        RUBY_VERSION = '2.2'
+      }
+      steps {
+        sh './test.sh'
+        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+    }
 
-    //   steps {
-    //     sh './test.sh'
+    stage('Test 2.3') {
+      environment {
+        RUBY_VERSION = '2.3'
+      }
+      steps {
+        sh './test.sh'
+        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+    }
 
-    //     junit 'spec/reports/*.xml, features/reports/*.xml'
-    //   }
-    // }
-
-    // stage('Test 2.3') {
-    //   environment {
-    //     RUBY_VERSION = '2.3'
-    //   }
-
-    //   steps {
-    //     sh './test.sh'
-
-    //     junit 'spec/reports/*.xml, features/reports/*.xml'
-    //   }
-    // }
-
-    // stage('Test 2.4') {
-    //   environment {
-    //     RUBY_VERSION = '2.4'
-    //   }
-
-    //   steps {
-    //     sh './test.sh'
-
-    //     junit 'spec/reports/*.xml, features/reports/*.xml'
-    //   }
-    // }
+    stage('Test 2.4') {
+      environment {
+        RUBY_VERSION = '2.4'
+      }
+      steps {
+        sh './test.sh'
+        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+    }
 
     stage('Build deb') {
       steps {
         sh './build-deb.sh'
+        archiveArtifacts "tmp/deb/*"
       }
     }
 
