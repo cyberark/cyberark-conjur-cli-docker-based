@@ -1,18 +1,18 @@
-# Conjur
+# conjur-cli
 
-*NOTE*: This is work-in-progress, for a future (as yet unreleased) version of Conjur.
-_It will not work with Conjur 4._
+Command-line interface for Conjur.
 
-Command-line interface to Conjur 5.
+*NOTE*: Conjur v4 users should use the `v5.x.x` release path. Conjur CLI `v6.0.0` only supports Conjur v5 and newer.
 
-A complete reference guide is available at [developer.conjur.net](http://developer.conjur.net/reference).
+A complete reference guide is available at [conjur.org](https://www.conjur.org).
 
 ## Quick start
 
 ```sh-session
-$ docker run -it -v $PWD:/work conjurinc/cli5
-root@2b5f618dfdcb:/# conjur -v
-conjur version 6.0.0.pre.beta.2
+$ gem install conjur-cli
+
+$ conjur -v
+conjur version 6.0.0
 ```
 
 ## Docker images
