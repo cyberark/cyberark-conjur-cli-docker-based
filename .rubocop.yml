@@ -5,7 +5,7 @@ Style/MethodDefParentheses:
   EnforcedStyle: require_no_parentheses
 
 Style/StringLiterals:
-  EnforcedStyle: double_quotes
+  Enabled: false # more trouble than it's worth
 
 Lint/EndAlignment:
   EnforcedStyleAlignWith: start_of_line
