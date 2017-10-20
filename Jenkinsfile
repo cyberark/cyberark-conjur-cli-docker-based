@@ -47,11 +47,11 @@ pipeline {
 
     stage('Publish deb') {
       when {
-        branch 'master'
+        branch 'v4'
       }
 
       steps {
-        sh './publish.sh conjurtools stable'
+        sh './publish-deb.sh $(cat APPLIANCE_VERSION) stable'
       }
     }
 
