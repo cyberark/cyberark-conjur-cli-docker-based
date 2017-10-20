@@ -1,3 +1,5 @@
+* Correctly specify dependency versions in gemspec.
+
 # 6.0.0
 
 * Provides compatibility with [cyberark/conjur](https://github.com/cyberark/conjur), Conjur 5 CE.
