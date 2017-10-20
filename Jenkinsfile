@@ -78,7 +78,9 @@ pipeline {
         }
       }
       steps {
+        checkout scm
         sh './publish-rubygem.sh'
+        deleteDir()
       }
     }
   }
