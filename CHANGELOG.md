@@ -1,3 +1,7 @@
+# 5.6.3
+
+* Fix the gemspec to reflect dependency changes.
+
 # 5.6.2
 
 * License changed to Apache 2.0

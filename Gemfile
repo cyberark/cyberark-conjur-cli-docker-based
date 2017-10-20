@@ -6,10 +6,6 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in conjur.gemspec
 gemspec
 
-gem 'activesupport', '~> 4.2'
-
-gem 'conjur-api', '>= 4.30.0', '~> 4'
-
 group :test, :development do
   gem 'pry'                     # Don't be tempted to change this to pry-byebug until we drop support for 1.9
   gem 'pry-doc'
