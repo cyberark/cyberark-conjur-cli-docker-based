@@ -37,23 +37,6 @@ pipeline {
       }
     }
 
-    stage('Build deb') {
-      steps {
-        sh './build-deb.sh'
-        archiveArtifacts "tmp/deb/*"
-      }
-    }
-
-    stage('Publish deb') {
-      when {
-        branch 'master'
-      }
-
-      steps {
-        sh './publish-deb.sh $(cat APPLIANCE_VERSION) stable'
-      }
-    }
-
     // Only publish to RubyGems if branch is 'master'
     // AND someone confirms this stage within 5 minutes
     stage('Publish to RubyGems?') {
@@ -87,7 +70,7 @@ pipeline {
         sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
 
         sh './publish.sh'
-
+        
         // Clean up again...
         sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
         deleteDir()
