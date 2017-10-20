@@ -62,7 +62,7 @@ pipeline {
 
       when {
         allOf {
-          branch 'master'
+          branch 'v4'
           expression {
             boolean publish = false
             try {
