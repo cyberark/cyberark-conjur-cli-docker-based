@@ -5,9 +5,6 @@ describe Conjur::Command::Assets, logged_in: true do
   let(:asset) {  double(attributes: asset_attributes ) }
   let(:asset_attributes) { {"some"=>"attributes" } }
   before(:each) { allow(api).to receive(KIND.to_sym).and_return(asset) }
-  def invoke_silently
-    expect { invoke }.to write
-  end
 
   context "asset:create" do
     before(:each) { 

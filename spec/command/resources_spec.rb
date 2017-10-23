@@ -11,10 +11,6 @@ describe Conjur::Command::Resources, logged_in: true do
     allow(api).to receive(:resource).with(full_resource_id).and_return(resource_instance)
   end 
 
-  def invoke_silently
-    expect { invoke }.to write
-  end
-
   shared_examples 'it displays resource attributes' do
     it "as JSON to stdout" do
       expect(JSON::parse( expect { invoke }.to write )).to eq(resource_attributes)

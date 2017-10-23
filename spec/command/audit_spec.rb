@@ -13,10 +13,6 @@ describe Conjur::Command::Audit, logged_in: true do
     invoke
   end
 
-  def invoke_silently
-    silence_stderr { invoke }
-  end
-
   def self.describe_command_success cmd, method, *expected_args, &block
     describe_command cmd do
       it "calls api.#{method}(#{expected_args.map(&:inspect).join(',')})" do

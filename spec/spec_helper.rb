@@ -47,6 +47,10 @@ shared_context "fresh config" do
   }
 end
 
+def invoke_silently
+  STDERR.grab { return invoke }
+end
+
 RSpec::Core::DSL.change_global_dsl do
   def describe_conjurize *argv, &block
     describe *argv do

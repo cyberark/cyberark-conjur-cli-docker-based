@@ -2,16 +2,6 @@ require 'spec_helper'
 require 'conjur/command/variables'
 
 describe Conjur::Command::Variables, :logged_in => true do
-  def invoke_silently
-    real_stderr = $stderr
-    $stderr = StringIO.new
-    begin
-      invoke
-    ensure
-      $stderr = real_stderr
-    end
-  end
-
   let (:variable) { double(:name => 'foo') }
   let (:incompatible_server_msg) { /not supported/ }
   
