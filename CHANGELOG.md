@@ -1,4 +1,5 @@
 * Correctly specify dependency versions in gemspec.
+* Allow ActiveSupport v5 as a dependency.
 
 # 6.0.0
 
