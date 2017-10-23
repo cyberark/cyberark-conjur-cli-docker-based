@@ -19,6 +19,6 @@
 # CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 module Conjur
-  VERSION = '5.6.3'.freeze
+  VERSION = '5.6.4'.freeze
   ::Version=VERSION
 end

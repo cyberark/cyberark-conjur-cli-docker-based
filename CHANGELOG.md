@@ -1,3 +1,7 @@
+# 5.6.4
+
+* Allow activesupport 5 as a dependency.
+
 # 5.6.3
 
 * Fix the gemspec to reflect dependency changes.
