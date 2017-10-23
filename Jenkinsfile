@@ -43,6 +43,7 @@ pipeline {
       agent { label 'releaser-v2' }
 
       when {
+        expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
         expression {
           def exitCode = sh returnStatus: true, script: ''' set +x
             echo "Determining if publishing is requested..."
