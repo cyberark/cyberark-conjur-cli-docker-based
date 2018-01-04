@@ -26,10 +26,10 @@ for package in *.deb; do
     -v $PWD/tmp/deb:/src \
     conjur-cli-publish \
     upload \
-    --url https://conjurinc.artifactoryonline.com/conjurinc \
+    --url https://conjurinc.jfrog.io/conjurinc \
     --user $ART_USERNAME \
     --password $ART_PASSWORD \
     --deb "$distribution"/"$component"/amd64 \
     $package \
-    debian-local
+    debian-private/
 done
