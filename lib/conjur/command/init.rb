@@ -140,6 +140,7 @@ class Conjur::Command::Init < Conjur::Command
 
     sock = TCPSocket.new host, port.to_i
     ssock = SSLSocket.new sock
+    ssock.hostname = host
     ssock.connect
     chain = ssock.peer_cert_chain
     cert = chain.first

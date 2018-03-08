@@ -1,3 +1,7 @@
+# 5.6.5
+
+* Fix init cert check when Conjur behind a SNI
+
 # 5.6.4
 
 * Allow activesupport 5 as a dependency.
