@@ -14,6 +14,8 @@ RUN apt-get install -qyf
 COPY standalone.entrypoint /bin/entry
 
 #---install summon and summon-conjur---#
+ENV CONJUR_MAJOR_VERSION=4
+ENV CONJUR_VERSION=4
 RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
   | env TMPDIR=$(mktemp -d) bash
 # as per https://github.com/cyberark/summon#linux
