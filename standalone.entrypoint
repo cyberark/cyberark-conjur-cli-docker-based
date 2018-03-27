@@ -1,0 +1,17 @@
+#!/bin/sh -e
+
+# A tool container entrypoint that tries to do the right thing whether you want
+# an interactive shell environment or run a command directly.
+#
+# It starts bash if
+#   - there is a tty (ie. docker was run with -t),
+#   - there are no arguments.
+#
+# Otherwise it runs the tool.
+
+TOOL=conjur
+
+[ -t 1 -a $# -eq 0 ] && exec bash
+
+# else
+exec $TOOL "$@"

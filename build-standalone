@@ -1,0 +1,6 @@
+#!/bin/bash -e
+
+# build the cli4 standalone container image
+docker build . \
+       -f Dockerfile.standalone \
+       -t cyberark/conjur-cli4

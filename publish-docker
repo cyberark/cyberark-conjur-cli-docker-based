@@ -1,0 +1,4 @@
+#!/bin/bash -e
+
+# push the cli4 standalone container image to Dockerhub
+docker push cyberark/conjur-cli4

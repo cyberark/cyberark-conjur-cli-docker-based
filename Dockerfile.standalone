@@ -1,0 +1,28 @@
+FROM ubuntu:16.04
+
+#---install useful tools and dependencies---#
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
+  jq curl vim nano ruby sudo openssh-client
+# as per https://hub.docker.com/r/conjurinc/cli5/~/dockerfile/
+
+#---install Conjur 4 CLI---#
+RUN curl -sSL -o conjur-cli.deb \
+  https://github.com/cyberark/conjur-cli/releases/download/v5.4.0/conjur_5.4.0-1_amd64.deb
+RUN dpkg -i conjur-cli.deb
+RUN apt-get install -qyf
+COPY standalone.entrypoint /bin/entry
+
+#---install summon and summon-conjur---#
+RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
+  | env TMPDIR=$(mktemp -d) bash
+# as per https://github.com/cyberark/summon#linux
+
+RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
+  | env TMPDIR=$(mktemp -d) bash
+# as per https://github.com/cyberark/summon-conjur#install
+
+#---clean up---#
+RUN rm -rf conjur-cli.deb /var/lib/apt/lists/*
+
+ENTRYPOINT ["/bin/entry"]
