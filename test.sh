@@ -12,8 +12,8 @@ RUBY_VERSION=${1-${RUBY_VERSION_DEFAULT}}
 function dockerfile_path {
     echo "Setting Ruby version as ${RUBY_VERSION}" >&2
     cp "Dockerfile" "Dockerfile.${RUBY_VERSION}"
-    if [[ ! grep "Dockerfile.${RUBY_VERSION}" .gitignore ]]; then
-        echo "Dockerfile.${RUBY_VERSION}" >>.git/info/exclude
+    if ! grep "Dockerfile.${RUBY_VERSION}" .git/info/exclude >/dev/null; then
+        echo "Dockerfile.${RUBY_VERSION}*" >>.git/info/exclude
     fi
     sed -i -e "s/${RUBY_VERSION_DEFAULT}/${RUBY_VERSION}/g" Dockerfile.${RUBY_VERSION}
 
