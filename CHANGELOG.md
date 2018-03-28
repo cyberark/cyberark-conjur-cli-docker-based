@@ -1,3 +1,7 @@
+# Next
+
+* Adds standalone Docker image (`cyberark/conjur-cli4`)
+
 # 5.6.5
 
 * Fix init cert check when Conjur behind a SNI
