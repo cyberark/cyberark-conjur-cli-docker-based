@@ -20,6 +20,30 @@ Or install it yourself as:
 
     $ gem install conjur-cli
 
+### Using Docker
+
+This interface is included in the stand-alone `cyberark/conjur-cli4` Docker
+image. For example:
+
+```sh-session
+$ docker run --rm -it cyberark/conjur-cli4
+root@2bfd462a7e69:/# 
+```
+
+To use it in `docker-compose`, you can define a service like this with the
+entrypoint changed so that the container will stay up:
+
+```yaml
+services:
+  conjur:
+    image: conjur-appliance:stable
+  client:
+    image: cyberark/conjur-cli4
+    depends_on: [ conjur ]
+    entrypoint: sleep
+    command: infinity
+```
+
 ### Bash completion
 
 To enable bash completions, run this command:
