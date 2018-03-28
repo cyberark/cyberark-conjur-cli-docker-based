@@ -1,28 +1,28 @@
 # -*- mode: dockerfile -*-
-FROM ubuntu:16.04
+FROM ruby:2.2.9
 
 #---install useful tools and dependencies---#
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      jq curl vim nano ruby sudo openssh-client
+      jq curl vim nano sudo openssh-client
 # as per https://hub.docker.com/r/conjurinc/cli5/~/dockerfile/
-
-#---install Conjur 4 CLI---#
-RUN curl -sSL -o conjur-cli.deb \
-  https://github.com/cyberark/conjur-cli/releases/download/v5.4.0/conjur_5.4.0-1_amd64.deb && \
-  dpkg -i conjur-cli.deb && \
-  apt-get install -qyf && \
-  rm -rf conjur-cli.deb /var/lib/apt/lists/*
 
 #---install summon and summon-conjur---#
 ENV CONJUR_MAJOR_VERSION=4
 ENV CONJUR_VERSION=4
 RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
-      | env TMPDIR=$(mktemp -d) bash && \
-    curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
-      | env TMPDIR=$(mktemp -d) bash
+| env TMPDIR=$(mktemp -d) bash && \
+curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
+| env TMPDIR=$(mktemp -d) bash
 # as per https://github.com/cyberark/summon#linux
 # and    https://github.com/cyberark/summon-conjur#install
 
+#---install Conjur 4 CLI---#
+WORKDIR /src
+COPY . .
+RUN gem build conjur-cli.gemspec && gem install conjur-cli && cd /root && rm -rf /src
+
+#---set defaults---#
+WORKDIR /root
 COPY standalone.entrypoint /bin/entry
 ENTRYPOINT ["/bin/entry"]

@@ -38,12 +38,6 @@ pipeline {
       }
     }
 
-    stage('Build standalone Docker image') {
-      steps {
-        sh './build-standalone'
-      }
-    }
-
     stage('Build deb') {
       steps {
         sh './build-deb.sh'
@@ -58,6 +52,12 @@ pipeline {
 
       steps {
         sh './publish-deb.sh $(cat APPLIANCE_VERSION) stable'
+      }
+    }
+
+    stage('Build standalone Docker image') {
+      steps {
+        sh './build-standalone'
       }
     }
 
