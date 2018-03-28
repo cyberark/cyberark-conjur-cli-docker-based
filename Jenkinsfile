@@ -38,6 +38,12 @@ pipeline {
       }
     }
 
+    stage('Build standalone Docker image') {
+      steps {
+        sh './build-standalone'
+      }
+    }
+
     stage('Build deb') {
       steps {
         sh './build-deb.sh'
@@ -52,6 +58,12 @@ pipeline {
 
       steps {
         sh './publish-deb.sh $(cat APPLIANCE_VERSION) stable'
+      }
+    }
+
+    stage('Publish standalone Docker image to DockerHub') {
+      steps {
+        sh './push-image'
       }
     }
 
