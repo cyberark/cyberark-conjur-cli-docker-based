@@ -22,24 +22,54 @@ Or install it yourself as:
 
 ### Using Docker
 
-This interface is included in the stand-alone `cyberark/conjur-cli4` Docker
-image. For example:
+This software is included in the standalone `cyberark/conjur-cli:4` Docker
+image. Docker containers are designed to be ephemeral, which means they don't
+store state after the container exits.
+
+You can start an ephemeral session with the Conjur CLI software like so:
 
 ```sh-session
-$ docker run --rm -it cyberark/conjur-cli:4-stable
-root@2bfd462a7e69:/# 
+$ docker run --rm -it cyberark/conjur-cli:latest
+root@b27a95721e7d:~# 
 ```
 
-To use it in `docker-compose`, you can define a service like this with the
-entrypoint changed so that the container will stay up:
+Any initialization you do or files you create in that session will be discarded
+(permanently lost) when you exit the shell. Changes that you make to the Conjur
+server will remain.
 
-```yaml
-services:
-  client:
-    image: cyberark/conjur-cli:4-stable
-    entrypoint: sleep
-    command: infinity
+You can also use a folder on your filesystem to persist the data that the Conjur
+CLI uses to connect. For example:
+
+```sh-session
+$ mkdir mydata
+$ chmod 700 mydata
+$ docker run --rm -it -v $(PWD)/mydata:/root cyberark/conjur-cli:4 init -h https://conjur.myorg.com
+SHA1 Fingerprint=16:C8:F8:AC:7B:57:BD:5B:58:B4:13:27:22:8E:3F:A2:12:01:DB:68
+
+Please verify this certificate on the appliance using command:
+                openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem
+
+Trust this certificate (yes/no): yes
+Wrote certificate to /root/conjur-conjur.pem
+Wrote configuration to /root/.conjurrc
+$ ls -lA mydata
+total 8
+drwxr-xr-x 2 you staff   64 Mar 28 19:30 .cache
+-rw-r--r-- 1 you staff  128 Mar 28 19:30 .conjurrc
+-rw-r--r-- 1 you staff 2665 Mar 28 19:30 conjur-conjur.pem
+$ docker run --rm -it -v $(PWD)/mydata:/root cyberark/conjur-cli:4 authn login -u your-user-name
+Please enter your password (it will not be echoed): 
+Logged in
+$ ls -lA mydata
+total 12
+drwxr-xr-x 2 you staff   64 Mar 28 19:26 .cache
+-rw-r--r-- 1 you staff  128 Mar 28 19:20 .conjurrc
+-rw------- 1 you staff  143 Mar 28 19:27 .netrc
+-rw-r--r-- 1 you staff 2665 Mar 28 19:20 conjur-conjur.pem
+$ 
 ```
+
+*Security notice:* the files created by `conjur authn login` are 
 
 ### Bash completion
 
