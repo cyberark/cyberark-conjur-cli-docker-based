@@ -26,7 +26,7 @@ This interface is included in the stand-alone `cyberark/conjur-cli4` Docker
 image. For example:
 
 ```sh-session
-$ docker run --rm -it cyberark/conjur-cli4
+$ docker run --rm -it cyberark/conjur-cli:4-stable
 root@2bfd462a7e69:/# 
 ```
 
@@ -35,11 +35,8 @@ entrypoint changed so that the container will stay up:
 
 ```yaml
 services:
-  conjur:
-    image: conjur-appliance:stable
   client:
-    image: cyberark/conjur-cli4
-    depends_on: [ conjur ]
+    image: cyberark/conjur-cli:4-stable
     entrypoint: sleep
     command: infinity
 ```
