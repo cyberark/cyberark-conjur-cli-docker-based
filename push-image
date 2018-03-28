@@ -1,7 +1,6 @@
 #!/bin/bash -e
 
-# Push the 'cli4' image to Dockerhub
-# Push stable images on 'v4' branch
+# Push the 'cli4' image to Dockerhub when on the 'v4' branch
 
 cd "$(git rev-parse --show-toplevel)"
 
@@ -18,8 +17,6 @@ function tag_and_push() {
     docker tag "$image" "$image:$tag"
     docker push "$image:$tag"
 }
-
-tag_and_push $IMAGE $TAG 'this branch'
 
 if [[ "$BRANCH_NAME" == 'v4' ]]; then
     bare_tag='4'
