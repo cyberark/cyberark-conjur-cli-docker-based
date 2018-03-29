@@ -29,7 +29,7 @@ store state after the container exits.
 You can start an ephemeral session with the Conjur CLI software like so:
 
 ```sh-session
-$ docker run --rm -it cyberark/conjur-cli:latest
+$ docker run --rm -it cyberark/conjur-cli:4
 root@b27a95721e7d:~# 
 ```
 
