@@ -69,7 +69,10 @@ drwxr-xr-x 2 you staff   64 Mar 28 19:26 .cache
 $ 
 ```
 
-*Security notice:* the files created by `conjur authn login` are 
+*Security notice:* the file `.netrc`, created or updated by `conjur authn
+login`, contains a user identity credential that can be used to access the
+Conjur API. You should remove it after use or otherwise secure it like you would
+another netrc file.
 
 ### Bash completion
 
