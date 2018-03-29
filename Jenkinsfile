@@ -55,6 +55,18 @@ pipeline {
       }
     }
 
+    stage('Build standalone Docker image') {
+      steps {
+        sh './build-standalone'
+      }
+    }
+
+    stage('Publish standalone Docker image to DockerHub') {
+      steps {
+        sh './push-image'
+      }
+    }
+
     // Only publish to RubyGems if the HEAD is
     // tagged with the same version as in version.rb
     stage('Publish to RubyGems') {

@@ -1,0 +1,33 @@
+FROM ruby:2.2.9
+
+#---install useful tools and dependencies---#
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      jq curl vim nano sudo openssh-client
+# as per https://hub.docker.com/r/conjurinc/cli5/~/dockerfile/
+
+#---install summon and summon-conjur---#
+ENV CONJUR_MAJOR_VERSION=4
+ENV CONJUR_VERSION=4
+RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
+      | env TMPDIR=$(mktemp -d) bash && \
+    curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
+      | env TMPDIR=$(mktemp -d) bash
+# as per https://github.com/cyberark/summon#linux
+# and    https://github.com/cyberark/summon-conjur#install
+
+# Note: these install scripts^^ conflict with one another if they are not given
+# different TMPDIRs.
+
+#---install Conjur 4 CLI---#
+WORKDIR /src
+COPY . .
+RUN gem build conjur-cli.gemspec && \
+    gem install conjur-cli && \
+    cd /root && \
+    rm -rf /src
+
+#---set defaults---#
+WORKDIR /root
+COPY standalone.entrypoint /bin/entry
+ENTRYPOINT ["/bin/entry"]

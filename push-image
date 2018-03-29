@@ -1,0 +1,29 @@
+#!/bin/bash -e
+
+# Push the 'cli:4' image to Dockerhub when on the 'v4' branch
+
+cd "$(git rev-parse --show-toplevel)"
+
+TAG="4-${1:-$(cat VERSION)-$(git rev-parse --short HEAD)}"
+IMAGE='cyberark/conjur-cli'
+
+function tag_and_push() {
+    local image="$1"
+    local tag="$2"
+    local description="$3"
+
+    echo "TAG = $tag, $description"
+
+    docker tag "$image" "$image:$tag"
+    docker push "$image:$tag"
+}
+
+if [[ "$BRANCH_NAME" == 'v4' ]]; then
+    bare_tag='4'
+    latest_tag='4-latest'
+    stable_tag="4-$(cat VERSION)-stable"
+
+    tag_and_push $IMAGE $bare_tag   'latest image (bare)'
+    tag_and_push $IMAGE $latest_tag 'latest image'
+    tag_and_push $IMAGE $stable_tag 'stable image'
+fi
