@@ -1,4 +1,4 @@
-# Next
+# 5.6.6
 
 * Adds standalone Docker image (`cyberark/conjur-cli4`)
 
