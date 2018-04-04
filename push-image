@@ -4,7 +4,6 @@
 
 cd "$(git rev-parse --show-toplevel)"
 
-TAG="5-${1:-$(cat VERSION)-$(git rev-parse --short HEAD)}"
 IMAGE='cyberark/conjur-cli'
 
 function tag_and_push() {
@@ -26,4 +25,8 @@ if [[ "$BRANCH_NAME" == 'master' ]]; then
     tag_and_push $IMAGE $bare_tag   'latest image (bare)'
     tag_and_push $IMAGE $latest_tag 'latest image'
     tag_and_push $IMAGE $stable_tag 'stable image'
+
+    # push to legacy `conjurinc/cli5` tag
+    docker tag "$image" conjurinc/cli5:latest
+    docker push conjurinc/cli5:latest
 fi
