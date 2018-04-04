@@ -9,7 +9,11 @@
 
 * Provides compatibility with [cyberark/conjur](https://github.com/cyberark/conjur), Conjur 5 CE.
 * License changed to Apache 2.0.
-* **Codebase forked: for changes to the 5.x (API v4) series, see CHANGELOG in `v4` branch**
+* **Codebase forked: for changes to the 5.x (API [v4][v4-branch]) series, see
+  [CHANGELOG in `v4` branch][v4-changelog]**
+
+[v4-branch]: https://github.com/cyberark/conjur-cli/tree/v4
+[v4-changelog]: https://github.com/cyberark/conjur-cli/blob/v4/CHANGELOG.md
 
 # 5.3.0
 
