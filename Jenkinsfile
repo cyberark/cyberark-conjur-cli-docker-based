@@ -37,14 +37,12 @@ pipeline {
       }
     }
 
-    stage('Build standalone Docker image') {
+    stage('Build standalone image & push to DockerHub') {
+      when {
+        branch 'master'
+      }
       steps {
         sh './build-standalone'
-      }
-    }
-
-    stage('Publish standalone Docker image to DockerHub') {
-      steps {
         sh './push-image'
       }
     }

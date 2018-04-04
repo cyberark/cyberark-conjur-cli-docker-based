@@ -17,16 +17,15 @@ function tag_and_push() {
     docker push "$image:$tag"
 }
 
-if [[ "$BRANCH_NAME" == 'master' ]]; then
-    bare_tag='5'
-    latest_tag='5-latest'
-    stable_tag="5-$(cat VERSION)-stable"
+bare_tag='5'
+latest_5_tag='5-latest'
+version_tag="5-$(cat VERSION)"
 
-    tag_and_push $IMAGE $bare_tag   'latest image (bare)'
-    tag_and_push $IMAGE $latest_tag 'latest image'
-    tag_and_push $IMAGE $stable_tag 'stable image'
+tag_and_push $IMAGE '5'        'latest image'
+tag_and_push $IMAGE '5-latset' 'same as "5"'
+tag_and_push $IMAGE 'latest'   'same as "5"'
+tag_and_push $IMAGE $version_tag 'version-specific image'
 
-    # push to legacy `conjurinc/cli5` tag
-    docker tag "$image" conjurinc/cli5:latest
-    docker push conjurinc/cli5:latest
-fi
+# push to legacy `conjurinc/cli5` tag
+docker tag "$image" conjurinc/cli5:latest
+docker push conjurinc/cli5:latest
