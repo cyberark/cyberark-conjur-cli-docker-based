@@ -31,7 +31,7 @@ You can also use a folder on your filesystem to persist the data that the Conjur
 ```sh-session
 $ mkdir mydata
 $ chmod 700 mydata
-$ docker run --rm -it -v $(PWD)/mydata:/root cyberark/conjur-cli:latest init -u https://eval.conjur.org
+$ docker run --rm -it -v $(PWD)/mydata:/root cyberark/conjur-cli:5 init -u https://eval.conjur.org
 
 SHA1 Fingerprint=E6:F7:AC:E3:3A:54:83:4F:D0:06:9B:49:45:C3:85:58:ED:34:4C:4C
 
@@ -47,7 +47,7 @@ total 16
 drwxr-xr-x  2 you  staff    68 Mar 29 14:16 .cache
 -rw-r--r--  1 you  staff   136 Mar 29 14:16 .conjurrc
 -rw-r--r--  1 you  staff  3444 Mar 29 14:16 conjur-your.email@yourorg.net.pem
-$ docker run --rm -it -v $(PWD)/mydata:/root cyberark/conjur-cli:latest authn login -u admin 
+$ docker run --rm -it -v $(PWD)/mydata:/root cyberark/conjur-cli:5 authn login -u admin 
 Please enter admin's password (it will not be echoed): 
 Logged in
 $ ls -lA mydata
