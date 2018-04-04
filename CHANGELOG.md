@@ -1,3 +1,6 @@
+# 6.0.1
+
+* Pushes to `cyberark/conjur-cli:5` on DockerHub when tests pass
 * Correctly specify dependency versions in gemspec.
 * Allow ActiveSupport v5 as a dependency.
 
@@ -5,6 +8,7 @@
 
 * Provides compatibility with [cyberark/conjur](https://github.com/cyberark/conjur), Conjur 5 CE.
 * License changed to Apache 2.0.
+* **Codebase forked: for changes to the 5.x (API v4) series, see CHANGELOG in `v4` branch**
 
 # 5.3.0
 
