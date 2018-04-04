@@ -1,3 +1,6 @@
+# 6.0.1
+
+* Use SNI when fetching certificate with `conjur init`.
 * Correctly specify dependency versions in gemspec.
 * Allow ActiveSupport v5 as a dependency.
 
