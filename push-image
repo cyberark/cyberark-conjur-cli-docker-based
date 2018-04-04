@@ -17,12 +17,9 @@ function tag_and_push() {
     docker push "$image:$tag"
 }
 
-bare_tag='5'
-latest_5_tag='5-latest'
 version_tag="5-$(cat VERSION)"
 
 tag_and_push $IMAGE '5'        'latest image'
-tag_and_push $IMAGE '5-latset' 'same as "5"'
 tag_and_push $IMAGE 'latest'   'same as "5"'
 tag_and_push $IMAGE $version_tag 'version-specific image'
 
