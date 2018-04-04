@@ -1,6 +1,7 @@
 # 6.0.1
 
 * Pushes to `cyberark/conjur-cli:5` on DockerHub when tests pass
+* Use SNI when fetching certificate with `conjur init`.
 * Correctly specify dependency versions in gemspec.
 * Allow ActiveSupport v5 as a dependency.
 
