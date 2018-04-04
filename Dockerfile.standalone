@@ -8,15 +8,28 @@
 
 FROM ruby:2.4.1
 
-# some useful tools for interactive usage
-RUN apt-get update && apt-get install -y --no-install-recommends \
-  jq curl vim nano \
-  && rm -rf /var/lib/apt/lists/*
+#---some useful tools for interactive usage---#
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      jq curl vim nano sudo openssh-client
+# as per https://hub.docker.com/r/conjurinc/cli5/~/dockerfile/
 
+#---install summon and summon-conjur---#
+ENV CONJUR_MAJOR_VERSION=5
+ENV CONJUR_VERSION=5
+RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
+      | env TMPDIR=$(mktemp -d) bash && \
+    curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
+      | env TMPDIR=$(mktemp -d) bash
+# as per https://github.com/cyberark/summon#linux
+# and    https://github.com/cyberark/summon-conjur#install
+ENV PATH="/usr/local/lib/summon:${PATH}"
+
+#---install Conjur 5 CLI---#
 # cache a reasonable version of api-ruby & deps
 RUN mkdir -p /usr/src && \
     cd /usr/src && \
-    git clone https://github.com/conjurinc/api-ruby.git -b possum && \
+    git clone https://github.com/cyberark/api-ruby.git && \
     cd api-ruby && \
     rake install
 
@@ -27,8 +40,8 @@ COPY . /usr/src/cli-ruby
 
 # only reinstall API if changed
 RUN cd /usr/src/api-ruby && git fetch && \
-    if [ $(git rev-parse HEAD origin/possum | uniq | wc -l) -gt 1 ]; then \
-      git reset --hard origin/possum && rake install ; \
+    if [ $(git rev-parse HEAD origin/master | uniq | wc -l) -gt 1 ]; then \
+      git reset --hard origin/master && rake install ; \
     fi
 
 RUN cd /usr/src/cli-ruby && rake install

@@ -1,0 +1,28 @@
+#!/bin/bash -eu
+
+# Push the 'cli:5' image to Dockerhub when on the 'master' branch
+
+cd "$(git rev-parse --show-toplevel)"
+
+IMAGE='cyberark/conjur-cli'
+
+function tag_and_push() {
+    local image="$1"
+    local tag="$2"
+    local description="$3"
+
+    echo "TAG = $tag, $description"
+
+    docker tag "$image" "$image:$tag"
+    docker push "$image:$tag"
+}
+
+version_tag="5-$(cat VERSION)"
+
+tag_and_push $IMAGE '5'        'latest image'
+tag_and_push $IMAGE 'latest'   'same as "5"'
+tag_and_push $IMAGE $version_tag 'version-specific image'
+
+# push to legacy `conjurinc/cli5` tag
+docker tag "$image" conjurinc/cli5:latest
+docker push conjurinc/cli5:latest
