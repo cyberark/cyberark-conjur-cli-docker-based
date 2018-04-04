@@ -17,12 +17,12 @@ function tag_and_push() {
     docker push "$image:$tag"
 }
 
-version_tag="5-$(cat VERSION)"
+version_tag="$(cat VERSION)"
 
 tag_and_push $IMAGE '5'        'latest image'
 tag_and_push $IMAGE 'latest'   'same as "5"'
 tag_and_push $IMAGE $version_tag 'version-specific image'
 
 # push to legacy `conjurinc/cli5` tag
-docker tag "$image" conjurinc/cli5:latest
+docker tag "$IMAGE" conjurinc/cli5:latest
 docker push conjurinc/cli5:latest
