@@ -2,7 +2,8 @@ Feature: Authenticate a role
 
   Scenario: Get a JSON token
     When I successfully run `conjur authn authenticate`
-    Then the JSON should have "data"
+    Then the JSON should have "protected"
+    And the JSON should have "payload"
     And the JSON should have "signature"
  
   Scenario: Get an auth token as HTTP Authorize header
@@ -16,7 +17,7 @@ Feature: Authenticate a role
     """
     And I login as "alice"
     When I successfully run `conjur authn authenticate`
-    Then the JSON at "data" should be "alice"
+    Then the JSON should be a hash
 
   @announce-command
   @announce-output
