@@ -7,37 +7,44 @@ pipeline {
   }
 
   stages {
-    parallel {
-      stage('Test 2.2') {
-        environment {
-          RUBY_VERSION = '2.2.8'
-        }
-        steps {
-          sh './test.sh'
-          junit 'spec/reports/*.xml, features/reports/*.xml'
-        }
-      }
 
-      stage('Test 2.3') {
-        environment {
-          RUBY_VERSION = '2.3.5'
+    stage('Tests') {
+      parallel {
+        stage('Ruby 2.2') {
+          steps {
+            environment {
+              RUBY_VERSION = '2.2.8'
+            }
+            steps {
+              sh './test.sh'
+              junit 'spec/reports/*.xml, features/reports/*.xml'
+            }
+          }
         }
-        steps {
-          sh './test.sh'
-          junit 'spec/reports/*.xml, features/reports/*.xml'
-        }
-      }
 
-      stage('Test 2.4') {
-        environment {
-          RUBY_VERSION = '2.4.2'
+        stage('Ruby 2.3') {
+          environment {
+            RUBY_VERSION = '2.3.5'
+          }
+          steps {
+            sh './test.sh'
+            junit 'spec/reports/*.xml, features/reports/*.xml'
+          }
+
         }
-        steps {
-          sh './test.sh'
-          junit 'spec/reports/*.xml, features/reports/*.xml'
+
+        stage('Ruby 2.4') {
+          environment {
+            RUBY_VERSION = '2.4.2'
+          }
+          steps {
+            sh './test.sh'
+            junit 'spec/reports/*.xml, features/reports/*.xml'
+          }
         }
       }
     }
+    
     stage('Build standalone image & push to DockerHub') {
       when {
         branch 'master'
