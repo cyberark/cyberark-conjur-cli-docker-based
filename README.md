@@ -68,17 +68,31 @@ $ cd dev
 dev $ ./start.sh
 ```
 
-This will drop you into a bash shell in a container called `cli`. The sandbox also includes a Postgres container and Conjur server container. The environment is already setup to connect the CLI to the server:
+This will drop you into a bash shell in a container called `cli`.
+
+The sandbox also includes a Postgres container and Conjur server container. The
+environment is already setup to connect the CLI to the server:
 
 * **CONJUR_APPLIANCE_URL** `http://conjur`
 * **CONJUR_ACCOUNT** `cucumber`
 
-You can obtain the API key for the role `cucumber:user:admin` from the Docker logs of the Conjur container. Use it to login:
+To login to conjur, type the following and you'll be prompted for a password:
 
 ```sh-session
 root@2b5f618dfdcb:/# conjur authn login admin
 Please enter admin's password (it will not be echoed):
-Logged in
+```
+
+The required password is the API key at the end of the output from the
+`start.sh` script.  It looks like this:
+
+```
+=============== LOGIN WITH THESE CREDENTIALS ===============
+
+username: admin
+api key : 9j113d35wag023rq7tnv201rsym1jg4pev1t1nb4419767ms1cnq00n
+
+============================================================
 ```
 
 At this point, you can use any CLI command you like.
