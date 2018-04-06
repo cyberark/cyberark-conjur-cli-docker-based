@@ -7,14 +7,13 @@ pipeline {
   }
 
   stages {
-
-    stage('Tests') {
+    stage('Run Tests') {
       parallel {
         stage('Ruby 2.2') {
-          steps {
+          // steps {
             environment {
               RUBY_VERSION = '2.2.8'
-            }
+            // }
             steps {
               sh './test.sh'
               junit 'spec/reports/*.xml, features/reports/*.xml'
