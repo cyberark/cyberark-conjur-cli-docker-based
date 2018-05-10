@@ -1,5 +1,18 @@
 #!/bin/sh -e
 
+# If no conjurrc file is found, create one with the appropriate plugins entry
+
+if [ ! -f "$CONJURRC" ]; then
+    cat <<EOF >"$CONJURRC"
+---
+account:
+plugins:
+- policy
+appliance_url:
+cert_file:
+EOF
+fi
+
 # A tool container entrypoint that tries to do the right thing whether you want
 # an interactive shell environment or run a command directly.
 #
