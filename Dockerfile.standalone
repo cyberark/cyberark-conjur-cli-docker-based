@@ -22,12 +22,14 @@ RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.s
 #---install Conjur 4 CLI---#
 WORKDIR /src
 COPY . .
-COPY .conjurrc.default /root/.conjurrc
 ENV CONJURRC=/root/.conjurrc
 RUN gem build conjur-cli.gemspec && \
     gem install conjur-cli conjur-asset-policy && \
     cd /root && \
     rm -rf /src
+RUN mkdir -p /opt/conjur
+COPY ./.conjurrc.default /root/.conjurrc
+COPY ./.conjurrc.default /opt/conjur/.conjurrc.default
 
 #---set defaults---#
 WORKDIR /root
