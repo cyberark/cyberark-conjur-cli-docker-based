@@ -97,7 +97,7 @@ describe Conjur::Command::Init do
         cert.rewind
         cert
       end
-      describe_command "init -a the-account -u https://localhost -c #{file.path}" do
+      describe_command "init -a the-account -u https://localhost -c #{cert.path}" do
         it "writes config and cert files" do
           expect(File).to receive(:open).twice
           expect(Conjur::Command::Init).to receive(:configure_cert_store).with GITHUB_CERT
