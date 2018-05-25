@@ -69,12 +69,16 @@ class Conjur::Command::Init < Conjur::Command
         puts fingerprint
 
         puts "\nPlease verify this certificate on the appliance using command:
-              openssl x509 -fingerprint -noout -in ~conjur/etc/ssl/conjur.pem\n\n"
+              openssl x509 -fingerprint -noout -in ~/conjur-#{account}.pem\n\n"
         exit_now! "You decided not to trust the certificate" unless highline.ask("Trust this certificate (yes/no): ").strip == "yes"
+
+      elsif certificate.present?
+        # If certificate was passed as a path, read out the contents of the certificate
+        certificate = File.open(certificate, 'r').read if File.readable?(certificate)
       end
-      
+
       configure_cert_store certificate
-      
+
       account = options[:account] || highline.ask("Enter your organization account name: ").to_s
 
       exit_now! "account is required" if account.blank?
@@ -110,7 +114,7 @@ class Conjur::Command::Init < Conjur::Command
       puts "Wrote configuration to #{config_file}"
     end
   end
-  
+
   def self.configure_cert_store certificate
     unless certificate.blank?
       cert_file = Tempfile.new("conjur_cert")
@@ -118,7 +122,7 @@ class Conjur::Command::Init < Conjur::Command
       OpenSSL::SSL::SSLContext::DEFAULT_CERT_STORE.add_file cert_file.path
     end
   end
-  
+
   def self.get_certificate connect_hostname
     include OpenSSL::SSL
     host, port = connect_hostname.split ':'

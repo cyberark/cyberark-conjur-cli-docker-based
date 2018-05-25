@@ -77,7 +77,7 @@ describe Conjur::Command::Init do
         ENV['GLI_DEBUG'] = 'true'
 
         expect(TCPSocket).to receive(:new).and_raise "can't connect"
-        
+
         expect { invoke }.to raise_error(GLI::CustomExit, /unable to retrieve certificate/i)
       end
     end
@@ -87,6 +87,22 @@ describe Conjur::Command::Init do
         expect(File).to receive(:open).twice
         expect(Conjur::Command::Init).to receive(:configure_cert_store).with "the-cert"
         invoke
+      end
+    end
+
+    context 'when certificate is a file' do
+      let(:cert) do
+        cert = TempFile.new('cert_file')
+        cert.write(GITHUB_CERT)
+        cert.rewind
+        cert
+      end
+      describe_command "init -a the-account -u https://localhost -c #{file.path}" do
+        it "writes config and cert files" do
+          expect(File).to receive(:open).twice
+          expect(Conjur::Command::Init).to receive(:configure_cert_store).with GITHUB_CERT
+          invoke
+        end
       end
     end
 
@@ -118,14 +134,14 @@ describe Conjur::Command::Init do
           }.stringify_keys)
         end
       end
-      
+
       context "default behavior" do
         describe_command "init -a the-account -u https://localhost -c the-cert" do
           before(:each) {
             allow(File).to receive(:expand_path).and_call_original
             allow(File).to receive(:expand_path).with('~/.conjurrc').and_return("#{tmpdir}/.conjurrc")
           }
-  
+
           include_examples "check config and cert files", "#{tmpdir}/.conjurrc"
           it "prints the config file location" do
             expect { invoke }.to write("Wrote configuration to #{tmpdir}/.conjurrc")
@@ -151,7 +167,7 @@ describe Conjur::Command::Init do
           include_examples "check config and cert files", file, file
         end
       end
-      
+
       context "explicit output file overrides CONJURRC" do
         describe_command "init -f #{tmpdir}/.conjurrc_2 -a the-account -u https://localhost -c the-cert" do
           ENV['CONJURRC'] = "#{tmpdir}/.conjurrc_env_2"
