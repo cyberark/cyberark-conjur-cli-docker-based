@@ -93,7 +93,7 @@ module Conjur
         apply_config
         load_plugins
         commands_from 'conjur/command'
-      rescue Exception => ex
+      rescue => ex
         stderr.puts "error: #{ex.message}"
         raise if ENV['GLI_DEBUG'] == 'true'
       end
