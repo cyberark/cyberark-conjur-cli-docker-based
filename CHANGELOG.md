@@ -1,3 +1,9 @@
+# 6.1.1
+
+* No longer displaying error stack traces by default when an exception occurs duing CLI
+  initialization (e.g when trying to open a missing conjur certificate file). Stack traces
+  can be enabled for all errors in the CLI by setting the environment variable `GLI_DEBUG=true`.
+
 # [6.1.0](https://github.com/cyberark/conjur-cli/releases/tag/v6.1.0)
 
 * Pin dependency 'conjur-api' to '~> 5.1'. This update adds authn-local support to the API. [conjur-api PR #131](https://github.com/cyberark/conjur-api-ruby/pull/131)
