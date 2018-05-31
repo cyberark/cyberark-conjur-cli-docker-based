@@ -18,11 +18,18 @@ Feature: Test the existence of a resource
   Scenario: Even foreign user can check existence of a resource 
     Given I load the policy:
     """
-    - !resource
-      kind: food
-      id: bacon
+    - &resources
+      - !resource
+        kind: food
+        id: bacon
 
     - !user alice
+
+    - !permit
+      role: !user alice
+      privileges:
+        - read
+      resources: *resources
     """
     And I login as "alice"
     And I reset the command list
