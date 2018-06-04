@@ -37,6 +37,16 @@ pipeline {
       }
     }
 
+    stage('Test 2.5') {
+      environment {
+        RUBY_VERSION = '2.5'
+      }
+      steps {
+        sh './test.sh'
+        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+    }
+
     stage('Build standalone image & push to DockerHub') {
       when {
         branch 'master'
