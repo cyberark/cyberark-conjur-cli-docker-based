@@ -2,6 +2,7 @@ require "rubygems"
 require "bundler/setup"
 require 'tempfile'
 require 'ostruct'
+require 'openssl'
 
 require "simplecov"
 SimpleCov.start
