@@ -33,6 +33,12 @@ Feature: Checking permissions on a resource
       kind: job
       id: cook
 
+    - !grant
+      role: !role
+        kind: job
+        id: cook
+      member: !user admin
+
     - !permit
       role: !role
         kind: job
