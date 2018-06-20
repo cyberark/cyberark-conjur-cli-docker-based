@@ -1,3 +1,7 @@
+# 6.2.0
+
+* Add `ldap-sync` subcommand.
+
 # 6.1.1
 
 * No longer displaying error stack traces by default when an exception occurs duing CLI
