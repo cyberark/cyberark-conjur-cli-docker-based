@@ -56,29 +56,7 @@ pipeline {
         expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
         branch "master"
         expression {
-          def exitCode = sh returnStatus: true, script: ''' set +x
-            echo "Determining if publishing is requested..."
-
-            VERSION=`cat lib/conjur/version.rb | grep \'VERSION\\s*=\' | sed -e "s/.*\'\\(.*\\)\'.*/\\1/"`
-            echo Declared version: $VERSION
-
-            # Jenkins git plugin is broken and always fetches with `--no-tags`
-            # (or `--tags`, neither of which is what you want), so tags end up
-            # not being fetched. Try to fix that.
-            # (Unfortunately this fetches all remote heads, so we may have to find
-            # another solution for bigger repos.)
-            git fetch -q
-
-            # note when tag not found git rev-parse will just print its name
-            # TAG=`git rev-parse tags/v$VERSION 2>/dev/null || :`
-            TAG=`git rev-list -n 1 "v$VERSION" 2>/dev/null || :`
-            echo Tag v$VERSION: $TAG
-
-            HEAD=`git rev-parse HEAD`
-            echo HEAD: $HEAD
-
-            test "$HEAD" = "$TAG"
-          '''
+          def exitCode = sh returnStatus: true, script: './needs-publishing'
           return exitCode == 0
         }
       }

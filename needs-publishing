@@ -1,0 +1,28 @@
+#!/bin/bash -ex
+
+echo "Determining if publishing is requested..."
+
+VERSION=$(ruby -I lib -r conjur/version -e 'puts Conjur::VERSION')
+echo Declared version: $VERSION
+
+if curl -s https://rubygems.org/api/v1/versions/conjur-cli.json | jq -e ".[] | select(.number == \"$VERSION\")" >/dev/null; then
+   echo "Found $VERSION on rubygems, not republishing"
+   exit 1
+fi
+   
+# Jenkins git plugin is broken and always fetches with `--no-tags`
+# (or `--tags`, neither of which is what you want), so tags end up
+# not being fetched. Try to fix that.
+# (Unfortunately this fetches all remote heads, so we may have to find
+# another solution for bigger repos.)
+git fetch -q
+
+# note when tag not found git rev-parse will just print its name
+# TAG=`git rev-parse tags/v$VERSION 2>/dev/null || :`
+TAG=`git rev-list -n 1 "v$VERSION" 2>/dev/null || :`
+echo Tag v$VERSION: $TAG
+
+HEAD=`git rev-parse HEAD`
+echo HEAD: $HEAD
+
+test "$HEAD" = "$TAG"
