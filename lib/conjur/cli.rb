@@ -25,9 +25,7 @@ require 'active_support/deprecation'
 require 'xdg'
 require 'fileutils'
 
-# this makes mime/types gem load much faster by lazy loading
-# mime types and caching them in binary form
-ENV['RUBY_MIME_TYPES_LAZY_LOAD'] ||= 'true'
+# this makes mime/types gem load much faster by caching them in binary form
 ENV['RUBY_MIME_TYPES_CACHE'] ||= (
   XDG['CACHE'].to_path.tap(&FileUtils.method(:mkdir_p)) + 'ruby-mime-types.cache'
 ).to_s
