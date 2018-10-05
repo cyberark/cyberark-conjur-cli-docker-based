@@ -4,17 +4,6 @@ Aruba.configure do |config|
   config.io_wait_timeout = 2
 end
 
-Transform /\$conjur_url/ do |statement|
-  statement.gsub "$conjur_url", Conjur.configuration.appliance_url
-end
-
-Transform /\%\{\w+\}/ do |statement|
-  JsonSpec.memory.each do |k,v|
-    statement = statement.gsub("%{#{k}}", v)
-  end
-  statement
-end
-
 Before('@conjurapi-log') do
   set_env 'CONJURAPI_LOG', 'stderr'
 end
