@@ -31,7 +31,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'aruba', '~> 0.12'
   gem.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
-  gem.add_development_dependency 'ci_reporter_cucumber', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 10.0'
   gem.add_development_dependency 'io-grab', '~> 0.0'
   gem.add_development_dependency 'json_spec'

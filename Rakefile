@@ -3,7 +3,6 @@ require "bundler/gem_tasks"
 
 begin
   require 'ci/reporter/rake/rspec'
-  require 'ci/reporter/rake/cucumber'
   require 'cucumber'
   require 'cucumber/rake/task'
   require 'rspec/core/rake_task'
