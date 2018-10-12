@@ -18,5 +18,5 @@ Feature: Host factory tokens
   Scenario: create a host using a token
     When I successfully run `conjur hostfactory tokens create myapp`
     And I keep the JSON response at "0/token" as "TOKEN"
-    Then I successfully run `conjur hostfactory hosts create %{TOKEN} host-01`
+    Then I use it to successfully run `conjur hostfactory hosts create %{TOKEN} host-01`
     And the JSON should have "api_key"
