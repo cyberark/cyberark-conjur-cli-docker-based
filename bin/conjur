@@ -22,5 +22,7 @@
 
 require 'active_support'
 require 'conjur/cli'
-
+if ENV['RAILS_ENV'] == 'development'
+  require 'pry'
+end
 exit Conjur::CLI.run(ARGV)
