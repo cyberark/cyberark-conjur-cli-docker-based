@@ -6,9 +6,9 @@ export COMPOSE_PROJECT_NAME=clirubydev
 docker-compose build
 
 if [ ! -f data_key ]; then
-	echo "Generating data key"
-	docker-compose run --no-deps --rm conjur data-key generate > data_key
-	docker-compose run --no-deps --rm conjurctl role retrieve-key cucumber:user:admin
+  echo "Generating data key"
+  docker-compose pull
+  docker-compose run --no-deps --rm conjur data-key generate > data_key
 fi
 
 export CONJUR_DATA_KEY="$(cat data_key)"
