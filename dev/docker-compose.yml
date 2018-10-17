@@ -17,6 +17,7 @@ services:
     entrypoint: sleep
     command: infinity
     environment:
+      RAILS_ENV: development
       CONJUR_APPLIANCE_URL: http://conjur
       CONJUR_ACCOUNT: cucumber
     working_dir: /src/conjur-cli
