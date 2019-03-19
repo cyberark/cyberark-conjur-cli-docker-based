@@ -6,6 +6,10 @@ pipeline {
     buildDiscarder(logRotator(daysToKeepStr: '30'))
   }
 
+  triggers {
+    cron(getDailyCronString())
+  }
+
   stages {
     stage('Test 2.2') {
       environment {
