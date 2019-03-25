@@ -11,16 +11,6 @@ pipeline {
   }
 
   stages {
-    stage('Test 2.3') {
-      environment {
-        RUBY_VERSION = '2.3'
-      }
-      steps {
-        sh './test.sh'
-        junit 'spec/reports/*.xml, features/reports/*.xml'
-      }
-    }
-
     stage('Test 2.4') {
       environment {
         RUBY_VERSION = '2.4'
