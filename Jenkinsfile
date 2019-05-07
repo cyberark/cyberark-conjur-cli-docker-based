@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 pipeline {
   agent { label 'executor-v2' }
 
@@ -41,12 +43,18 @@ pipeline {
       }
     }
 
-    stage('Build standalone image & push to DockerHub') {
+    stage('Build standalone image') {
+      steps {
+        sh './build-standalone'
+      }
+    }
+
+    stage('Push standalone image to DockerHub') {
       when {
         branch 'master'
       }
+
       steps {
-        sh './build-standalone'
         sh './push-image'
       }
     }
@@ -64,6 +72,7 @@ pipeline {
           return exitCode == 0
         }
       }
+
       steps {
         // Clean up first
         sh 'docker run -i --rm -v $PWD:/src -w /src alpine/git clean -fxd'
