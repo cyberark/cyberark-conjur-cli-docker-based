@@ -6,7 +6,7 @@
 #
 # Entrypoint is bash, with `conjur` command available.
 
-FROM ruby:2.4.1
+FROM ruby:2.4.6
 
 #---some useful tools for interactive usage---#
 RUN apt-get update && \
