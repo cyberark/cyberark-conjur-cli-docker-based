@@ -1,3 +1,7 @@
+# 6.2.1
+
+* Pin to xdg gem v2.2.3 due to a [crashing CLI](https://github.com/cyberark/conjur-cli/issues/243).
+
 # 6.2.0
 
 * Add `ldap-sync` subcommand.
