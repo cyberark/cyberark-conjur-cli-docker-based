@@ -24,7 +24,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'highline', '~> 1.7'
   gem.add_dependency 'netrc', '~> 0.10'
   gem.add_dependency 'deep_merge', '~> 1.0'
-  gem.add_dependency 'xdg', '~> 2.2'
+  gem.add_dependency 'xdg', '= 2.2.3'
   gem.add_dependency 'table_print', '~> 1.5'
 
   gem.add_development_dependency 'rspec', '~> 3.0'
