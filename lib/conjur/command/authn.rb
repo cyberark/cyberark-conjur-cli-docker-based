@@ -102,5 +102,18 @@ login again using the new user credentials. To erase credentials, use the 'authn
         end
       end
     end
+
+    authn.desc "Prints out the current Conjur certificate authority (CA) certificate chain"
+    authn.command :ca do |c|
+      c.action do
+        if Conjur.configuration.ssl_certificate
+          puts Conjur.configuration.ssl_certificate
+        elsif Conjur.configuration.cert_file
+          puts IO.read(Conjur.configuration.cert_file)
+        else
+          exit_now! 'No certificate configured.', -1
+        end
+      end
+    end
   end
 end
