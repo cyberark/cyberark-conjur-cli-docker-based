@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -eux
+
+DIR="coverage"
+BIN="cc-test-reporter"
+REPORT="${DIR}/.resultset.json"
+
+if [[ ! -e ${REPORT} ]]; then
+    echo "SimpleCov report (${REPORT}) not found"
+    ls -laR ${DIR}
+    exit 1
+fi
+
+if [[ ! -x ${BIN} ]]; then
+    echo "cc-test-reporter binary not found, not reporting coverage data to code climate"
+    ls -laR ${DIR}
+    # report is present but reporter binary is not, definitely a bug, exit error.
+    exit 1
+fi
+
+# Simplecov excludes files not within the current repo, it also needs to
+# be able to read all the files referenced within the report. As the reports
+# are generated in containers, the absolute paths contained in the report
+# are not valid outside that container. This sed fixes the paths
+# So they are correct relative to the Jenkins workspace.
+sed -i -E "s+/src+${WORKSPACE}+g" "${REPORT}"
+
+echo "Coverage reports prepared, submitting to CodeClimate."
+# vars GIT_COMMIT, GIT_BRANCH & TRID are set by ccCoverage.dockerPrep
+
+./${BIN} after-build \
+    --coverage-input-type "simplecov"\
+    --id "${TRID}"
+
+echo "Successfully Reported Coverage Data"
