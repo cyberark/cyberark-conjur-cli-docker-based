@@ -4,8 +4,11 @@ require 'tempfile'
 require 'ostruct'
 
 require "simplecov"
-SimpleCov.start
-  
+
+SimpleCov.start do
+  command_name "#{ENV['RUBY_VERSION']}"
+end
+
 def post_response(id, attributes = {})
   attributes[:id] = id
   

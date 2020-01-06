@@ -13,6 +13,15 @@ pipeline {
   }
 
   stages {
+    stage('Prepare For CodeClimate Coverage Report Submission'){
+      steps {
+        script {
+          ccCoverage.dockerPrep()
+          sh 'mkdir -p coverage'
+        }
+      }
+    }
+
     stage('Test 2.4') {
       environment {
         RUBY_VERSION = '2.4'
@@ -40,6 +49,14 @@ pipeline {
       steps {
         sh './test.sh'
         junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+    }
+
+    stage('Submit Coverage Report'){
+      steps{
+        sh 'ci/submit-coverage'
+        archiveArtifacts artifacts: "coverage/.resultset.json", fingerprint: false
+        publishHTML([reportDir: 'coverage', reportFiles: 'index.html', reportName: 'Coverage Report', reportTitles: '', allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true])
       }
     }
 

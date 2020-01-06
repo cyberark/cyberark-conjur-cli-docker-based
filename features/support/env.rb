@@ -6,7 +6,9 @@ require 'aruba/cucumber'
 require 'json_spec/cucumber'
 require 'simplecov'
 
-SimpleCov.start
+SimpleCov.start do
+  command_name "#{ENV['RUBY_VERSION']}"
+end
 
 ENV['CONJUR_APPLIANCE_URL'] ||= 'http://localhost/api/v6'
 ENV['CONJUR_ACCOUNT'] ||= 'cucumber'
