@@ -3,17 +3,9 @@
 TAG="cyberark/conjur-cli:latest"
 
 ENV_VARS=(
-  "BUNDLE_APP_CONFIG=/usr/local/bundle"
-  "BUNDLE_PATH=/usr/local/bundle"
-  "BUNDLE_SILENCE_ROOT_WARNING=1"
   "CONJUR_MAJOR_VERSION=5"
   "CONJUR_VERSION=5"
-  "GEM_HOME=/usr/local/bundle"
-  "PATH=/usr/local/lib/summon:/usr/local/bundle/bin:/usr/local/bundle/gems/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-  "RUBY_DOWNLOAD_SHA256=25da31b9815bfa9bba9f9b793c055a40a35c43c6adfb1fdbd81a09099f9b529c"
-  "RUBY_MAJOR=2.4"
-  "RUBY_VERSION=2.4.6"
-  "RUBYGEMS_VERSION=3.0.3"
+  "PATH=/usr/local/lib/summon:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 )
 
 # Flatten resulting image.
