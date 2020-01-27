@@ -5,18 +5,26 @@
 # then installs the CLI system-wide.
 #
 # Entrypoint is bash, with `conjur` command available.
+FROM ubuntu:latest
 
-FROM ruby:2.4.6
+ENV CONJUR_MAJOR_VERSION=5 \
+    CONJUR_VERSION=5 \
+    DEBIAN_FRONTEND=noninteractive
 
-#---some useful tools for interactive usage---#
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      jq curl vim nano sudo openssh-client
-# as per https://hub.docker.com/r/conjurinc/cli5/~/dockerfile/
+      build-essential \
+      curl \
+      git \
+      nano \
+      openssh-client \
+      ruby2.5 ruby2.5-dev \
+      sudo \
+      vim \
+      tzdata && \
+    apt-get clean
 
-#---install summon and summon-conjur---#
-ENV CONJUR_MAJOR_VERSION=5
-ENV CONJUR_VERSION=5
+# Install `summon` and `summon-conjur`
 RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
       | env TMPDIR=$(mktemp -d) bash && \
     curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
@@ -25,20 +33,21 @@ RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.s
 # and    https://github.com/cyberark/summon-conjur#install
 ENV PATH="/usr/local/lib/summon:${PATH}"
 
-#---install Conjur 5 CLI---#
-# cache a reasonable version of api-ruby & deps
+# Install Conjur 5 CLI
+# Cache a reasonable version of api-ruby & deps
 RUN mkdir -p /usr/src && \
     cd /usr/src && \
-    git clone https://github.com/cyberark/api-ruby.git && \
+    git clone --depth 1 https://github.com/cyberark/api-ruby.git && \
     cd api-ruby && \
+    gem install bundler && \
     rake install
 
 COPY standalone.entrypoint /bin/entry
 
-# update API and install everything
+# Update API and install everything
 COPY . /usr/src/cli-ruby
 
-# only reinstall API if changed
+# Only reinstall API if changed
 RUN cd /usr/src/api-ruby && git fetch && \
     if [ $(git rev-parse HEAD origin/master | uniq | wc -l) -gt 1 ]; then \
       git reset --hard origin/master && rake install ; \

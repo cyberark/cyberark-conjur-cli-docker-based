@@ -1,6 +1,44 @@
 #!/bin/bash -e
 
-# build the cli standalone container image
+TAG="cyberark/conjur-cli:latest"
+
+ENV_VARS=(
+  "CONJUR_MAJOR_VERSION=5"
+  "CONJUR_VERSION=5"
+  "PATH=/usr/local/lib/summon:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+)
+
+# Flatten resulting image.
+function flatten() {
+  local image="$1"
+  echo "Flattening image '$image'..."
+
+  # Since `--squash` is still experimental, we have to flatten the image
+  # by exporting and importing a container based on the source image. By
+  # doing this though, we lose a lot of the Dockerfile variables that are
+  # required for running the image (ENV, EXPOSE, WORKDIR, etc) so we
+  # manually rebuild them.
+  # See here for more details: https://github.com/moby/moby/issues/8334
+  local container=`docker create $image`
+
+  env_var_params=()
+  for env_var in ${ENV_VARS[@]}; do
+    env_var_params+=("--change")
+    env_var_params+=("ENV $env_var")
+  done
+
+  docker export $container | docker import \
+    "${env_var_params[@]}" \
+    --change 'ENTRYPOINT ["/bin/entry"]' \
+    - $image
+  docker rm $container
+}
+
+# Build the cli standalone container image
+echo "Building image $TAG"
+
 docker build . \
        -f Dockerfile.standalone \
-       -t cyberark/conjur-cli
+       -t "$TAG"
+
+flatten "$TAG"
