@@ -26,9 +26,15 @@ pipeline {
       environment {
         RUBY_VERSION = '2.4'
       }
+
       steps {
         sh './test.sh'
-        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+
+      post {
+        always {
+          junit 'spec/reports/*.xml, features/reports/*.xml'
+        }
       }
     }
 
@@ -36,9 +42,15 @@ pipeline {
       environment {
         RUBY_VERSION = '2.5'
       }
+
       steps {
         sh './test.sh'
-        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+
+      post {
+        always {
+          junit 'spec/reports/*.xml, features/reports/*.xml'
+        }
       }
     }
 
@@ -46,17 +58,28 @@ pipeline {
       environment {
         RUBY_VERSION = '2.6'
       }
+
       steps {
         sh './test.sh'
-        junit 'spec/reports/*.xml, features/reports/*.xml'
+      }
+
+      post {
+        always {
+          junit 'spec/reports/*.xml, features/reports/*.xml'
+        }
       }
     }
 
     stage('Submit Coverage Report'){
       steps{
         sh 'ci/submit-coverage'
-        archiveArtifacts artifacts: "coverage/.resultset.json", fingerprint: false
         publishHTML([reportDir: 'coverage', reportFiles: 'index.html', reportName: 'Coverage Report', reportTitles: '', allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true])
+      }
+
+      post {
+        always {
+          archiveArtifacts artifacts: "coverage/.resultset.json", fingerprint: false
+        }
       }
     }
 
