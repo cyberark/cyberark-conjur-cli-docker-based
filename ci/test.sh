@@ -11,7 +11,7 @@ unset CONJUR_AUTHN_LOGIN
 
 bundle exec rake jenkins || true
 
-env CONJUR_AUTHN_LOGIN=admin CONJUR_AUTHN_API_KEY=secret bundle exec cucumber -r acceptance-features/support \
+env CONJUR_AUTHN_LOGIN=admin CONJUR_AUTHN_API_KEY='ADmin123!!!!' bundle exec cucumber -r acceptance-features/support \
 	-r acceptance-features/step_definitions \
 	-f pretty \
 	-f junit --out acceptance-features/reports \
