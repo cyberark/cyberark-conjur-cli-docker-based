@@ -16,6 +16,7 @@ RUN apt-get update && \
       build-essential \
       curl \
       git \
+      jq \
       nano \
       openssh-client \
       ruby2.5 ruby2.5-dev \
