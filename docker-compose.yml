@@ -6,7 +6,7 @@ services:
   conjur:
     image: cyberark/conjur
     command: server -a cucumber
-    depends_on: 
+    depends_on:
       - pg
     environment:
       - CONJUR_DATA_KEY
