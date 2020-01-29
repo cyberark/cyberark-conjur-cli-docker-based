@@ -10,14 +10,14 @@ describe Conjur::Command::Authn do
         describe_command "#{cmd}" do
           it "prompts for username and password and logs in the user" do
             expect(Conjur::Authn).to receive(:ask_for_credentials).with({}).and_return [ "the-user", "the-api-key" ]
-  
+
             expect { invoke }.to write("Logged in")
           end
         end
         describe_command "#{cmd} -u the-user" do
           it "prompts for password and logs in the user" do
             expect(Conjur::Authn).to receive(:ask_for_credentials).with({username: 'the-user'}).and_return [ "the-user", "the-api-key" ]
-  
+
             expect { invoke }.to write("Logged in")
           end
         end

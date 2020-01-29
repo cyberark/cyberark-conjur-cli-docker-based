@@ -37,11 +37,11 @@ describe Conjur::Authn do
       allow(ENV).to receive(:[]).with("CONJUR_AUTHN_LOGIN").and_return "the-login"
       allow(ENV).to receive(:[]).with("CONJUR_AUTHN_API_KEY").and_return "the-api-key"
     end
-    
+
     context "login and API key" do
       it "are used to authn" do
         expect(Conjur::Authn.get_credentials).to eq([ "the-login", "the-api-key" ])
-          
+
         expect(api.username).to eq('the-login')
         expect(api.api_key).to eq('the-api-key')
       end
@@ -94,7 +94,7 @@ describe Conjur::Authn do
       before do
         allow(Conjur::Config).to receive(:[]).with(:netrc_path).and_return path
       end
-      
+
       context "with specified netrc_path" do
         let(:path) { "/a/dummy/netrc/path" }
         it "consults Conjur::Config for netrc_path" do
@@ -102,7 +102,7 @@ describe Conjur::Authn do
           expect(Conjur::Authn.netrc).to eq(netrc)
         end
       end
-  
+
       context "without specified netrc_path" do
         let(:path) { nil }
         it "uses default netrc path" do
