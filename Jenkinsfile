@@ -83,6 +83,14 @@ pipeline {
       }
     }
 
+    stage('Validate') {
+      parallel {
+        stage('Changelog') {
+          steps { sh './bin/parse-changelog.sh' }
+        }
+      }
+    }
+
     stage('Build standalone image') {
       steps {
         sh './build-standalone'
