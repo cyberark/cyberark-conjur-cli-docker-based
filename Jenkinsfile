@@ -13,7 +13,11 @@ pipeline {
   }
 
   stages {
-    stage('Prepare For CodeClimate Coverage Report Submission'){
+    stage('Validate Changelog') {
+      steps { sh './bin/parse-changelog.sh' }
+    }
+
+    stage('Prepare CC Report Dir'){
       steps {
         script {
           ccCoverage.dockerPrep()
@@ -79,14 +83,6 @@ pipeline {
       post {
         always {
           archiveArtifacts artifacts: "coverage/.resultset.json", fingerprint: false
-        }
-      }
-    }
-
-    stage('Validate') {
-      parallel {
-        stage('Changelog') {
-          steps { sh './bin/parse-changelog.sh' }
         }
       }
     }
