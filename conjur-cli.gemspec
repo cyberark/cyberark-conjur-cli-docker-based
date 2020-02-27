@@ -18,6 +18,9 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Conjur::VERSION
 
+  # Filter out development only executables
+  gem.executables -= %w{parse-changelog.sh}
+
   gem.add_dependency 'activesupport', '>= 4.2', '< 6'
   gem.add_dependency 'conjur-api', '~> 5.3'
   gem.add_dependency 'deep_merge', '~> 1.0'
