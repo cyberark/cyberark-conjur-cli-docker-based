@@ -59,67 +59,12 @@ drwxr-xr-x  2 you  staff    68 Mar 29 14:16 .cache
 ```
 *Security notice:* the file `.netrc`, created or updated by `conjur authn login`, contains a user identity credential that can be used to access the Conjur API. You should remove it after use or otherwise secure it like you would another netrc file.
 
-## Development
-
-Create a sandbox environment in Docker using the `./dev` folder:
-
-```sh-session
-$ cd dev
-dev $ ./start.sh
-```
-
-This will drop you into a bash shell in a container called `cli`.
-
-The sandbox also includes a Postgres container and Conjur server container. The
-environment is already setup to connect the CLI to the server:
-
-* **CONJUR_APPLIANCE_URL** `http://conjur`
-* **CONJUR_ACCOUNT** `cucumber`
-
-To login to conjur, type the following and you'll be prompted for a password:
-
-```sh-session
-root@2b5f618dfdcb:/# conjur authn login admin
-Please enter admin's password (it will not be echoed):
-```
-
-The required password is the API key at the end of the output from the
-`start.sh` script.  It looks like this:
-
-```
-=============== LOGIN WITH THESE CREDENTIALS ===============
-
-username: admin
-api key : 9j113d35wag023rq7tnv201rsym1jg4pev1t1nb4419767ms1cnq00n
-
-============================================================
-```
-
-At this point, you can use any CLI command you like.
-
-### Running Cucumber
-
-To install dev packages, run `bundle` from within the container:
-
-```sh-session
-root@2b5f618dfdcb:/# cd /usr/src/cli-ruby/
-root@2b5f618dfdcb:/usr/src/cli-ruby# bundle
-```
-
-Then you can run the cucumber tests:
-
-```sh-session
-root@2b5f618dfdcb:/usr/src/cli-ruby# cucumber
-...
-```
-
 ## Contributing
 
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+We welcome contributions of all kinds to this repository. For instructions on how to get started and descriptions of our development workflows, please see our [contributing
+guide][contrib].
+
+[contrib]: https://github.com/cyberark/conjur/blob/master/CONTRIBUTING.md
 
 ## License
 
