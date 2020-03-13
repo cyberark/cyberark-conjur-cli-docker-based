@@ -15,7 +15,7 @@ From here your pull request will be reviewed and once you've responded to all
 feedback it will be merged into the project. Congratulations, you're a
 contributor!
 
-# Development
+## Development
 
 Create a sandbox environment in Docker using the `./dev` folder:
 
