@@ -1,5 +1,5 @@
 Then(/^I(?: can)? type and confirm a new password/) do
-  @password = SecureRandom.hex(12)
+  @password = "SEcret12!!!!"
   step %Q(I type "#{@password}")
   step %Q(I type "#{@password}")
   step "the exit status should be 0"
