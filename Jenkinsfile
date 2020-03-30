@@ -93,6 +93,12 @@ pipeline {
       }
     }
 
+    stage('Scan Docker image') {
+      steps {
+        scanAndReport("cyberark/conjur-cli:latest", "NONE")
+      }
+    }
+
     stage('Push standalone image to DockerHub') {
       when {
         branch 'master'
