@@ -68,3 +68,14 @@ Then you can run the cucumber tests:
 root@2b5f618dfdcb:/usr/src/cli-ruby# cucumber
 ...
 ```
+
+## Releasing
+
+To create a new release, follow the instructions in our general release
+guidelines [here](https://github.com/cyberark/community/blob/master/Conjur/CONTRIBUTING.md#release-process).
+
+Note: this project documents the version in two places:
+- The [VERSION](./VERSION) file
+- In [`lib/conjur/version.rb`](./lib/conjur/version.rb)
+
+Both version files must be updated when this project is preparing for a release.
