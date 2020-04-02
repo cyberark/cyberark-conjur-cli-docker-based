@@ -1,28 +1,38 @@
-#!/bin/bash -eu
+#!/bin/bash
 
-# Push the 'cli:5' image to Dockerhub when on the 'master' branch
+set -e
 
-cd "$(git rev-parse --show-toplevel)"
+readonly REGISTRY="cyberark"
+readonly VERSION="$(cat VERSION)"
+readonly VERSION_TAG="5-${VERSION}"
+readonly image_name="conjur-cli"
+readonly full_image_name="${REGISTRY}/${image_name}:latest"
 
-IMAGE='cyberark/conjur-cli'
+readonly TAGS=(
+  "5"
+  "5-latest"
+  "$VERSION_TAG"
+)
 
-function tag_and_push() {
-    local image="$1"
-    local tag="$2"
-    local description="$3"
+# fetching tags is required for git_description to work
+git fetch --tags
+git_description=$(git describe)
 
-    echo "TAG = $tag, $description"
+# if it’s not a tagged commit, VERSION will have extra junk (i.e. -g666c4b2), so we won’t publish that commit
+# only when tag matches the VERSION, push VERSION and latest releases
+# and x and x.y releases
+#Ex: v5-6.2.1
+if [ "$git_description" = "v${VERSION_TAG}" ]; then
+  echo "Revision $git_description matches version $VERSION exactly. Pushing to Dockerhub..."
 
-    docker tag "$image" "$image:$tag"
-    docker push "$image:$tag"
-}
+  for tag in "${TAGS[@]}"; do
+    echo "Tagging and pushing $REGISTRY/$image_name:$tag"
 
-version_tag="5-$(cat VERSION)"
+    docker tag $full_image_name "$REGISTRY/$image_name:$tag"
+    docker push "$REGISTRY/$image_name:$tag"
+  done
 
-tag_and_push $IMAGE '5'        'latest image'
-tag_and_push $IMAGE '5-latest'   'same as "5"'
-tag_and_push $IMAGE $version_tag 'version-specific image'
-
-# push to legacy `conjurinc/cli5` tag
-docker tag "$IMAGE" conjurinc/cli5:latest
-docker push conjurinc/cli5:latest
+  # push to legacy `conjurinc/cli5` tag
+  docker tag $full_image_name conjurinc/cli5:latest
+  docker push conjurinc/cli5:latest
+fi
