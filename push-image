@@ -22,7 +22,7 @@ git_description=$(git describe)
 # only when tag matches the VERSION, push VERSION and latest releases
 # and x and x.y releases
 #Ex: v5-6.2.1
-if [ "$git_description" = "v${VERSION_TAG}" ]; then
+if [ "$git_description" = "v${VERSION}" ]; then
   echo "Revision $git_description matches version $VERSION exactly. Pushing to Dockerhub..."
 
   for tag in "${TAGS[@]}"; do
