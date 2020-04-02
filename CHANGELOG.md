@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.2.2] - 2020-04-02
+### Changed
+- Docker image updated to flatten to a single layer and reduce the image
+  size ([cyberark/conjur-cli#253](https://github.com/cyberark/conjur-cli/issues/253))
+
+### Fixed
+- CLI image is only updated in DockerHub when the project has a new tag
+  ([cyberark/conjur-cli#270](https://github.com/cyberark/conjur-cli/issues/270))
+
+### Security
+- Update rake for CVE-2020-8130 ([cyberark/conjur-cli#263](https://github.com/cyberark/conjur-cli/issues/263))
+
 ## [6.2.1] - 2019-05-22
 ### Added
 - Pin to xdg gem v2.2.3 due to a [crashing CLI](https://github.com/cyberark/conjur-cli/issues/243).
@@ -36,7 +48,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **Codebase forked: for changes to the 5.x (API [v4](https://github.com/cyberark/conjur-cli/tree/v4)) series, see
   [CHANGELOG in `v4` branch][v4-changelog](https://github.com/cyberark/conjur-cli/blob/v4/CHANGELOG.md)**
 
-[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.1...HEAD
+[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.2...HEAD
+[6.2.2]: https://github.com/cyberark/conjur-cli/compare/v6.2.1...v6.2.2
 [6.2.1]: https://github.com/cyberark/conjur-cli/compare/v6.2.0...v6.2.1
 [6.1.0]: https://github.com/cyberark/conjur-cli/compare/v6.0.1...v6.1.0
 [6.0.1]: https://github.com/cyberark/conjur-cli/compare/v6.0.0...v6.0.1
