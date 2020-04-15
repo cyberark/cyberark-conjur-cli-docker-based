@@ -94,8 +94,17 @@ pipeline {
     }
 
     stage('Scan Docker image') {
-      steps {
-        scanAndReport("cyberark/conjur-cli:latest", "NONE")
+      parallel {
+        stage('Scan Docker image for fixable vulns') {
+          steps {
+            scanAndReport("cyberark/conjur-cli:latest", "NONE", false)
+          }
+        }
+        stage('Scan Docker image for total vulns') {
+          steps {
+            scanAndReport("cyberark/conjur-cli:latest", "NONE", true)
+          }
+        }
       }
     }
 
