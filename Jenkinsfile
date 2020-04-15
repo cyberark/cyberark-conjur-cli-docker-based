@@ -97,7 +97,7 @@ pipeline {
       parallel {
         stage('Scan Docker image for fixable vulns') {
           steps {
-            scanAndReport("cyberark/conjur-cli:latest", "NONE", false)
+            scanAndReport("cyberark/conjur-cli:latest", "HIGH", false)
           }
         }
         stage('Scan Docker image for total vulns') {
