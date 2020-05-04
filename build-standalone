@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-TAG="cyberark/conjur-cli:latest"
+IMAGE="cyberark/conjur-cli:latest"
 
 ENV_VARS=(
   "CONJUR_MAJOR_VERSION=5"
@@ -9,7 +9,7 @@ ENV_VARS=(
 )
 
 # Flatten resulting image.
-function flatten() {
+flatten() {
   local image="$1"
   echo "Flattening image '$image'..."
 
@@ -19,26 +19,27 @@ function flatten() {
   # required for running the image (ENV, EXPOSE, WORKDIR, etc) so we
   # manually rebuild them.
   # See here for more details: https://github.com/moby/moby/issues/8334
-  local container=`docker create $image`
+  local container
+  container=$(docker create "$image")
 
   env_var_params=()
-  for env_var in ${ENV_VARS[@]}; do
+  for env_var in "${ENV_VARS[@]}"; do
     env_var_params+=("--change")
     env_var_params+=("ENV $env_var")
   done
 
-  docker export $container | docker import \
+  docker export "$container" | docker import \
     "${env_var_params[@]}" \
     --change 'ENTRYPOINT ["/bin/entry"]' \
-    - $image
-  docker rm $container
+    - "$image"
+  docker rm "$container"
 }
 
 # Build the cli standalone container image
-echo "Building image $TAG"
+echo "Building image $IMAGE"
 
 docker build . \
-       -f Dockerfile.standalone \
-       -t "$TAG"
+       --file Dockerfile.standalone \
+       --tag "$IMAGE"
 
-flatten "$TAG"
+flatten "$IMAGE"
