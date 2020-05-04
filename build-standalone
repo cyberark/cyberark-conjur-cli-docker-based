@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-TAG="cyberark/conjur-cli:latest"
+IMAGE="cyberark/conjur-cli:latest"
 
 ENV_VARS=(
   "CONJUR_MAJOR_VERSION=5"
@@ -36,10 +36,10 @@ flatten() {
 }
 
 # Build the cli standalone container image
-echo "Building image $TAG"
+echo "Building image $IMAGE"
 
 docker build . \
-       -f Dockerfile.standalone \
-       -t "$TAG"
+       --file Dockerfile.standalone \
+       --tag "$IMAGE"
 
-flatten "$TAG"
+flatten "$IMAGE"
