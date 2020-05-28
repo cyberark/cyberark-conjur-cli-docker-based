@@ -6,6 +6,13 @@ Command-line interface for Conjur.
 
 A complete reference guide is available at [conjur.org](https://www.conjur.org).
 
+## Table of Contents
+- [Quick Start](#quick-start)
+- [Using Docker](#using-docker)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Quick start
 
 ```sh-session
@@ -16,6 +23,7 @@ conjur version 6.0.0
 ```
 
 ## Using Docker
+
 [![Docker Build Status](https://img.shields.io/docker/build/conjurinc/cli5.svg)](https://hub.docker.com/r/conjurinc/cli5/)
 This software is included in the standalone cyberark/conjur-cli:5 Docker image. Docker containers are designed to be ephemeral, which means they don't store state after the container exits.
 
@@ -75,41 +83,26 @@ GLOBAL OPTIONS
 
 ### Commands
 
-[authn](#authn)       - Login and logout
+| Command                            | Description                                       |
+| ---------------------------------- | ------------------------------------------------- |
+| [authn](#conjur-authn)             | - Login and logout                                |
+| [check](#conjur-check)             | - Check for a privilege on a resource             |
+| [env](#conjur-env)                 | - Use values of Conjur variables in local context |
+| [host](#conjur-host)               | - Manage hosts                                    |
+| [hostfactory](#conjur-hostfactory) | - Manage host factories                           |
+| [init](#conjur-init)               | - Initialize the Conjur configuration             |
+| [ldap-sync](#conjur-ldap-sync)     | - LDAP sync management commands                   |
+| [list](#conjur-list)               | - List objects                                    |
+| [plugin](#conjur-plugin)           | - Manage plugins                                  |
+| [policy](#conjur-policy)           | - Manage policies                                 |
+| [pubkeys](#conjur-pubkeys)         | - Public keys service operations                  |
+| [resource](#conjur-resource)       | - Manage resources                                |
+| [role](#conjur-role)               | - Manage roles                                    |
+| [show](#conjur-show)               | - Show an object                                  |
+| [user](#conjur-user)               | - Manage users                                    |
+| [variable](#conjur-variable)       | - Manage variables                                |
 
-[check](#check)       - Check for a privilege on a resource
-
-[env](#env)         - Use values of Conjur variables in local context
-
-[help](#help)        - Shows a list of commands or help for one command
-
-[host](#host)        - Manage hosts
-
-[hostfactory](#hostfactory) - Manage host factories
-
-[init](#init)        - Initialize the Conjur configuration
-
-[ldap-sync](#ldap-sync)   - LDAP sync management commands
-
-[list](#list)        - List objects
-
-[plugin](#plugin)      - Manage plugins
-
-[policy](#policy)      - Manage policies
-
-[pubkeys](#pubkeys)     - Public keys service operations
-
-[resource](#resource)    - Manage resources
-
-[role](#role)        - Manage roles
-
-[show](#show)        - Show an object
-
-[user](#user)        - Manage users
-
-[variable](#variable)    - Manage variables
-
-#### authn
+#### `conjur authn`
 
 ```
 NAME
@@ -127,7 +120,7 @@ COMMANDS
     whoami       - Prints out the current logged in username
 ```
 
-#### check
+#### `conjur check`
 
 ```
 NAME
@@ -138,7 +131,7 @@ PRIVILEGES
    read, write, execute
 ```
 
-#### env
+#### `conjur env`
 
 ```
 NAME
@@ -174,13 +167,7 @@ Example of environment configuration:
 { local_variable_1: 'literal value', local_variable_2: !var id/of/Conjur/Variable , local_variable_3: !tmp id/of/another/Conjur/variable }
 ```
 
-#### help
-
-```
-Shows help menu
-```
-
-#### host
+#### `conjur host`
 
 ```
 NAME
@@ -195,7 +182,7 @@ COMMANDS
     rotate_api_key - Rotate a host's API key
 ```
 
-#### hostfactory
+#### `conjur hostfactory`
 
 ```
 NAME
@@ -210,7 +197,7 @@ COMMANDS
     tokens - Operations on tokens
 ```
 
-#### init
+#### `conjur init`
 
 ```
 NAME
@@ -219,7 +206,7 @@ SYNOPSIS
    conjur [global options] init [-u URL of Conjur service] [-a account name]
 ```
 
-#### ldap-sync
+#### `conjur ldap-sync`
 
 ```
 NAME
@@ -232,13 +219,13 @@ COMMANDS
     policy - Manage the policy used to sync Conjur and the LDAP server
 ```
 
-#### list
+#### `conjur list`
 
 ```
 Lists conjur objects
 ```
 
-#### plugin
+#### `conjur plugin`
 
 ```
 NAME
@@ -257,7 +244,7 @@ COMMANDS
     uninstall - Uninstall a plugin
 ```
 
-#### policy
+#### `conjur policy`
 
 ```
 NAME
@@ -272,7 +259,7 @@ COMMANDS
 --replace – replaces a policy
 ```
 
-#### pubkeys
+#### `conjur pubkeys`
 
 ```
 NAME
@@ -281,7 +268,7 @@ SYNOPSIS
    conjur [global options] pubkeys [USER]
 ```
 
-#### resource
+#### `conjur resource`
 
 ```
 NAME
@@ -296,7 +283,7 @@ COMMANDS
     permitted_roles - List roles with a specified privilege on the resource
 ```
 
-#### role
+#### `conjur role`
 
 ```
 NAME
@@ -315,7 +302,7 @@ COMMANDS
                   recursively expanded.
 ```
 
-#### show
+#### `conjur show`
 
 ```
 NAME
@@ -324,7 +311,7 @@ SYNOPSIS
    conjur show [object]
 ```
 
-#### user
+#### `conjur user`
 
 ```
 NAME
@@ -339,7 +326,7 @@ COMMANDS
     update_password - Update the password of the logged-in user
 ```
 
-#### variable
+#### `conjur variable`
 
 ```
 NAME
