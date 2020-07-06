@@ -7,13 +7,17 @@ Command-line interface for Conjur.
 A complete reference guide is available at [conjur.org](https://www.conjur.org).
 
 ## Table of Contents
-- [Quick Start](#quick-start)
+- [Getting Started](#getting-started)
+    - [Quick Start](#quick-start)
+    - [Using This Project With Conjur OSS](#Using-conjur-cli-with-Conjur-OSS)
 - [Using Docker](#using-docker)
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Quick start
+## Getting Started 
+
+### Quick start
 
 ```sh-session
 $ gem install conjur-cli
@@ -21,6 +25,17 @@ $ gem install conjur-cli
 $ conjur -v
 conjur version 6.0.0
 ```
+
+### Using conjur-cli with Conjur OSS 
+
+Are you using this project with [Conjur OSS](https://github.com/cyberark/conjur)? Then we 
+**strongly** recommend choosing the version of this project to use from the latest [Conjur OSS 
+suite release](https://docs.conjur.org/Latest/en/Content/Overview/Conjur-OSS-Suite-Overview.html). 
+Conjur maintainers perform additional testing on the suite release versions to ensure 
+compatibility. When possible, upgrade your Conjur version to match the 
+[latest suite release](https://docs.conjur.org/Latest/en/Content/ReleaseNotes/ConjurOSS-suite-RN.htm); 
+when using integrations, choose the latest suite release that matches your Conjur version. For any 
+questions, please contact us on [Discourse](https://discuss.cyberarkcommons.org/c/conjur/5).
 
 ## Using Docker
 
