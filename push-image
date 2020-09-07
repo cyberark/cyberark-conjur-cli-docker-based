@@ -3,6 +3,7 @@
 set -e
 
 readonly REGISTRY="cyberark"
+readonly INTERNAL_REGISTRY="registry2.itci.conjur.net"
 readonly VERSION="$(cat VERSION)"
 readonly VERSION_TAG="5-${VERSION}"
 readonly image_name="conjur-cli"
@@ -22,17 +23,24 @@ git_description=$(git describe)
 # only when tag matches the VERSION, push VERSION and latest releases
 # and x and x.y releases
 #Ex: v5-6.2.1
-if [ "$git_description" = "v${VERSION}" ]; then
-  echo "Revision $git_description matches version $VERSION exactly. Pushing to Dockerhub..."
+if [ "${git_description}" = "v${VERSION}" ]; then
+  echo "Revision ${git_description} matches version ${VERSION} exactly. Pushing to Dockerhub..."
 
   for tag in "${TAGS[@]}"; do
-    echo "Tagging and pushing $REGISTRY/$image_name:$tag"
+    echo "Tagging and pushing ${REGISTRY}/${image_name}:${tag}"
 
-    docker tag $full_image_name "$REGISTRY/$image_name:$tag"
-    docker push "$REGISTRY/$image_name:$tag"
+    # push to dockerhub
+    docker tag "${full_image_name}" "${REGISTRY}/${image_name}:${tag}"
+    docker push "${REGISTRY}/${image_name}:${tag}"
+
+    # push to internal registry
+    # necessary because some cyberark teams/networks can't pull from dockerhub
+    docker tag "${full_image_name}" "${INTERNAL_REGISTRY}/${image_name}:${tag}"
+    docker push "${INTERNAL_REGISTRY}/${image_name}:${tag}"
+
   done
 
   # push to legacy `conjurinc/cli5` tag
-  docker tag $full_image_name conjurinc/cli5:latest
+  docker tag "${full_image_name}" conjurinc/cli5:latest
   docker push conjurinc/cli5:latest
 fi
