@@ -29,7 +29,13 @@ end
 shared_context "when logged in", logged_in: true do
   include_context "with mock authn"
   before do
-    allow(api).to receive(:credentials) { {} }
+    allow(api).to receive(:credentials) do
+      {
+        :username => 'dknuth',
+        :headers => { :authorization => "fakeauth" },
+      }
+    end
+
     netrc[authn_host] = [username, api_key]
     allow(Conjur::Command).to receive_messages api: api
   end
