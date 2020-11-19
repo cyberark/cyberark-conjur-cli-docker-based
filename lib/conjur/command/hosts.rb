@@ -36,7 +36,7 @@ class Conjur::Command::Hosts < Conjur::Command
           host_resourceid = full_resource_id("host:#{host}")
 
           unless api.resource(host_resourceid).exists?
-            exit_now! "host '#{host}' not found"
+            exit_now! "Host '#{host}' not found"
           end
 
           # Prepend 'host/' if it wasn't passed in
