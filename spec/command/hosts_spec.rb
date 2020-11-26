@@ -29,5 +29,19 @@ describe Conjur::Command::Hosts, logged_in: true do
         invoke
       end
     end
+
+    describe_command 'host rotate_api_key --host non-existing' do
+      before do
+        expect(RestClient::Request).to receive(:execute).with({
+                  method: :head,
+                  url: "https://core.example.com/api/resources/#{account}/host/non-existing",
+                  headers: {authorization: "fakeauth"},
+                  username: username,
+              }).and_raise RestClient::ResourceNotFound
+      end
+      it 'rotate_api_key with non-existing --host option' do
+        expect { invoke }.to raise_error(GLI::CustomExit, /Host 'non-existing' not found/i)
+      end
+    end
   end
 end

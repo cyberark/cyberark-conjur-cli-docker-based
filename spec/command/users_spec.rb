@@ -52,5 +52,18 @@ describe Conjur::Command::Users, logged_in: true do
         invoke
       end
     end
+    describe_command 'user rotate_api_key --user non-existing' do
+      before do
+      expect(RestClient::Request).to receive(:execute).with({
+            method: :head,
+            url: "https://core.example.com/api/resources/#{account}/user/non-existing",
+            headers: {authorization: "fakeauth"},
+            username: username,
+        }).and_raise RestClient::ResourceNotFound
+      end
+      it 'rotate_api_key with non-existing --user option' do
+        expect { invoke }.to raise_error(GLI::CustomExit, /User 'non-existing' not found/i)
+      end
+    end
   end
 end

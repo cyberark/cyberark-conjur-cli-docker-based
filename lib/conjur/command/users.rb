@@ -47,7 +47,11 @@ class Conjur::Command::Users < Conjur::Command
           if api.username == options[:user]
             exit_now! 'To rotate the API key of the currently logged-in user, use this command without any flags or options'
           end
-          puts api.resource([ Conjur.configuration.account, "user", options[:user] ].join(":")).rotate_api_key
+          user_resource_id = [Conjur.configuration.account, "user", options[:user]].join(":")
+          unless api.resource(user_resource_id).exists?
+            exit_now! "User '#{options[:user]}' not found"
+          end
+          puts api.resource(user_resource_id).rotate_api_key
         else
           username, password = Conjur::Authn.read_credentials
           new_api_key = Conjur::API.rotate_api_key username, password
