@@ -3,11 +3,11 @@ require File.expand_path('../lib/conjur/version', __FILE__)
 require "English"
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Rafal Rzepecki", "Kevin Gilpin"]
-  gem.email         = ["rafal@conjur.net", "kgilpin@conjur.net",]
+  gem.authors       = ["Conjur Maintainers"]
+  gem.email         = ["conj_maintainers@cyberark.com",]
   gem.summary       = %q{Conjur command line interface}
-  gem.homepage      = "https://github.com/conjurinc/cli-ruby"
-  gem.license       = 'MIT'
+  gem.homepage      = "https://github.com/cyberark/conjur-cli"
+  gem.license       = 'Apache 2.0'
 
   gem.files         = (`git ls-files`.split($OUTPUT_RECORD_SEPARATOR)
                                      .select { |x| x !~ /^Dockerfile/ }

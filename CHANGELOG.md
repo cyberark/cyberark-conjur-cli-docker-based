@@ -5,9 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.2.3] - 2020-12-22
 ### Fixed
-- The Conjur CLI now raises a proper error when trying to rotate a non-existing user's API key
-  ([cyberark/conjur#979](https://github.com/cyberark/conjur/issues/979))
+- The Conjur CLI now raises a proper error when trying to rotate a non-existing
+  user's API key.
+  [cyberark/conjur#979](https://github.com/cyberark/conjur/issues/979)
 
 ## [6.2.2] - 2020-04-02
 ### Changed
@@ -51,7 +54,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **Codebase forked: for changes to the 5.x (API [v4](https://github.com/cyberark/conjur-cli/tree/v4)) series, see
   [CHANGELOG in `v4` branch][v4-changelog](https://github.com/cyberark/conjur-cli/blob/v4/CHANGELOG.md)**
 
-[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.2...HEAD
+[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.3...HEAD
+[6.2.3]: https://github.com/cyberark/conjur-cli/compare/v6.2.2...v6.2.3
 [6.2.2]: https://github.com/cyberark/conjur-cli/compare/v6.2.1...v6.2.2
 [6.2.1]: https://github.com/cyberark/conjur-cli/compare/v6.2.0...v6.2.1
 [6.1.0]: https://github.com/cyberark/conjur-cli/compare/v6.0.1...v6.1.0
