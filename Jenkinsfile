@@ -109,9 +109,7 @@ pipeline {
     }
 
     stage('Push standalone image to DockerHub') {
-      when {
-        branch 'master'
-      }
+      when { tag "v*" }
 
       steps {
         sh './push-image'
@@ -123,11 +121,7 @@ pipeline {
     stage('Publish to RubyGems') {
       when {
         expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-        branch "master"
-        expression {
-          def exitCode = sh returnStatus: true, script: './needs-publishing'
-          return exitCode == 0
-        }
+        tag "v*"
       }
 
       steps {
