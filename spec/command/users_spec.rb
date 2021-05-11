@@ -12,7 +12,8 @@ describe Conjur::Command::Users, logged_in: true do
         user: username, 
         password: api_key,
         headers: { },
-        payload: "new-password"
+        payload: "new-password",
+        ssl_cert_store: cert_store
        })
     end
     
@@ -40,7 +41,8 @@ describe Conjur::Command::Users, logged_in: true do
                     user: username,
                     password: api_key,
                     headers: {},
-                    payload: ''
+                    payload: '',
+                    ssl_cert_store: cert_store
                 }).and_return double(:response, body: 'new api key')
         expect(Conjur::Authn).to receive(:save_credentials).with({
                     username: username,
@@ -59,6 +61,7 @@ describe Conjur::Command::Users, logged_in: true do
             url: "https://core.example.com/api/resources/#{account}/user/non-existing",
             headers: {authorization: "fakeauth"},
             username: username,
+            ssl_cert_store: cert_store
         }).and_raise RestClient::ResourceNotFound
       end
       it 'rotate_api_key with non-existing --user option' do
