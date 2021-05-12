@@ -13,6 +13,7 @@ describe Conjur::Command::Hosts, logged_in: true do
             authorization: "fakeauth",
           },
           username: "dknuth",
+          ssl_cert_store: cert_store
         }).and_return true
         expect(RestClient::Request).to receive(:execute).with({
             method: :put,
@@ -22,6 +23,7 @@ describe Conjur::Command::Hosts, logged_in: true do
             },
             payload: '',
             username: "dknuth",
+            ssl_cert_store: cert_store
         }).and_return double(:response, body: 'new api key')
       end
 
@@ -37,6 +39,7 @@ describe Conjur::Command::Hosts, logged_in: true do
                   url: "https://core.example.com/api/resources/#{account}/host/non-existing",
                   headers: {authorization: "fakeauth"},
                   username: username,
+                  ssl_cert_store: cert_store
               }).and_raise RestClient::ResourceNotFound
       end
       it 'rotate_api_key with non-existing --host option' do
