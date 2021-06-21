@@ -5,7 +5,7 @@
 # then installs the CLI system-wide.
 #
 # Entrypoint is bash, with `conjur` command available.
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV CONJUR_MAJOR_VERSION=5 \
     CONJUR_VERSION=5 \
@@ -19,7 +19,7 @@ RUN apt-get update && \
       jq \
       nano \
       openssh-client \
-      ruby2.5 ruby2.5-dev \
+      ruby2.7 ruby2.7-dev \
       sudo \
       vim \
       tzdata && \
