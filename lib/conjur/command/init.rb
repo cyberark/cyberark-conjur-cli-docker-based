@@ -58,8 +58,9 @@ class Conjur::Command::Init < Conjur::Command
     c.action do |global_options,options,args|
       url = options[:url] || highline.ask("Enter the URL of your Conjur service: ").to_s
       url = URI.parse(url)
-
-      Conjur.configuration.appliance_url = url.to_s
+      url = url.to_s.sub(/(\/)+$/,'')
+      
+      Conjur.configuration.appliance_url = url
 
       if (certificate = options[:certificate]).blank? && url.scheme == "https"
         connect_hostname = [ url.host, url.port ].join(":")
