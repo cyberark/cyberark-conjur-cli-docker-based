@@ -5,7 +5,7 @@
 # then installs the CLI system-wide.
 #
 # Entrypoint is bash, with `conjur` command available.
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 ENV CONJUR_MAJOR_VERSION=5 \
     CONJUR_VERSION=5 \
@@ -19,16 +19,16 @@ RUN apt-get update && \
       jq \
       nano \
       openssh-client \
-      ruby2.5 ruby2.5-dev \
+      ruby2.7 ruby2.7-dev \
       sudo \
       vim \
       tzdata && \
     apt-get clean
 
 # Install `summon` and `summon-conjur`
-RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/master/install.sh \
+RUN curl -sSL https://raw.githubusercontent.com/cyberark/summon/main/install.sh \
       | env TMPDIR=$(mktemp -d) bash && \
-    curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/master/install.sh \
+    curl -sSL https://raw.githubusercontent.com/cyberark/summon-conjur/main/install.sh \
       | env TMPDIR=$(mktemp -d) bash
 # as per https://github.com/cyberark/summon#linux
 # and    https://github.com/cyberark/summon-conjur#install
@@ -50,8 +50,8 @@ COPY . /usr/src/cli-ruby
 
 # Only reinstall API if changed
 RUN cd /usr/src/api-ruby && git fetch && \
-    if [ $(git rev-parse HEAD origin/master | uniq | wc -l) -gt 1 ]; then \
-      git reset --hard origin/master && rake install ; \
+    if [ $(git rev-parse HEAD origin/main | uniq | wc -l) -gt 1 ]; then \
+      git reset --hard origin/main && rake install ; \
     fi
 
 RUN cd /usr/src/cli-ruby && rake install

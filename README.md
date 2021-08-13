@@ -9,7 +9,7 @@ A complete reference guide is available at [conjur.org](https://www.conjur.org).
 ## Table of Contents
 - [Getting Started](#getting-started)
     - [Quick Start](#quick-start)
-    - [Using This Project With Conjur OSS](#Using-conjur-cli-with-Conjur-OSS)
+    - [Using This Project With Conjur Open Source](#Using-conjur-cli-with-Conjur-Open-Source)
 - [Using Docker](#using-docker)
 - [Usage](#usage)
 - [Contributing](#contributing)
@@ -26,9 +26,9 @@ $ conjur -v
 conjur version 6.0.0
 ```
 
-### Using conjur-cli with Conjur OSS 
+### Using conjur-cli with Conjur Open Source 
 
-Are you using this project with [Conjur OSS](https://github.com/cyberark/conjur)? Then we 
+Are you using this project with [Conjur Open Source](https://github.com/cyberark/conjur)? Then we 
 **strongly** recommend choosing the version of this project to use from the latest [Conjur OSS 
 suite release](https://docs.conjur.org/Latest/en/Content/Overview/Conjur-OSS-Suite-Overview.html). 
 Conjur maintainers perform additional testing on the suite release versions to ensure 
@@ -361,7 +361,7 @@ COMMANDS
 We welcome contributions of all kinds to this repository. For instructions on how to get started and descriptions of our development workflows, please see our [contributing
 guide][contrib].
 
-[contrib]: https://github.com/cyberark/conjur/blob/master/CONTRIBUTING.md
+[contrib]: https://github.com/cyberark/conjur-cli/blob/main/CONTRIBUTING.md
 
 ## License
 
