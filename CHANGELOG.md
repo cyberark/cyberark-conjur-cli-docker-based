@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.2.5] - 2021-09-29
+
 ### Fixed
 - Upgraded `highline` dependency to fix deprecation warning.
   [cyberark/conjur-cli#330](https://github.com/cyberark/conjur-cli/pull/330)
