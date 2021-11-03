@@ -65,7 +65,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **Codebase forked: for changes to the 5.x (API [v4](https://github.com/cyberark/conjur-cli/tree/v4)) series, see
   [CHANGELOG in `v4` branch][v4-changelog](https://github.com/cyberark/conjur-cli/blob/v4/CHANGELOG.md)**
 
-[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.4...HEAD
+[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.5...HEAD
+[6.2.5]: https://github.com/cyberark/conjur-cli/compare/v6.2.4...v6.2.5
 [6.2.4]: https://github.com/cyberark/conjur-cli/compare/v6.2.3...v6.2.4
 [6.2.3]: https://github.com/cyberark/conjur-cli/compare/v6.2.2...v6.2.3
 [6.2.2]: https://github.com/cyberark/conjur-cli/compare/v6.2.1...v6.2.2
