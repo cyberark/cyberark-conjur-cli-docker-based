@@ -36,23 +36,12 @@ ENV PATH="/usr/local/lib/summon:${PATH}"
 
 # Install Conjur 5 CLI
 # Cache a reasonable version of api-ruby & deps
-RUN mkdir -p /usr/src && \
-    cd /usr/src && \
-    git clone --depth 1 https://github.com/cyberark/api-ruby.git && \
-    cd api-ruby && \
-    gem install bundler && \
-    rake install
+RUN gem install conjur-api --pre
 
 COPY standalone.entrypoint /bin/entry
 
 # Update API and install everything
 COPY . /usr/src/cli-ruby
-
-# Only reinstall API if changed
-RUN cd /usr/src/api-ruby && git fetch && \
-    if [ $(git rev-parse HEAD origin/main | uniq | wc -l) -gt 1 ]; then \
-      git reset --hard origin/main && rake install ; \
-    fi
 
 RUN cd /usr/src/cli-ruby && rake install
 
