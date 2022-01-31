@@ -1,11 +1,15 @@
 #!/bin/bash -ex
 
-: ${RUBY_VERSION=2.7}
+: ${RUBY_VERSION=3.0}
 
 # My local RUBY_VERSION is set to ruby-#.#.# so this allows running locally.
 RUBY_VERSION=$(cut -d '-' -f 2 <<< $RUBY_VERSION)
 
 main() {
+  if ! docker info >/dev/null 2>&1; then
+    echo "Docker does not seem to be running, run it first and retry"
+    exit 1
+  fi
 
   # set up the containers to run in their own namespace
   COMPOSE_PROJECT_NAME="$(basename "$PWD")_$(openssl rand -hex 3)"

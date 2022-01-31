@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
   # Filter out development only executables
   gem.executables -= %w{parse-changelog.sh}
 
-  gem.add_dependency 'activesupport', '>= 4.2'
+  gem.add_dependency 'activesupport', '~> 6.0'
   gem.add_dependency 'conjur-api', '~> 5.3'
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'gli', '>=2.8.0'
@@ -37,7 +37,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'io-grab', '~> 0.0'
   gem.add_development_dependency 'json_spec'
   gem.add_development_dependency 'pry-byebug'
-  gem.add_development_dependency 'rake', '~> 12.3.3'
+  gem.add_development_dependency 'rake', '~> 13.0'
   gem.add_development_dependency 'rspec', '~> 3.0'
   gem.add_development_dependency 'simplecov', '~> 0.17', '< 0.18'
 end

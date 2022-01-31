@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
 # Constants
-RUBY_VERSION_DEFAULT="2.7"
+RUBY_VERSION_DEFAULT="3.0"
 
 # Arguments
 RUBY_VERSION=${1-${RUBY_VERSION_DEFAULT}}
