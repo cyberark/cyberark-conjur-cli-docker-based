@@ -1,5 +1,5 @@
 # docker 17.06+ will let us do this:
-# ARG RUBY_VERSION=2.7
+# ARG RUBY_VERSION=3.0
 FROM ruby:${RUBY_VERSION}
 
 RUN mkdir /src

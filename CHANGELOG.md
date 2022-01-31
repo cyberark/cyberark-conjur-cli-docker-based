@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Allow activesupport >=6 as a dependency for ruby-3.0.2.
+  [cyberark/conjur-cli#339](https://github.com/cyberark/conjur-cli/pull/339)
+- Add Ruby 3 tests in CI.
+- Set Ruby 3 as default.
+  [cyberark/conjur-cli#344](https://github.com/cyberark/conjur-cli/pull/344)
+- Bump `conjur-api-ruby` gem.
+- Bump `rake` gem.
 
 ## [6.2.5] - 2021-09-29
 
