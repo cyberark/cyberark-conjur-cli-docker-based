@@ -8,19 +8,19 @@ of the license associated with each component.
 
 SECTION 1: Apache-2.0 
 
->>> https://rubygems.org/gems/conjur-api/versions/5.3.4
->>> https://rubygems.org/gems/gli/versions/2.19.2
+>>> https://rubygems.org/gems/conjur-api/versions/5.3.7
+>>> https://rubygems.org/gems/gli/versions/2.21.0
 
 SECTION 2: BSD-2-Clause
 
->>> https://rubygems.org/gems/highline/versions/1.7.10
+>>> https://rubygems.org/gems/highline/versions/2.0.3
 >>> https://rubygems.org/gems/xdg/versions/2.2.3
 
 SECTION 3: MIT 
 
->>> https://rubygems.org/gems/activesupport/versions/5.2.4.4
->>> https://rubygems.org/gems/deep_merge/versions/1.0.1
->>> https://rubygems.org/gems/netrc/versions/0.10.3
+>>> https://rubygems.org/gems/activesupport/versions/6.1.4.4
+>>> https://rubygems.org/gems/deep_merge/versions/1.2.2
+>>> https://rubygems.org/gems/netrc/versions/0.11.0
 >>> https://rubygems.org/gems/table_print/versions/1.5.7
 
 APPENDIX: Standard License Files and Templates
@@ -35,7 +35,7 @@ APPENDIX: Standard License Files and Templates
 
 Apache-2.0 License is applicable to the following component(s).
 
->>> https://rubygems.org/gems/conjur-api/versions/5.3.4
+>>> https://rubygems.org/gems/conjur-api/versions/5.3.7
 
 Copyright (c) 2020 CyberArk Software Ltd. All rights reserved.'
 
@@ -51,7 +51,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
->>> https://rubygems.org/gems/gli/versions/2.19.2
+>>> https://rubygems.org/gems/gli/versions/2.21.0
 
 Copyright (c) 2010 by Dave Copeland
 
@@ -69,7 +69,7 @@ limitations under the License.
 
 --------------- SECTION 2: BSD-2-Clause ----------
 
->>> https://rubygems.org/gems/highline/versions/1.7.10
+>>> https://rubygems.org/gems/highline/versions/2.0.3
 
 Copyright 2005 Gray Productions. All rights reserved.
 
@@ -100,7 +100,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 MIT License is applicable to the following component(s).
 
->>> https://rubygems.org/gems/activesupport/versions/5.2.4.4
+>>> https://rubygems.org/gems/activesupport/versions/6.1.4.4
 
 Copyright (c) 2005-2018 David Heinemeier Hansson'
 
@@ -123,7 +123,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 
->>> https://rubygems.org/gems/deep_merge/versions/1.0.1
+>>> https://rubygems.org/gems/deep_merge/versions/1.2.2
 
 Copyright (c) 2008-2104 Steve Midgley, Daniel DeLeo
 
@@ -145,7 +145,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
->>> https://rubygems.org/gems/netrc/versions/0.10.3
+>>> https://rubygems.org/gems/netrc/versions/0.11.0
 
 Copyright (c) 2011-2014 CONTRIBUTORS.md
 

@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [6.2.6] - 2022-01-31
+
 ### Changed
 - Allow activesupport >=6 as a dependency for ruby-3.0.2.
   [cyberark/conjur-cli#339](https://github.com/cyberark/conjur-cli/pull/339)
@@ -73,7 +76,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - **Codebase forked: for changes to the 5.x (API [v4](https://github.com/cyberark/conjur-cli/tree/v4)) series, see
   [CHANGELOG in `v4` branch][v4-changelog](https://github.com/cyberark/conjur-cli/blob/v4/CHANGELOG.md)**
 
-[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.5...HEAD
+[Unreleased]: https://github.com/cyberark/conjur-cli/compare/v6.2.6...HEAD
+[6.2.6]: https://github.com/cyberark/conjur-cli/compare/v6.2.5...v6.2.6
 [6.2.5]: https://github.com/cyberark/conjur-cli/compare/v6.2.4...v6.2.5
 [6.2.4]: https://github.com/cyberark/conjur-cli/compare/v6.2.3...v6.2.4
 [6.2.3]: https://github.com/cyberark/conjur-cli/compare/v6.2.2...v6.2.3
