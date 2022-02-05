@@ -21,11 +21,11 @@ Gem::Specification.new do |gem|
   # Filter out development only executables
   gem.executables -= %w{parse-changelog.sh}
 
-  gem.add_dependency 'activesupport', '~> 6.0'
+  gem.add_dependency 'activesupport', '~> 6.1'
   gem.add_dependency 'conjur-api', '~> 5.3'
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'gli', '>=2.8.0'
-  gem.add_dependency 'highline', '~> 2.0'
+  gem.add_dependency 'highline', '~> 1.7'
   gem.add_dependency 'netrc', '~> 0.10'
   gem.add_dependency 'table_print', '~> 1.5'
   gem.add_dependency 'xdg', '= 2.2.3'
@@ -35,6 +35,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'ci_reporter_rspec', '~> 1.0'
   gem.add_development_dependency 'cucumber-api'
   gem.add_development_dependency 'io-grab', '~> 0.0'
+  gem.add_development_dependency 'i18n', '~> 1.8.11'
   gem.add_development_dependency 'json_spec'
   gem.add_development_dependency 'pry-byebug'
   gem.add_development_dependency 'rake', '~> 13.0'
