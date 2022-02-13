@@ -21,7 +21,7 @@ Gem::Specification.new do |gem|
   # Filter out development only executables
   gem.executables -= %w{parse-changelog.sh}
 
-  gem.add_dependency 'activesupport', '~> 6.0'
+  gem.add_dependency 'activesupport', '~> 7.0'
   gem.add_dependency 'conjur-api', '~> 5.3'
   gem.add_dependency 'deep_merge', '~> 1.0'
   gem.add_dependency 'gli', '>=2.8.0'
