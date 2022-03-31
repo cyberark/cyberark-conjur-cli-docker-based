@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:21.10
 
 RUN apt-get update -y && apt-get install -y software-properties-common git build-essential
 

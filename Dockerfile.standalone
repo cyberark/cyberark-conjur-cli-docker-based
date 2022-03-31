@@ -5,7 +5,7 @@
 # then installs the CLI system-wide.
 #
 # Entrypoint is bash, with `conjur` command available.
-FROM ubuntu:20.04
+FROM ubuntu:21.10
 
 ENV CONJUR_MAJOR_VERSION=5 \
     CONJUR_VERSION=5 \
