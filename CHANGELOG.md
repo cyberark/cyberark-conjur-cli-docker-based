@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+- Remove support for Ruby versions 2.5 and 2.6 [cyberark/cyberark-conjur-cli-docker-based#351](https://github.com/cyberark/cyberark-conjur-cli-docker-based/pull/351)
+
 ## [6.2.6] - 2022-01-31
 
 ### Changed
