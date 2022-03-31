@@ -26,38 +26,6 @@ pipeline {
       }
     }
 
-    stage('Test Ruby 2.5') {
-      environment {
-        RUBY_VERSION = '2.5'
-      }
-
-      steps {
-        sh './test.sh'
-      }
-
-      post {
-        always {
-          junit 'spec/reports/*.xml, features/reports/*.xml'
-        }
-      }
-    }
-
-    stage('Test Ruby 2.6') {
-      environment {
-        RUBY_VERSION = '2.6'
-      }
-
-      steps {
-        sh './test.sh'
-      }
-
-      post {
-        always {
-          junit 'spec/reports/*.xml, features/reports/*.xml'
-        }
-      }
-    }
-
     stage('Test Ruby 2.7') {
       environment {
         RUBY_VERSION = '2.7'
