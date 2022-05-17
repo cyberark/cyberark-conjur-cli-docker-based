@@ -42,7 +42,7 @@ start_conjur() {
 }
 
 run_tests() {
-  env CONJUR_AUTHN_API_KEY=$(docker-compose exec -T conjur rails r "print Credentials['cucumber:user:admin'].api_key") \
+  env CONJUR_AUTHN_API_KEY=$(docker-compose exec -T conjur conjurctl role retrieve-key cucumber:user:admin) \
     docker-compose run test "$@"
 }
 
