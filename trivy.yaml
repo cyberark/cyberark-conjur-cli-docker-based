@@ -1,0 +1,4 @@
+scan:
+  skip-files:
+    # Skip the cc-test-reporter since we can't update the code. We'll monitor it elsewhere.
+    - usr/src/cli-ruby/cc-test-reporter
