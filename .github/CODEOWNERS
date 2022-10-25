@@ -8,3 +8,6 @@
 
 # Changes to SECURITY.md require Security Architect approval
 SECURITY.md @cyberark/security-architects @conjurinc/security-architects @conjurdemos/security-architects
+
+# Changes to trivy.yaml require Security Architect approval
+trivy.yaml @cyberark/security-architects
