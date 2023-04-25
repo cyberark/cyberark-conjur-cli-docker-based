@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [6.2.9] - 2023-04-25
+
+### Security
+- Upgrade ruby from 2.7 to 3.1 in bin/parse-changelog.sh
+  [cyberark/cyberark-conjur-cli-docker-based#358](https://github.com/cyberark/cyberark-conjur-cli-docker-based/pull/358)
+
 ## [6.2.8] - 2022-08-16
 
 ### Fixed
