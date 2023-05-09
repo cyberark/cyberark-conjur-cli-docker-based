@@ -40,8 +40,7 @@ describe Conjur::Command::Init do
     it "returns the right certificate from github" do
       fingerprint, certificate = Conjur::Command::Init.get_certificate('github.com:443')
       expect(fingerprint).to eq(GITHUB_FP)
-      expect(certificate).to eq("cool")
-      # expect(certificate.strip).to include(GITHUB_CERT.strip)
+      expect(certificate.strip).to include(GITHUB_CERT.strip)
     end
   end
 
