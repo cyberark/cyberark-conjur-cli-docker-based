@@ -14,7 +14,7 @@ pipeline {
 
   stages {
     stage('Validate Changelog') {
-      steps { sh './bin/parse-changelog.sh' }
+      steps { parseChangelog() }
     }
 
     stage('Prepare CC Report Dir'){
@@ -26,9 +26,9 @@ pipeline {
       }
     }
 
-    stage('Test Ruby 2.7') {
+    stage('Test Ruby 3.1') {
       environment {
-        RUBY_VERSION = '2.7'
+        RUBY_VERSION = '3.1'
       }
 
       steps {
