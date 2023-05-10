@@ -26,9 +26,9 @@ pipeline {
       }
     }
 
-    stage('Test Ruby 3.1') {
+    stage('Test Ruby 2.7') {
       environment {
-        RUBY_VERSION = '3.1'
+        RUBY_VERSION = '2.7'
       }
 
       steps {
