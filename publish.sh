@@ -1,39 +1,41 @@
-#!/usr/bin/env bash
-set -e
-
-if [ $# -ne 1 ]; then
-  echo "Usage: $0 <project>"
-  exit 1
-fi
-
-project="${1}"
-
-if [ ! -f "${project}.gemspec" ]; then
-  echo "Cannot find ${project}.gemspec"
-  echo "Usage: $0 <project>"
-  exit 1
-fi
-
-base="$(dirname "${0}")"
-
-docker run \
-  --rm \
-  --env RUBYGEMS_API_KEY \
-  --volume "$(pwd)":"$(pwd)" \
-  --workdir "$(pwd)" \
-  cyberark/ubuntu-ruby-builder:latest \
-  "${base}/publish-rubygem-container-entrpoint.sh" "${project}"
-
-
-
-
-# ! /bin/bash -e
-
-#docker pull registry.tld/conjurinc/publish-rubygem
+# ! /usr/bin/env bash
+#set -e
 #
-#summon --yaml "RUBYGEMS_API_KEY: !var rubygems/api-key" \
-#  docker run --rm --env-file @SUMMONENVFILE -v "$(pwd)":/opt/src \
-#  registry.tld/conjurinc/publish-rubygem conjur-cli
+#if [ $# -ne 1 ]; then
+#  echo "Usage: $0 <project>"
+#  exit 1
+#fi
+#
+#project="${1}"
+#
+#if [ ! -f "${project}.gemspec" ]; then
+#  echo "Cannot find ${project}.gemspec"
+#  echo "Usage: $0 <project>"
+#  exit 1
+#fi
+#
+#base="$(dirname "${0}")"
+#
+#docker run \
+#  --rm \
+#  --env RUBYGEMS_API_KEY \
+#  --volume "$(pwd)":"$(pwd)" \
+#  --workdir "$(pwd)" \
+#  cyberark/ubuntu-ruby-builder:latest \
+#  "${base}/publish-rubygem-container-entrpoint.sh" "${project}"
+
+
+
+#Original
+#!/bin/bash -e
+
+docker pull registry.tld/conjurinc/publish-rubygem
+
+summon --yaml "RUBYGEMS_API_KEY: !var rubygems/api-key" \
+  docker run --rm --env-file @SUMMONENVFILE -v "$(pwd)":/opt/src \
+  registry.tld/conjurinc/publish-rubygem conjur-cli
+
+
 
 
 
